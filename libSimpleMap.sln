@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31112.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "libSimpleMap", "libSimpleMap\libSimpleMap.csproj", "{972CDE86-DAEC-444A-B16D-F5A217950D60}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "libGIS", "..\libGis\libGis\libGIS.csproj", "{08260C04-EA06-47B3-99C3-55802B71F173}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{972CDE86-DAEC-444A-B16D-F5A217950D60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{972CDE86-DAEC-444A-B16D-F5A217950D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{972CDE86-DAEC-444A-B16D-F5A217950D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{972CDE86-DAEC-444A-B16D-F5A217950D60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08260C04-EA06-47B3-99C3-55802B71F173}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08260C04-EA06-47B3-99C3-55802B71F173}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08260C04-EA06-47B3-99C3-55802B71F173}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08260C04-EA06-47B3-99C3-55802B71F173}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E3A7541E-FC1E-4D04-970A-61C9AEE3F9AC}
+	EndGlobalSection
+EndGlobal
