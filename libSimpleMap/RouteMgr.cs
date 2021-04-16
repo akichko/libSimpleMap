@@ -202,7 +202,7 @@ namespace libSimpleMap
             if (tmpTileCostInfo.tile != null)
                 return 0;
 
-            mapMgr.LoadTile(tileId, true, (ushort)(SpMapContentType.Link | SpMapContentType.Node), tmpTileCostInfo.maxUsableRoadType);
+            mapMgr.LoadTile(tileId, (ushort)(SpMapContentType.Link | SpMapContentType.Node), tmpTileCostInfo.maxUsableRoadType);
             CmnTile tmpTile = mapMgr.SearchTile(tileId);
 
             tmpTileCostInfo.SetTileCostInfo((SpTile)tmpTile);

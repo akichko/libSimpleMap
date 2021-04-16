@@ -78,8 +78,10 @@ namespace libSimpleMap
 
 
 
-        public override int UpdateObjGroup(UInt16 objType, CmnObjGroup objGroup) /* abstract ?? */
+        public override int UpdateObjGroup(CmnObjGroup objGroup) /* abstract ?? */
         {
+            UInt16 objType = objGroup.Type;
+
             //上書き
             objDic[objType] = objGroup;
 
@@ -114,6 +116,13 @@ namespace libSimpleMap
                 default:
                     return 0;
             }
+
+            return 0;
+        }
+
+        public override int UpdateObjGroupList(List<CmnObjGroup> objGroupList)
+        {
+            objGroupList.ForEach(x => this.UpdateObjGroup(x));
 
             return 0;
         }
@@ -250,6 +259,13 @@ namespace libSimpleMap
         public SpObjGroup(UInt16 type)
         {
             Type = type;
+        }
+
+        public SpObjGroup(UInt16 type, CmnObj[] objArray, UInt16 loadedSubType)
+        {
+            Type = type;
+            this.loadedSubType = loadedSubType;
+            this.objArray = objArray;
         }
     }
 

@@ -574,7 +574,7 @@ namespace libSimpleMap
                 if ((reqType & mapObjType) == mapObjType)
                 {
                     //読み込み
-                    tmpTile.UpdateObjGroup(mapObjType, LoadObjGroup(tileId, mapObjType, reqMaxSubType));
+                    tmpTile.UpdateObjGroup(LoadObjGroup(tileId, mapObjType, reqMaxSubType));
                 }
             }
 
@@ -588,43 +588,35 @@ namespace libSimpleMap
             switch((SpMapContentType)type)
             {
                 case SpMapContentType.Link:
+
                     MapLink[] tmpMapLink = GetRoadLink(tileId, (byte)subType);
-
-                    CmnObjGroup tmpObjGroup = new SpObjGroup(type);
-                    tmpObjGroup.objArray = tmpMapLink;
-                    tmpObjGroup.loadedSubType = subType;
-
-                    return tmpObjGroup;
+                    return new SpObjGroup(type, tmpMapLink, subType);
 
                 case SpMapContentType.Node:
+
                     MapNode[] tmpMapNode = GetRoadNode(tileId, (byte)subType);
-
-                    tmpObjGroup = new SpObjGroup(type);
-                    tmpObjGroup.objArray = tmpMapNode;
-                    tmpObjGroup.loadedSubType = subType;
-
-                    return tmpObjGroup;
+                    return new SpObjGroup(type, tmpMapNode, subType);
 
                 case SpMapContentType.LinkGeometry:
 
                     MapLink[] tmpMapLinkGeometry = GetRoadGeometry(tileId, (byte)subType);
-                    tmpObjGroup = new SpObjGroup(type);
-                    tmpObjGroup.objArray = tmpMapLinkGeometry;
-                    tmpObjGroup.loadedSubType = subType;
-
-                    return tmpObjGroup;
+                    return new SpObjGroup(type, tmpMapLinkGeometry, subType);
 
                 case SpMapContentType.LinkAttribute:
 
                     MapLink[] tmpMapLinkAttr = GetRoadAttribute(tileId, (byte)subType);
-                    tmpObjGroup = new SpObjGroup(type);
-                    tmpObjGroup.objArray = tmpMapLinkAttr;
-                    tmpObjGroup.loadedSubType = subType;
-
-                    return tmpObjGroup;
+                    return new SpObjGroup(type, tmpMapLinkAttr, subType);
             }
 
             return null;
+        }
+
+        public List<CmnObjGroup> LoadObjGroupList(uint tileId, ushort type = ushort.MaxValue, ushort subType = ushort.MaxValue)
+        {
+            return this.GetMapContentTypeList()
+                .Where(x => (x & type) == x)
+                .Select(x => LoadObjGroup(tileId, x, subType))
+                .ToList();
         }
     }
 }

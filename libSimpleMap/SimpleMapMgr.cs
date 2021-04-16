@@ -463,14 +463,14 @@ namespace libSimpleMap
 
         public MapLink[] GetRoadLink(uint tileId, byte maxRoadType)
         {
-            LoadTile(tileId, false, (UInt16)SpMapContentType.Link, maxRoadType);
+            LoadTile(tileId, (UInt16)SpMapContentType.Link, maxRoadType);
 
             SpTile tile = (SpTile)SearchTile(tileId);
             return tile.link;
         }
         public MapNode[] GetRoadNode(uint tileId, byte maxRoadType)
         {
-            LoadTile(tileId, false, (UInt16)SpMapContentType.Node, maxRoadType);
+            LoadTile(tileId, (UInt16)SpMapContentType.Node, maxRoadType);
 
             SpTile tile = (SpTile)SearchTile(tileId);
             return tile.node;
