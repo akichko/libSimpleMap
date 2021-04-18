@@ -85,7 +85,7 @@ namespace libSimpleMap
 
             using (var sr = new StreamReader(mapPath + "LINK\\" + tileId + "_LINK.txt"))
             {
-                short numLink = 0;
+                ushort numLink = 0;
                 String fbuf;
 
                 while ((fbuf = sr.ReadLine()) != null)
@@ -120,8 +120,8 @@ namespace libSimpleMap
                     tmpLink.edgeNodeTileId[1] = UInt32.Parse(sEndNodeTileId);
                     if (tmpLink.edgeNodeTileId[1] == 0)
                         tmpLink.edgeNodeTileId[1] = tileId;
-                    tmpLink.edgeNodeIndex[0] = Int16.Parse(sStartNodeIndex);
-                    tmpLink.edgeNodeIndex[1] = Int16.Parse(sEndNodeIndex);
+                    tmpLink.edgeNodeIndex[0] = UInt16.Parse(sStartNodeIndex);
+                    tmpLink.edgeNodeIndex[1] = UInt16.Parse(sEndNodeIndex);
                     //tmpLink.linkCost = short.Parse(sLinkCost);
                     tmpLink.roadType = byte.Parse(sRoadType);
                     tmpLink.fOneWay = sbyte.Parse(sOneWay);
@@ -186,7 +186,7 @@ namespace libSimpleMap
                     if (tmpConnectLink.tileId == 0)
                         tmpConnectLink.tileId = tileId;
                     tmpConnectLink.linkId = Int64.Parse(sConnLinkId);
-                    tmpConnectLink.linkIndex = short.Parse(sConnLinkIndex);
+                    tmpConnectLink.linkIndex = ushort.Parse(sConnLinkIndex);
                     tmpConnectLink.linkDirection = byte.Parse(sConnLinkDirection);
                     tmpConnectLink.roadType = byte.Parse(sConnLinkRoadType);
 
@@ -355,7 +355,9 @@ namespace libSimpleMap
                 case SpMapContentType.Link:
 
                     MapLink[] tmpMapLink = GetRoadLink(tileId, (byte)subType);
-                    return new SpObjGroup(type, tmpMapLink, subType);
+                    SpObjGroup tmp = new SpObjGroup(type, tmpMapLink, subType);
+                    tmp.isDrawReverse = true;
+                    return tmp;
 
                 case SpMapContentType.Node:
 

@@ -147,7 +147,7 @@ namespace libSimpleMap
 
         public NodeHandle GetEdgeNode(SpTile tile, MapLink link, byte direction, bool cacheOnly)
         {
-            short nodeIndex = link.edgeNodeIndex[direction]; //direction=1: 順方向
+            ushort nodeIndex = link.edgeNodeIndex[direction]; //direction=1: 順方向
 
             uint nodeTileId = GetEdgeNodeTileId(tile, link, direction);
 
@@ -412,6 +412,34 @@ namespace libSimpleMap
         //        tileDic[tileId].tile.PrintGeometry();
         //}
 
+
+        new public List<CmnObjHdlRef> SearchRefObject(CmnObjHandle cmnObjHdl)
+        {
+            switch ((SpMapContentType)cmnObjHdl.obj.Type)
+            {
+                case SpMapContentType.Link:
+
+                    //接続リンク
+                    List<DLinkHandle> connectLinkS = GetConnectLinks((SpTile)cmnObjHdl.tile, (MapLink)cmnObjHdl.obj, 0, true, false);
+                    var retS = connectLinkS.Select(x => new CmnObjHdlRef((CmnTile)x.tile, (CmnObj)x.mapLink, (ushort)SpMapRefType.BackLink)).ToList();
+
+                    List<DLinkHandle> connectLinkE = GetConnectLinks((SpTile)cmnObjHdl.tile, (MapLink)cmnObjHdl.obj, 1, true, false);
+                    var retE = connectLinkE.Select(x => new CmnObjHdlRef((CmnTile)x.tile, (CmnObj)x.mapLink, (ushort)SpMapRefType.NextLink));
+
+                    retS.AddRange(retE);
+
+                    return retS;
+
+                case SpMapContentType.Node:
+
+                    break;
+
+            }
+            return null;
+
+        }
+
+
         public int WriteMap(uint tileId, string filename, bool append)
         {
             if (tileDic.ContainsKey(tileId))
@@ -539,6 +567,7 @@ namespace libSimpleMap
     {
         int Connect(string mapPath);
         int Disconnect();
+        public List<uint> GetMapTileIdList();
         byte[] GetRawData(uint tileId, SpMapContentType contentType);
         byte[] GetLinkData(uint tileId);
         byte[] GetNodeData(uint tileId);

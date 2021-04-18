@@ -86,13 +86,13 @@ namespace libSimpleMap
                 //データ数
                 ms.Read(tmpBuf, 0, 2);
                 ushort numLink = BitConverter.ToUInt16(tmpBuf, 0);
-                for (short i = 0; i < numLink; i++)
+                for (ushort i = 0; i < numLink; i++)
                 {
                     MapLink tmpLink = new MapLink();
                     tmpLink.index = i;
 
                     ms.Read(tmpBuf, 0, 2);
-                    tmpLink.edgeNodeIndex[0] = BitConverter.ToInt16(tmpBuf, 0);
+                    tmpLink.edgeNodeIndex[0] = BitConverter.ToUInt16(tmpBuf, 0);
 
                     ms.Read(tmpBuf, 0, 1);
                     sbyte offsetX = (sbyte)tmpBuf[0];
@@ -106,7 +106,7 @@ namespace libSimpleMap
                     tmpLink.endNodeTileOffset.offsetY = offsetY;
 
                     ms.Read(tmpBuf, 0, 2);
-                    tmpLink.edgeNodeIndex[1] = BitConverter.ToInt16(tmpBuf, 0);
+                    tmpLink.edgeNodeIndex[1] = BitConverter.ToUInt16(tmpBuf, 0);
 
                     ms.Read(tmpBuf, 0, 2);
                     tmpLink.linkCost = BitConverter.ToInt16(tmpBuf, 0);
@@ -181,7 +181,7 @@ namespace libSimpleMap
                         tmpLink.tileId = GisTileCode.SCalcTileId((ushort)(baseTileXY.x + offsetX), (ushort)(baseTileXY.y + offsetY));
 
                         ms.Read(tmpBuf, 0, 2);
-                        tmpLink.linkIndex = BitConverter.ToInt16(tmpBuf, 0);
+                        tmpLink.linkIndex = BitConverter.ToUInt16(tmpBuf, 0);
 
                         ms.Read(tmpBuf, 0, 1);
                         tmpLink.linkDirection = (byte)tmpBuf[0];
@@ -289,15 +289,20 @@ namespace libSimpleMap
 
         public List<uint> GetMapTileIdList()
         {
-            List<uint> retList = new List<uint>();
-            string[] names = Directory.GetFiles(mapPath + "NODE", "*.txt");
-            foreach (string name in names)
-            {
-                string tileName = name.Replace(mapPath + "NODE\\", "").Replace("_NODE.txt", "");
-                retList.Add(uint.Parse(tileName));
+            //SQLite
+            return dal.GetMapTileIdList();
 
-            }
-            return retList;
+            //Filesystem
+
+            //List<uint> retList = new List<uint>();
+            //string[] names = Directory.GetFiles(mapPath + "NODE", "*.txt");
+            //foreach (string name in names)
+            //{
+            //    string tileName = name.Replace(mapPath + "NODE\\", "").Replace("_NODE.txt", "");
+            //    retList.Add(uint.Parse(tileName));
+
+            //}
+            //return retList;
         }
 
 
@@ -566,15 +571,15 @@ namespace libSimpleMap
 
         CmnTile LoadTile(uint tileId, UInt16 reqType = 0xFFFF, UInt16 reqMaxSubType = 0xFFFF)
         {
-            List<UInt16> mapObjTypeList = GetMapContentTypeList();
+            List<UInt16> objTypeList = GetMapContentTypeList();
             SpTile tmpTile = new SpTile(tileId);
 
-            foreach (UInt16 mapObjType in mapObjTypeList)
+            foreach (UInt16 objType in objTypeList)
             {
-                if ((reqType & mapObjType) == mapObjType)
+                if ((reqType & objType) == objType)
                 {
                     //読み込み
-                    tmpTile.UpdateObjGroup(LoadObjGroup(tileId, mapObjType, reqMaxSubType));
+                    tmpTile.UpdateObjGroup(LoadObjGroup(tileId, objType, reqMaxSubType));
                 }
             }
 
@@ -590,7 +595,9 @@ namespace libSimpleMap
                 case SpMapContentType.Link:
 
                     MapLink[] tmpMapLink = GetRoadLink(tileId, (byte)subType);
-                    return new SpObjGroup(type, tmpMapLink, subType);
+                    SpObjGroup tmp = new SpObjGroup(type, tmpMapLink, subType);
+                    tmp.isDrawReverse = true;
+                    return tmp;
 
                 case SpMapContentType.Node:
 

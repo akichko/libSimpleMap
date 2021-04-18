@@ -44,6 +44,19 @@ namespace libSimpleMap
         }
 
 
+        public List<uint> GetMapTileIdList()
+        {
+
+            List<uint> retList = new List<uint>();
+            string[] names = Directory.GetFiles(mapPath + "NODE", "*.txt");
+            foreach (string name in names)
+            {
+                string tileName = name.Replace(mapPath + "NODE\\", "").Replace("_NODE.txt", "");
+                retList.Add(uint.Parse(tileName));
+
+            }
+            return retList;
+        }
 
         public byte[] GetRawData(uint tileId, SpMapContentType contentType)
         {

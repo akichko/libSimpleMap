@@ -48,6 +48,26 @@ namespace libSimpleMap
         }
 
 
+        public List<uint> GetMapTileIdList()
+        {
+
+            List<uint> retList = new List<uint>();
+            string sql = $"select distinct tile_id from map_tile";
+
+            SQLiteCommand com = new SQLiteCommand(sql, con);
+            SQLiteDataReader reader = com.ExecuteReader();
+
+            while (reader.Read() == true)
+            {
+                Int64 tileId = (Int64)reader["tile_id"];
+
+                retList.Add((uint)tileId);
+            }
+
+
+            return retList;
+        }
+
 
         public byte[] GetRawData(uint tileId, SpMapContentType contentType)
         {
