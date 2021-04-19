@@ -435,17 +435,15 @@ namespace libSimpleMap
             List<CmnObjRef> ret = new List<CmnObjRef>();
 
             //始点ノード側接続リンク
-            CmnObjRef nodeRef = new CmnObjRef((int)SpMapRefType.BackLink, (ushort)SpMapContentType.Node);
-            nodeRef.tile = tile;
-            nodeRef.objIndex = edgeNodeIndex[0];
-            nodeRef.final = false;
+            CmnObjRef nodeRef = new CmnObjRef((int)SpMapRefType.BackLink, (ushort)SpMapContentType.Node, false);
+            nodeRef.key.tile = tile;
+            nodeRef.key.objIndex = edgeNodeIndex[0];
             ret.Add(nodeRef);
 
             //始点ノード側接続リンク
-            nodeRef = new CmnObjRef((int)SpMapRefType.NextLink, (ushort)SpMapContentType.Node);
-            nodeRef.tileId = edgeNodeTileId[1];
-            nodeRef.objIndex = edgeNodeIndex[1];
-            nodeRef.final = false;
+            nodeRef = new CmnObjRef((int)SpMapRefType.NextLink,  (ushort)SpMapContentType.Node, false);
+            nodeRef.key.tileId = edgeNodeTileId[1];
+            nodeRef.key.objIndex = edgeNodeIndex[1];
             ret.Add(nodeRef);
 
             return ret;
@@ -515,9 +513,9 @@ namespace libSimpleMap
             {
                 case SpMapRefType.NextLink:
 
-                    refNode = new CmnObjHdlRef(null, null, refType, (ushort)SpMapContentType.Node);
-                    refNode.nextRef.tileId = edgeNodeTileId[1];
-                    refNode.nextRef.objIndex = edgeNodeIndex[1];
+                    refNode = new CmnObjHdlRef(null, refType, (ushort)SpMapContentType.Node);
+                    refNode.nextRef.key.tileId = edgeNodeTileId[1];
+                    refNode.nextRef.key.objIndex = edgeNodeIndex[1];
                     refNode.nextRef.final = false;
 
                     ret.Add(refNode);
@@ -525,9 +523,9 @@ namespace libSimpleMap
 
                 case SpMapRefType.BackLink:
 
-                    refNode = new CmnObjHdlRef(null, null, refType, (ushort)SpMapContentType.Node);
-                    refNode.nextRef.tileId = edgeNodeTileId[0];
-                    refNode.nextRef.objIndex = edgeNodeIndex[0];
+                    refNode = new CmnObjHdlRef(null, refType, (ushort)SpMapContentType.Node);
+                    refNode.nextRef.key.tileId = edgeNodeTileId[0];
+                    refNode.nextRef.key.objIndex = edgeNodeIndex[0];
                     refNode.nextRef.final = false;
 
                     ret.Add(refNode);
@@ -634,8 +632,8 @@ namespace libSimpleMap
             foreach (var connLink in connectLink) {
 
                 CmnObjRef linkRef = new CmnObjRef((int)SpMapRefType.RelatedLink, (ushort)SpMapContentType.Link);
-                linkRef.tileId = connLink.tileId;
-                linkRef.objIndex = connLink.linkIndex;
+                linkRef.key.tileId = connLink.tileId;
+                linkRef.key.objIndex = connLink.linkIndex;
 
                 ret.Add(linkRef);
             }
@@ -656,9 +654,9 @@ namespace libSimpleMap
 
                     foreach (var x in connectLink)
                     {
-                        CmnObjHdlRef refLink = new CmnObjHdlRef(null, null, refType, (ushort)SpMapContentType.Link);
-                        refLink.nextRef.tileId = x.tileId;
-                        refLink.nextRef.objIndex = x.linkIndex;
+                        CmnObjHdlRef refLink = new CmnObjHdlRef(null, refType, (ushort)SpMapContentType.Link);
+                        refLink.nextRef.key.tileId = x.tileId;
+                        refLink.nextRef.key.objIndex = x.linkIndex;
 
                         ret.Add(refLink);
                     }

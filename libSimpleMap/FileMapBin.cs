@@ -53,10 +53,10 @@ namespace libSimpleMap
         }
 
 
-        public CmnTile CreateTile(uint tileId)
-        {
-            return new SpTile(tileId);
-        }
+        //public CmnTile CreateTile(uint tileId)
+        //{
+        //    return new SpTile(tileId);
+        //}
 
         public MapLink[] GetRoadLink(uint tileId, ushort maxRoadType = 0xFFFF)
         {

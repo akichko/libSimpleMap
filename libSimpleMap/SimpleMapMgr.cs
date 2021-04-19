@@ -123,6 +123,10 @@ namespace libSimpleMap
 
 
 
+        override public CmnTile CreateTile(uint tileId)
+        {
+            return new SpTile(tileId);
+        }
 
 
         public uint CalcTileId(LatLon latlon)
@@ -413,31 +417,31 @@ namespace libSimpleMap
         //}
 
 
-        new public List<CmnObjHdlRef> SearchRefObject(CmnObjHandle cmnObjHdl)
-        {
-            switch ((SpMapContentType)cmnObjHdl.obj.Type)
-            {
-                case SpMapContentType.Link:
+        //new public List<CmnObjHdlRef> SearchRefObject(CmnObjHandle cmnObjHdl)
+        //{
+        //    switch ((SpMapContentType)cmnObjHdl.obj.Type)
+        //    {
+        //        case SpMapContentType.Link:
 
-                    //接続リンク
-                    List<DLinkHandle> connectLinkS = GetConnectLinks((SpTile)cmnObjHdl.tile, (MapLink)cmnObjHdl.obj, 0, true, false);
-                    var retS = connectLinkS.Select(x => new CmnObjHdlRef((CmnTile)x.tile, (CmnObj)x.mapLink, (ushort)SpMapRefType.BackLink)).ToList();
+        //            //接続リンク
+        //            List<DLinkHandle> connectLinkS = GetConnectLinks((SpTile)cmnObjHdl.tile, (MapLink)cmnObjHdl.obj, 0, true, false);
+        //            var retS = connectLinkS.Select(x => new CmnObjHdlRef((ushort)SpMapRefType.BackLink, (CmnTile)x.tile, (CmnObj)x.mapLink)).ToList();
 
-                    List<DLinkHandle> connectLinkE = GetConnectLinks((SpTile)cmnObjHdl.tile, (MapLink)cmnObjHdl.obj, 1, true, false);
-                    var retE = connectLinkE.Select(x => new CmnObjHdlRef((CmnTile)x.tile, (CmnObj)x.mapLink, (ushort)SpMapRefType.NextLink));
+        //            List<DLinkHandle> connectLinkE = GetConnectLinks((SpTile)cmnObjHdl.tile, (MapLink)cmnObjHdl.obj, 1, true, false);
+        //            var retE = connectLinkE.Select(x => new CmnObjHdlRef((ushort)SpMapRefType.NextLink, (CmnTile)x.tile, (CmnObj)x.mapLink));
 
-                    retS.AddRange(retE);
+        //            retS.AddRange(retE);
 
-                    return retS;
+        //            return retS;
 
-                case SpMapContentType.Node:
+        //        case SpMapContentType.Node:
 
-                    break;
+        //            break;
 
-            }
-            return null;
+        //    }
+        //    return null;
 
-        }
+        //}
 
 
         public int WriteMap(uint tileId, string filename, bool append)
@@ -461,10 +465,10 @@ namespace libSimpleMap
             }
         }
 
-        //public int SaveTile(SpTile tile, bool compress)
-        //{
-        //    return mal.SaveTile(tile);
-        //}
+        public int SaveTile(SpTile tile, bool compress)
+        {
+            return ((ISpMapAccess)mal).SaveTile(tile);
+        }
 
 
         //MAL-API
