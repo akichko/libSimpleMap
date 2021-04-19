@@ -430,7 +430,7 @@ namespace libSimpleMap
         }
 
 
-        public override List<CmnObjRef> GetObjAllRefList(CmnTile tile)
+        public override List<CmnObjRef> GetObjAllRefList(CmnTile tile, byte direction)
         {
             List<CmnObjRef> ret = new List<CmnObjRef>();
 
@@ -449,10 +449,9 @@ namespace libSimpleMap
             return ret;
         }
 
-        public override List<AttrItemInfo> GetAttributeListItem()
+        public override List<AttrItemInfo> GetAttributeListItem(CmnTile tile)
         {
             List<AttrItemInfo> listItem = new List<AttrItemInfo>();
-
             AttrItemInfo item;
 
             //基本属性
@@ -460,24 +459,31 @@ namespace libSimpleMap
             item = new AttrItemInfo(new string[] { "RoadType", $"{roadType}" });
             listItem.Add(item);
 
-            
+            List<CmnObjHdlRef> nextLinkList = GetObjRefHdlList((int)SpMapRefType.NextLink, tile);
+            nextLinkList.ForEach(x =>
+            {
+                listItem.Add(new AttrItemInfo(new string[] { $"nextLink[]", $"" }, new AttrTag((int)SpMapRefType.NextLink, x.nextRef.key, null)));
+            });
+
             //形状詳細表示
             if (true)
-            {
+            {                
                 for (int i = 0; i < geometry.Length; i++)
                 {
-                    item = new AttrItemInfo(new string[] { $"geometry[{i}]", $"({geometry[i].ToString()})" }, geometry[i]);
-                    listItem.Add(item);
+                    //listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({geometry[i].ToString()})" }, geometry[i]));
+                    listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({geometry[i].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[i])));
                 }
             }
             //簡易表示
             else
             {
-                item = new AttrItemInfo(new string[] { "geometry[S]", $"({geometry[0].ToString()})" }, geometry[0]);
-                listItem.Add(item);
+                listItem.Add(new AttrItemInfo(new string[] { $"geometry[S]", $"({geometry[0].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[0])));
+                listItem.Add(new AttrItemInfo(new string[] { $"geometry[E]", $"({geometry[geometry.Length - 1].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[geometry.Length - 1])));
+                //item = new AttrItemInfo(new string[] { "geometry[S]", $"({geometry[0].ToString()})" }, geometry[0]);
+                //listItem.Add(item);
 
-                item = new AttrItemInfo(new string[] { "geometry[E]", $"({geometry[geometry.Length - 1].ToString()})"}, geometry[geometry.Length - 1]);
-                listItem.Add(item);
+                //item = new AttrItemInfo(new string[] { "geometry[E]", $"({geometry[geometry.Length - 1].ToString()})"}, geometry[geometry.Length - 1]);
+                //listItem.Add(item);
             }
 
             if (attribute != null)
@@ -502,10 +508,9 @@ namespace libSimpleMap
 
 
 
-        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile tile)
+        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile tile, byte direction = 1)
         {
-            List<CmnObjHdlRef> ret = new List<CmnObjHdlRef>();
-            
+            List<CmnObjHdlRef> ret = new List<CmnObjHdlRef>();            
 
             CmnObjHdlRef refNode;
 
@@ -514,8 +519,8 @@ namespace libSimpleMap
                 case SpMapRefType.NextLink:
 
                     refNode = new CmnObjHdlRef(null, refType, (ushort)SpMapContentType.Node);
-                    refNode.nextRef.key.tileId = edgeNodeTileId[1];
-                    refNode.nextRef.key.objIndex = edgeNodeIndex[1];
+                    refNode.nextRef.key.tileId = edgeNodeTileId[direction];
+                    refNode.nextRef.key.objIndex = edgeNodeIndex[direction];
                     refNode.nextRef.final = false;
 
                     ret.Add(refNode);
@@ -524,12 +529,11 @@ namespace libSimpleMap
                 case SpMapRefType.BackLink:
 
                     refNode = new CmnObjHdlRef(null, refType, (ushort)SpMapContentType.Node);
-                    refNode.nextRef.key.tileId = edgeNodeTileId[0];
-                    refNode.nextRef.key.objIndex = edgeNodeIndex[0];
+                    refNode.nextRef.key.tileId = edgeNodeTileId[1 - direction];
+                    refNode.nextRef.key.objIndex = edgeNodeIndex[1 - direction];
                     refNode.nextRef.final = false;
 
                     ret.Add(refNode);
-
                     return ret;
             }
             return ret;
@@ -625,7 +629,7 @@ namespace libSimpleMap
         public override UInt64 Id { get { return 0; } }
         public override UInt16 Type { get { return (UInt16)SpMapContentType.LinkAttribute; } }
 
-        public override List<CmnObjRef> GetObjAllRefList(CmnTile tile)
+        public override List<CmnObjRef> GetObjAllRefList(CmnTile tile, byte direction = 1)
         {
             List<CmnObjRef> ret = new List<CmnObjRef>();
 
@@ -643,7 +647,7 @@ namespace libSimpleMap
 
 
 
-        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile tile)
+        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile tile, byte direction = 1)
         {
             List<CmnObjHdlRef> ret = new List<CmnObjHdlRef>();
 
@@ -657,6 +661,7 @@ namespace libSimpleMap
                         CmnObjHdlRef refLink = new CmnObjHdlRef(null, refType, (ushort)SpMapContentType.Link);
                         refLink.nextRef.key.tileId = x.tileId;
                         refLink.nextRef.key.objIndex = x.linkIndex;
+                        refLink.nextRef.key.objDirection = x.linkDirection;
 
                         ret.Add(refLink);
                     }
@@ -814,7 +819,7 @@ namespace libSimpleMap
 
     }
 
-
+#if false
     public struct t_condition
     {
         int conditionId;
@@ -822,7 +827,7 @@ namespace libSimpleMap
         int regulation2;
         int regulation3;
     }
-
+#endif
 
 
 
