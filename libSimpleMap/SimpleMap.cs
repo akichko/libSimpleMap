@@ -36,7 +36,7 @@ namespace libSimpleMap
             tileInfo = new GisTileCode(tileId);
 
 
-            objDic = new Dictionary<UInt16, CmnObjGroup>();
+            //objDic = new Dictionary<UInt16, CmnObjGroup>();
             //objDic.Add((UInt16)SpMapContentType.Link, new SpObjGroup());
             //objDic.Add((UInt16)SpMapContentType.Node, new SpObjGroup());
 
@@ -48,6 +48,7 @@ namespace libSimpleMap
         {
             return new SpTile(tileId);
         }
+
 
         public MapNode GetMapNode(Int64 nodeId)
         {
@@ -247,7 +248,7 @@ namespace libSimpleMap
         {
             return ((uint[])Enum.GetValues(typeof(SpMapContentType)))
                 .Select(x => (UInt16)x)
-                .Where(x => (UInt16)x != 0xFFFF)
+                .Where(x => x != 0xFFFF && x != (UInt16)SpMapContentType.Tile)
                 .ToList();
         }
     }
@@ -918,6 +919,7 @@ namespace libSimpleMap
         Node = 0x0002,
         LinkGeometry = 0x0004,
         LinkAttribute = 0x0008,
+        Tile = 0x0010,
         All = 0xffff
 
     }
