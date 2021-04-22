@@ -50,7 +50,7 @@ namespace libSimpleMap
         }
 
 
-        public MapNode GetMapNode(Int64 nodeId)
+        public MapNode GetMapNode(UInt64 nodeId)
         {
             foreach (MapNode mapNode in node)
             {
@@ -614,7 +614,7 @@ namespace libSimpleMap
     public class MapNode : CmnObj
     {
         //public SpTile tile; //検索時に記憶するようにする？
-        public Int64 nodeId; //いずれ消す？
+        public UInt64 nodeId; //いずれ消す？
         public short index;
         public ConnectLink[] connectLink; //メッシュ内退出リンク
 
@@ -627,7 +627,8 @@ namespace libSimpleMap
         }
 
 
-        public override UInt64 Id { get { return 0; } }
+        public override UInt64 Id => nodeId;
+        
         public override UInt16 Type { get { return (UInt16)SpMapContentType.LinkAttribute; } }
 
         public override List<CmnObjRef> GetObjAllRefList(CmnTile tile, byte direction = 1)

@@ -150,7 +150,7 @@ namespace libSimpleMap
                 String fbuf;
 
                 short index = 0;
-                Int64 preNodeId = 0;
+                UInt64 preNodeId = 0;
                 List<ConnectLink> tmpConnectLinkList = null;
 
                 //データ数読み込み
@@ -167,7 +167,7 @@ namespace libSimpleMap
                     string sConnLinkDirection = csv_column[csvIndex++];
                     string sConnLinkRoadType = csv_column[csvIndex++];
 
-                    Int64 tmpNodeId = Int64.Parse(sNodeId);
+                    UInt64 tmpNodeId = UInt64.Parse(sNodeId);
 
                     if (tmpNodeId != preNodeId)
                     {
