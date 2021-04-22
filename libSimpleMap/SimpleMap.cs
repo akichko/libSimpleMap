@@ -16,7 +16,7 @@ namespace libSimpleMap
         public MapLink[] linkGeometry;
         public MapLink[] linkAttr;
 
-        override public UInt16 Type { get{return 0;} }
+        override public UInt32 Type { get{return 0;} }
 
         //public byte loadedRoadType = 0;
         //public byte loadedLinkLevel = 0;
@@ -82,7 +82,7 @@ namespace libSimpleMap
 
         public override int UpdateObjGroup(CmnObjGroup objGroup) /* abstract ?? */
         {
-            UInt16 objType = objGroup.Type;
+            UInt32 objType = objGroup.Type;
 
             //上書き
             objDic[objType] = objGroup;
@@ -244,11 +244,11 @@ namespace libSimpleMap
 
 
 
-        public static List<UInt16> GetMapContentTypeList()
+        public static List<UInt32> GetMapContentTypeList()
         {
             return ((uint[])Enum.GetValues(typeof(SpMapContentType)))
-                .Select(x => (UInt16)x)
-                .Where(x => x != 0xFFFF && x != (UInt16)SpMapContentType.Tile)
+                .Select(x => (UInt32)x)
+                .Where(x => x != 0xFFFF && x != (UInt32)SpMapContentType.Tile)
                 .ToList();
         }
     }
@@ -256,14 +256,14 @@ namespace libSimpleMap
     
     public class SpObjGroup : CmnObjGroup
     {
-        public override UInt16 Type { get; }
+        public override UInt32 Type { get; }
 
-        public SpObjGroup(UInt16 type)
+        public SpObjGroup(UInt32 type)
         {
             Type = type;
         }
 
-        public SpObjGroup(UInt16 type, CmnObj[] objArray, UInt16 loadedSubType)
+        public SpObjGroup(UInt32 type, CmnObj[] objArray, UInt16 loadedSubType)
         {
             Type = type;
             this.loadedSubType = loadedSubType;
@@ -291,7 +291,7 @@ namespace libSimpleMap
         public LinkAttribute attribute { get; set; }
 
         public override UInt64 Id { get { return linkId; } }
-        public override UInt16 Type { get { return (UInt16)SpMapContentType.Link; } }
+        public override UInt32 Type { get { return (UInt32)SpMapContentType.Link; } }
         public override UInt16 SubType { get { return (UInt16)roadType; } }
         public override LatLon[] Geometry { get { return geometry; }  }
 
@@ -436,13 +436,13 @@ namespace libSimpleMap
             List<CmnObjRef> ret = new List<CmnObjRef>();
 
             //始点ノード側接続リンク
-            CmnObjRef nodeRef = new CmnObjRef((int)SpMapRefType.BackLink, (ushort)SpMapContentType.Node, false);
+            CmnObjRef nodeRef = new CmnObjRef((int)SpMapRefType.BackLink, (UInt32)SpMapContentType.Node, false);
             nodeRef.key.tile = tile;
             nodeRef.key.objIndex = edgeNodeIndex[0];
             ret.Add(nodeRef);
 
             //始点ノード側接続リンク
-            nodeRef = new CmnObjRef((int)SpMapRefType.NextLink,  (ushort)SpMapContentType.Node, false);
+            nodeRef = new CmnObjRef((int)SpMapRefType.NextLink,  (UInt32)SpMapContentType.Node, false);
             nodeRef.key.tileId = edgeNodeTileId[1];
             nodeRef.key.objIndex = edgeNodeIndex[1];
             ret.Add(nodeRef);
@@ -519,7 +519,7 @@ namespace libSimpleMap
             {
                 case SpMapRefType.NextLink:
 
-                    refNode = new CmnObjHdlRef(null, refType, (ushort)SpMapContentType.Node);
+                    refNode = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Node);
                     refNode.nextRef.key.tileId = edgeNodeTileId[direction];
                     refNode.nextRef.key.objIndex = edgeNodeIndex[direction];
                     refNode.nextRef.final = false;
@@ -529,7 +529,7 @@ namespace libSimpleMap
 
                 case SpMapRefType.BackLink:
 
-                    refNode = new CmnObjHdlRef(null, refType, (ushort)SpMapContentType.Node);
+                    refNode = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Node);
                     refNode.nextRef.key.tileId = edgeNodeTileId[1 - direction];
                     refNode.nextRef.key.objIndex = edgeNodeIndex[1 - direction];
                     refNode.nextRef.final = false;
@@ -601,13 +601,13 @@ namespace libSimpleMap
     public class MapLinkGeometry : CmnObj
     {
         public override UInt64 Id { get { return 0; } }
-        public override UInt16 Type { get { return (UInt16)SpMapContentType.LinkGeometry; } }
+        public override UInt32 Type { get { return (UInt16)SpMapContentType.LinkGeometry; } }
     }
 
     public class MapLinkAttribute : CmnObj
     {
         public override UInt64 Id { get { return 0; } }
-        public override UInt16 Type{ get { return (UInt16)SpMapContentType.LinkAttribute; } }
+        public override UInt32 Type { get { return (UInt16)SpMapContentType.LinkAttribute; } }
 
     }
 
@@ -629,7 +629,7 @@ namespace libSimpleMap
 
         public override UInt64 Id => nodeId;
         
-        public override UInt16 Type { get { return (UInt16)SpMapContentType.LinkAttribute; } }
+        public override UInt32 Type { get { return (UInt32)SpMapContentType.LinkAttribute; } }
 
         public override List<CmnObjRef> GetObjAllRefList(CmnTile tile, byte direction = 1)
         {
@@ -637,7 +637,7 @@ namespace libSimpleMap
 
             foreach (var connLink in connectLink) {
 
-                CmnObjRef linkRef = new CmnObjRef((int)SpMapRefType.RelatedLink, (ushort)SpMapContentType.Link);
+                CmnObjRef linkRef = new CmnObjRef((int)SpMapRefType.RelatedLink, (UInt32)SpMapContentType.Link);
                 linkRef.key.tileId = connLink.tileId;
                 linkRef.key.objIndex = connLink.linkIndex;
 
@@ -660,7 +660,7 @@ namespace libSimpleMap
 
                     foreach (var x in connectLink)
                     {
-                        CmnObjHdlRef refLink = new CmnObjHdlRef(null, refType, (ushort)SpMapContentType.Link);
+                        CmnObjHdlRef refLink = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Link);
                         refLink.nextRef.key.tileId = x.tileId;
                         refLink.nextRef.key.objIndex = x.linkIndex;
                         refLink.nextRef.key.objDirection = x.linkDirection;

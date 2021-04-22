@@ -559,7 +559,7 @@ namespace libSimpleMap
 
 
 
-        public List<UInt16> GetMapContentTypeList()
+        public List<UInt32> GetMapContentTypeList()
         {
             return SpTile.GetMapContentTypeList();
 
@@ -569,12 +569,12 @@ namespace libSimpleMap
             //    .ToList();
         }
 
-        CmnTile LoadTile(uint tileId, UInt16 reqType = 0xFFFF, UInt16 reqMaxSubType = 0xFFFF)
+        CmnTile LoadTile(uint tileId, UInt32 reqType = 0xFFFFFFFF, UInt16 reqMaxSubType = 0xFFFF)
         {
-            List<UInt16> objTypeList = GetMapContentTypeList();
+            List<UInt32> objTypeList = GetMapContentTypeList();
             SpTile tmpTile = new SpTile(tileId);
 
-            foreach (UInt16 objType in objTypeList)
+            foreach (UInt32 objType in objTypeList)
             {
                 if ((reqType & objType) == objType)
                 {
@@ -587,7 +587,7 @@ namespace libSimpleMap
 
         }
 
-        public CmnObjGroup LoadObjGroup(uint tileId, UInt16 type, UInt16 subType = 0xFFFF)
+        public CmnObjGroup LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
         {
            
             switch((SpMapContentType)type)
@@ -618,7 +618,7 @@ namespace libSimpleMap
             return null;
         }
 
-        public List<CmnObjGroup> LoadObjGroupList(uint tileId, ushort type = ushort.MaxValue, ushort subType = ushort.MaxValue)
+        public List<CmnObjGroup> LoadObjGroupList(uint tileId, UInt32 type = 0xffffffff, ushort subType = ushort.MaxValue)
         {
             return this.GetMapContentTypeList()
                 .Where(x => (x & type) == x)

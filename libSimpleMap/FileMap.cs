@@ -341,13 +341,13 @@ namespace libSimpleMap
         }
 
 
-        public List<UInt16> GetMapContentTypeList()
+        public List<UInt32> GetMapContentTypeList()
         {
             return SpTile.GetMapContentTypeList();
         }
 
 
-        public CmnObjGroup LoadObjGroup(uint tileId, UInt16 type, UInt16 subType = 0xFFFF)
+        public CmnObjGroup LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
         {
 
             switch ((SpMapContentType)type)
@@ -380,7 +380,7 @@ namespace libSimpleMap
 
 
 
-        public List<CmnObjGroup> LoadObjGroupList(uint tileId, ushort type = ushort.MaxValue, ushort subType = ushort.MaxValue)
+        public List<CmnObjGroup> LoadObjGroupList(uint tileId, UInt32 type = 0xffffffff, ushort subType = 0xffff)
         {
             return this.GetMapContentTypeList()
                 .Where(x => (x & type) == x)
