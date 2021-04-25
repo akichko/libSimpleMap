@@ -301,6 +301,41 @@ namespace libSimpleMap
         }
 
 
+
+
+        override public uint GetMapObjType(ECmnMapContentType cmnRefType)
+        {
+            switch (cmnRefType)
+            {
+                case ECmnMapContentType.Link:
+                    return (int)SpMapContentType.Link;
+                case ECmnMapContentType.Node:
+                    return (int)SpMapContentType.Node;
+                case ECmnMapContentType.LinkGeometry:
+                    return (int)SpMapContentType.LinkGeometry;
+                default:
+                    return 0;
+            }
+        }
+
+        override public int GetMapRefType(ECmnMapRefType cmnRefType)
+        {
+            switch (cmnRefType)
+            {
+                case ECmnMapRefType.NextLink:
+                    return (int)SpMapRefType.NextLink;
+                case ECmnMapRefType.BackLink:
+                    return (int)SpMapRefType.BackLink;
+                default:
+                    return 0;
+            }
+        }
+
+
+
+
+        /*旧仕様 *************************************************************************************/
+
         public LinkHandle SearchMapLink(uint targetTileId, int targetLinkIndex)
         {
             SpTile tmpTile = (SpTile)SearchTile(targetTileId);
@@ -404,6 +439,11 @@ namespace libSimpleMap
 
         }
 
+
+
+
+
+
         //public async Task<uint> LoadTileList(List<uint> tileIdList)
         //{
         //    return 0;
@@ -465,7 +505,7 @@ namespace libSimpleMap
             }
         }
 
-        public int SaveTile(SpTile tile, bool compress)
+        public int SaveTile(SpTile tile)
         {
             return ((ISpMapAccess)mal).SaveTile(tile);
         }
@@ -529,7 +569,7 @@ namespace libSimpleMap
         //    return GetMapTileList();
         //}
 
-        public int SaveTile(SpTile tile) { return 0; }
+        //public int SaveTile(SpTile tile) { return 0; }
         public int SaveRoadLink(SpTile tile) { return 0; }
         public int SaveRoadNode(SpTile tile) { return 0; }
         public int SaveRoadGeometry(SpTile tile) { return 0; }
@@ -581,7 +621,7 @@ namespace libSimpleMap
         int SaveNodeData(uint tileId, byte[] tileBuf, int size);
         int SaveGeometryData(uint tileId, byte[] tileBuf, int size);
 
-        int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf);
+        int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf, byte[] attributeBuf);
     }
 
 }

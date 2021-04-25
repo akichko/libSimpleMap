@@ -109,10 +109,10 @@ namespace libSimpleMap
                     tmpLink.edgeNodeIndex[1] = BitConverter.ToUInt16(tmpBuf, 0);
 
                     ms.Read(tmpBuf, 0, 2);
-                    tmpLink.linkCost = BitConverter.ToInt16(tmpBuf, 0);
+                    tmpLink.linkCost = BitConverter.ToUInt16(tmpBuf, 0);
 
                     ms.Read(tmpBuf, 0, 2);
-                    tmpLink.linkLength = BitConverter.ToInt16(tmpBuf, 0);
+                    tmpLink.linkLength = BitConverter.ToUInt16(tmpBuf, 0);
 
                     ms.Read(tmpBuf, 0, 1);
                     tmpLink.roadType = tmpBuf[0];
@@ -261,14 +261,14 @@ namespace libSimpleMap
                     {
                         LatLon tmpLatLon = new LatLon();
 
-                        ms.Read(tmpBuf, 0, 2);
-                        short tmpLatDiff = BitConverter.ToInt16(tmpBuf, 0);
-                        tmpLat = tmpLat + BitConverter.ToInt16(tmpBuf, 0);
+                        ms.Read(tmpBuf, 0, 4);
+                        int tmpLatDiff = BitConverter.ToInt32(tmpBuf, 0);
+                        tmpLat = tmpLat + BitConverter.ToInt32(tmpBuf, 0);
                         tmpLatLon.lat = tmpLat / 10000000.0;
 
-                        ms.Read(tmpBuf, 0, 2);
-                        short tmpLonDiff = BitConverter.ToInt16(tmpBuf, 0);
-                        tmpLon = tmpLon + BitConverter.ToInt16(tmpBuf, 0);
+                        ms.Read(tmpBuf, 0, 4);
+                        int tmpLonDiff = BitConverter.ToInt32(tmpBuf, 0);
+                        tmpLon = tmpLon + BitConverter.ToInt32(tmpBuf, 0);
                         tmpLatLon.lon = tmpLon / 10000000.0;
 
                         tmpGeometry.Add(tmpLatLon);
@@ -321,16 +321,22 @@ namespace libSimpleMap
                     byte[] linkBuf = MakeRoadLinkBin(tile);
                     byte[] nodeBuf = MakeRoadNodeBin(tile);
                     byte[] geometryBuf = MakeRoadGeometryBin(tile);
+                    byte[] attributeBuf = MakeLinkAttributeBin(tile);
 
                     if (compression)
                     {
                         Zlib zlib = new Zlib();
                         linkBuf = zlib.Compress(linkBuf);
                         nodeBuf = zlib.Compress(nodeBuf);
+                        
+                        //Console.Write($"geometryBuf: {geometryBuf.Length/1024} -> ");
                         geometryBuf = zlib.Compress(geometryBuf);
+                        //Console.WriteLine($"{geometryBuf.Length/1024}");
+
+                        attributeBuf = zlib.Compress(geometryBuf);
                     }
 
-                    dal.SaveAllData(tile.tileId, linkBuf, nodeBuf, geometryBuf);
+                    dal.SaveAllData(tile.tileId, linkBuf, nodeBuf, geometryBuf, attributeBuf);
 
                     break;
 
@@ -512,7 +518,7 @@ namespace libSimpleMap
 
             int bufLength;
 
-            byte[] tileBuf = new byte[1024 * 1024];
+            byte[] tileBuf = new byte[4 * 1024 * 1024];
             byte[] tmpBuf;
 
             TileXY baseTileXY = new TileXY(tileId);
@@ -539,14 +545,66 @@ namespace libSimpleMap
                     for (int i = 1; i < tmpLink.geometry.Length; i++)
                     {
 
-                        tmpBuf = BitConverter.GetBytes((short)((tmpLink.geometry[i].lat * 10000000 - tmpLink.geometry[i - 1].lat * 10000000)));
-                        ms.Write(tmpBuf, 0, 2);
+                        tmpBuf = BitConverter.GetBytes((int)(tmpLink.geometry[i].lat * 10000000) - (int)(tmpLink.geometry[i - 1].lat * 10000000));
+                        ms.Write(tmpBuf, 0, 4);
 
-                        tmpBuf = BitConverter.GetBytes((short)((tmpLink.geometry[i].lon * 10000000 - tmpLink.geometry[i - 1].lon * 10000000)));
-                        ms.Write(tmpBuf, 0, 2);
+                        tmpBuf = BitConverter.GetBytes((int)(tmpLink.geometry[i].lon * 10000000) - (int)(tmpLink.geometry[i - 1].lon * 10000000));
+                        ms.Write(tmpBuf, 0, 4);
 
                     }
 
+                }
+                bufLength = (int)ms.Position;
+            }
+
+            Array.Resize(ref tileBuf, bufLength);
+            //Console.WriteLine($"bufLength = {bufLength/1024/1024}");
+
+            return tileBuf;
+        }
+
+
+        public byte[] MakeLinkAttributeBin(SpTile tile)
+        {
+            uint tileId = tile.tileId;
+            SpTile tmpTile = tile;
+
+            int bufLength;
+
+            byte[] tileBuf = new byte[8 * 1024 * 1024];
+            byte[] tmpBuf;
+            byte[] tmpStrBuf;
+
+            using (MemoryStream ms = new MemoryStream(tileBuf))
+            {
+                //データ数
+                tmpBuf = BitConverter.GetBytes((short)tmpTile.link.Length);
+                ms.Write(tmpBuf, 0, 2);
+
+                foreach (MapLink tmpLinkAttr in tmpTile.linkAttr)
+                {
+                    tmpBuf = BitConverter.GetBytes((long)tmpLinkAttr.linkId);
+                    ms.Write(tmpBuf, 0, 8);
+
+                    tmpBuf = BitConverter.GetBytes((int)tmpLinkAttr.attribute.wayId);
+                    ms.Write(tmpBuf, 0, 4);
+
+                    int numTag = tmpLinkAttr.attribute.tagInfo.Count;
+                    tmpBuf = BitConverter.GetBytes((short)numTag);
+                    ms.Write(tmpBuf, 0, 2);
+
+                    for (int i = 0; i < numTag; i++)
+                    {
+                        tmpStrBuf = System.Text.Encoding.UTF8.GetBytes(tmpLinkAttr.attribute.tagInfo[i].tag);
+                        tmpBuf = BitConverter.GetBytes((short)tmpStrBuf.Length);
+                        ms.Write(tmpBuf, 0, 2);
+                        ms.Write(tmpStrBuf, 0, tmpStrBuf.Length);
+
+                        tmpStrBuf = System.Text.Encoding.UTF8.GetBytes(tmpLinkAttr.attribute.tagInfo[i].val);
+                        tmpBuf = BitConverter.GetBytes((short)tmpStrBuf.Length);
+                        ms.Write(tmpBuf, 0, 2);
+                        ms.Write(tmpStrBuf, 0, tmpStrBuf.Length);
+                    }
                 }
                 bufLength = (int)ms.Position;
             }

@@ -233,7 +233,7 @@ namespace libSimpleMap
                         tmpLinkShape.geometry = tmpGeometry.ToArray();
                         tmpLinkShape = new MapLink();
 
-                        //link[index].geometry = new List<LatLon>();
+                        tmpGeometry = new List<LatLon>();
                         tmpLinkShape.linkId = tmpLinkId;
                         preLinkId = tmpLinkId;
                         tmpLinkShapeList.Add(tmpLinkShape);

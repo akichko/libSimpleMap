@@ -607,73 +607,73 @@ namespace libSimpleMap
 
         //結果出力
 
-        public void WriteCacheTileXY()
-        {
-            Console.WriteLine("Writing Cache Tile List ... ");
+        //public void WriteCacheTileXY()
+        //{
+        //    Console.WriteLine("Writing Cache Tile List ... ");
 
-            using (var sw = new StreamWriter(@"D:\share\osm\cacheTile.txt"))
-            {
+        //    using (var sw = new StreamWriter(@"D:\share\osm\cacheTile.txt"))
+        //    {
 
-                foreach (var x in dykstra.dicTileCostInfo.Where(x => x.Value.costInfo != null))
-                {
-                    LatLon tmp = GisTileCode.SCalcLatLon(x.Value.tileId);
-                    //TileXY tmp = new TileXY(x.Value.tileId);
-                    //Console.WriteLine($" [{x.Value.tileId}], {tmp.lon}, {tmp.lat}");
-                    sw.WriteLine($"{x.Value.tileId}, {tmp.lon}, {tmp.lat}");
-                }
-            }
-        }
+        //        foreach (var x in dykstra.dicTileCostInfo.Where(x => x.Value.costInfo != null))
+        //        {
+        //            LatLon tmp = GisTileCode.SCalcLatLon(x.Value.tileId);
+        //            //TileXY tmp = new TileXY(x.Value.tileId);
+        //            //Console.WriteLine($" [{x.Value.tileId}], {tmp.lon}, {tmp.lat}");
+        //            sw.WriteLine($"{x.Value.tileId}, {tmp.lon}, {tmp.lat}");
+        //        }
+        //    }
+        //}
 
-        public void WriteCalclatedLinks()
-        {
-            Console.WriteLine("Writing calculated Link List ... ");
+        //public void WriteCalclatedLinks()
+        //{
+        //    Console.WriteLine("Writing calculated Link List ... ");
 
-            int tileCount = 0;
-            using (var sw = new StreamWriter(@"D:\share\osm\calculatedLink.txt"))
-            {
-                foreach (var tileCost in dykstra.dicTileCostInfo.Values.Where(x => x.costInfo != null))
-                {
+        //    int tileCount = 0;
+        //    using (var sw = new StreamWriter(@"D:\share\osm\calculatedLink.txt"))
+        //    {
+        //        foreach (var tileCost in dykstra.dicTileCostInfo.Values.Where(x => x.costInfo != null))
+        //        {
 
-                    var linkList = tileCost.costInfo
-                        .SelectMany(x => x)
-                        .Where(x => x.status != 0)
-                        .Select(x => x.tileCostInfo.tile.link[x.linkIndex]);
+        //            var linkList = tileCost.costInfo
+        //                .SelectMany(x => x)
+        //                .Where(x => x.status != 0)
+        //                .Select(x => x.tileCostInfo.tile.link[x.linkIndex]);
 
-                    if (linkList.Count() > 0)
-                    {
-                        tileCount++;
-                        //Console.WriteLine($"tile = {tileCost.tileId} count={tileCount}");
-                        mapMgr.LoadTile(tileCost.tileId);
-                    }
+        //            if (linkList.Count() > 0)
+        //            {
+        //                tileCount++;
+        //                //Console.WriteLine($"tile = {tileCost.tileId} count={tileCount}");
+        //                mapMgr.LoadTile(tileCost.tileId);
+        //            }
 
-                    foreach (var link in linkList)
-                    {
-                        link.WriteGeometry(0, sw);
-                        sw.WriteLine("");
+        //            foreach (var link in linkList)
+        //            {
+        //                link.WriteGeometry(0, sw);
+        //                sw.WriteLine("");
 
-                    }
+        //            }
 
-                }
-                Console.WriteLine($"calculated tile num = {tileCount}");
+        //        }
+        //        Console.WriteLine($"calculated tile num = {tileCount}");
 
-            }
-        }
+        //    }
+        //}
 
         public int PrintResult()
         {
             return dykstra.PrintResult();
         }
 
-        public int PrintCalcCount()
-        {
-            return dykstra.PrintCalcCount();
+        //public int PrintCalcCount()
+        //{
+        //    return dykstra.PrintCalcCount();
 
-        }
+        //}
 
-        public int WriteResult()
-        {
-            return dykstra.WriteResult();
-        }
+        //public int WriteResult()
+        //{
+        //    return dykstra.WriteResult();
+        //}
 
         public List<DLinkHandle> GetResult()
         {

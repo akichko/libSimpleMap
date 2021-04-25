@@ -236,7 +236,10 @@ namespace libSimpleMap
 
         public int CalcLinkCost()
         {
-            Array.ForEach(link, x => x.CalcCost());
+            Array.ForEach(link, x => {
+                x.linkLength = (ushort)LatLon.CalcLength(x.Geometry);
+            });
+            //Array.ForEach(link, x => x.CalcCost());
             //link.ForEach(x => x.CalcCost());
 
             return 0;
@@ -283,8 +286,8 @@ namespace libSimpleMap
         public TileOffset2 endNodeTileOffset;
 
         public byte roadType; //4bit
-        public short linkLength;
-        public short linkCost;
+        public ushort linkLength;
+        public ushort linkCost;
         public sbyte fOneWay; //表示用にここにも
 
         public LatLon[] geometry { get; set; }
@@ -294,6 +297,48 @@ namespace libSimpleMap
         public override UInt32 Type { get { return (UInt32)SpMapContentType.Link; } }
         public override UInt16 SubType { get { return (UInt16)roadType; } }
         public override LatLon[] Geometry { get { return geometry; }  }
+
+        public override double Length => linkLength;
+
+
+        public override int Cost { 
+            get {
+                double tmpCost;
+                switch (roadType)
+                {
+                    case 1:
+                        tmpCost = Length * 0.5;
+                        break;
+                    case 2:
+                        tmpCost = Length * 0.6;
+                        break;
+                    case 3:
+                        tmpCost = Length * 0.7;
+                        break;
+                    case 4:
+                        tmpCost = Length * 0.8;
+                        break;
+                    case 5:
+                        tmpCost = Length * 0.9;
+                        break;
+                    default:
+                        tmpCost = Length;
+                        break;
+                }
+                return (int)tmpCost;
+            }
+        }
+
+        public override byte Oneway {
+            get {
+                if (fOneWay == 1)
+                    return 1;
+                else if (fOneWay == -1)
+                    return 0;
+                else
+                    return 0xff;
+            } 
+        } 
 
         //public Int64 linkId
         //{
@@ -328,24 +373,24 @@ namespace libSimpleMap
             edgeNodeTileId = new uint[2];
         }
 
-        public void PrintGeometry(int direction)
-        {
-            if (direction == 0)
-            {
-                for (int i = geometry.Length - 1; i >= 0; i--)
-                {
-                    Console.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
-                }
+        //public void PrintGeometry(int direction)
+        //{
+        //    if (direction == 0)
+        //    {
+        //        for (int i = geometry.Length - 1; i >= 0; i--)
+        //        {
+        //            Console.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
+        //        }
 
-            }
-            else
-            {
-                for (int i = 0; i < geometry.Length; i++)
-                {
-                    Console.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
-                }
-            }
-        }
+        //    }
+        //    else
+        //    {
+        //        for (int i = 0; i < geometry.Length; i++)
+        //        {
+        //            Console.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
+        //        }
+        //    }
+        //}
 
         public int WriteGeometry(int direction, StreamWriter sw)
         {
@@ -368,13 +413,13 @@ namespace libSimpleMap
 
 
 
-        public LatLon[] GetGeometry(int direction)
-        {
-            if (direction == 0)
-                return geometry.Reverse().ToArray();
-            else
-                return geometry;
-        }
+        //public LatLon[] GetGeometry(int direction)
+        //{
+        //    if (direction == 0)
+        //        return geometry.Reverse().ToArray();
+        //    else
+        //        return geometry;
+        //}
 
 
         public LinkDistance GetDistance2(LatLon latlon)
@@ -418,14 +463,14 @@ namespace libSimpleMap
                 tmpLength += geometry[i].GetDistanceTo(geometry[i - 1]);
             }
 
-            linkLength = (short)tmpLength;
+            linkLength = (ushort)tmpLength;
 
             double weight = 1.0;
             if (roadType <= 2) weight = 0.5;
             else if (roadType <= 4) weight = 0.6;
             else if (roadType <= 6) weight = 0.7;
 
-            linkCost = (short)(linkLength * weight);
+            linkCost = (ushort)(linkLength * weight);
             return 0;
 
         }
@@ -457,8 +502,15 @@ namespace libSimpleMap
 
             //基本属性
 
-            item = new AttrItemInfo(new string[] { "RoadType", $"{roadType}" });
-            listItem.Add(item);
+            listItem.Add(new AttrItemInfo(
+                new string[] { "Id", $"{Id}" },
+                new AttrTag(0, new CmnSearchKey((int)SpMapContentType.Link).AddObjHandle(tile, this), null))
+                );
+            listItem.Add(new AttrItemInfo(new string[] { "TileId", $"{tile.tileId}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "Index", $"{Index}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "RoadType", $"{roadType}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "linkLength", $"{linkLength}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "Cost", $"{linkLength}" }));
 
             List<CmnObjHdlRef> nextLinkList = GetObjRefHdlList((int)SpMapRefType.NextLink, tile);
             nextLinkList.ForEach(x =>
@@ -536,6 +588,8 @@ namespace libSimpleMap
 
                     ret.Add(refNode);
                     return ret;
+                default:
+                    break;
             }
             return ret;
         }
@@ -543,55 +597,55 @@ namespace libSimpleMap
 
         //デバッグ・その他
 
-        public int show_geometry()
-        {
-            //    Console.WriteLine("◆LINK Id={0}", linkId);
-            //    for (int i = 0; i < shape.numCoord; i++)
-            //    {
-            //        Console.WriteLine("  {0}:\tX:{1}\ty:{2}", i, shape.geometry[i].x, shape.geometry[i].y);
+        //public int show_geometry()
+        //{
+        //    //    Console.WriteLine("◆LINK Id={0}", linkId);
+        //    //    for (int i = 0; i < shape.numCoord; i++)
+        //    //    {
+        //    //        Console.WriteLine("  {0}:\tX:{1}\ty:{2}", i, shape.geometry[i].x, shape.geometry[i].y);
 
-            //    }
-            return 0;
-        }
+        //    //    }
+        //    return 0;
+        //}
 
-        public int show_geometry_for_plot()
-        {
-            //for (int i = 0; i < shape.numCoord; i++)
-            //{
-            //    Console.WriteLine("{0}\t{1}\t{2}\t0", i, shape.geometry[i].x, shape.geometry[i].y);
+        //public int show_geometry_for_plot()
+        //{
+        //    //for (int i = 0; i < shape.numCoord; i++)
+        //    //{
+        //    //    Console.WriteLine("{0}\t{1}\t{2}\t0", i, shape.geometry[i].x, shape.geometry[i].y);
 
-            //}
-            Console.WriteLine("");
-            Console.WriteLine("");
+        //    //}
+        //    Console.WriteLine("");
+        //    Console.WriteLine("");
 
-            //Console.Write("\n\n");
+        //    //Console.Write("\n\n");
 
-            return 0;
-        }
+        //    return 0;
+        //}
 
-        public int show_geometry_for_plot3D(int direction, int start_z, int end_z)
-        {
-            //Console.WriteLine("<{0}\t{1}\t{2}>", direction, start_z, end_z);
+        //public int show_geometry_for_plot3D(int direction, int start_z, int end_z)
+        //{
+        //    //Console.WriteLine("<{0}\t{1}\t{2}>", direction, start_z, end_z);
 
-            //if (direction == 1)
-            //{
-            //    for (int i = 0; i < shape.numCoord; i++)
-            //    {
-            //        Console.WriteLine("{0}\t{1}\t{2}\t{3}", i, shape.geometry[i].x, shape.geometry[i].y, start_z + (end_z - start_z) * i / (double)(shape.numCoord - 1));
-            //    }
-            //}
-            //else
-            //{
-            //    for (int i = 0; i < shape.numCoord; i++)
-            //    {
-            //        Console.WriteLine("{0}\t{1}\t{2}\t{3}", i, shape.geometry[shape.numCoord - 1 - i].x, shape.geometry[shape.numCoord - 1 - i].y, start_z + ((end_z - start_z) * i) / (double)(shape.numCoord - 1));
-            //    }
-            //}
-            //Console.WriteLine("");
-            //Console.WriteLine("");
+        //    //if (direction == 1)
+        //    //{
+        //    //    for (int i = 0; i < shape.numCoord; i++)
+        //    //    {
+        //    //        Console.WriteLine("{0}\t{1}\t{2}\t{3}", i, shape.geometry[i].x, shape.geometry[i].y, start_z + (end_z - start_z) * i / (double)(shape.numCoord - 1));
+        //    //    }
+        //    //}
+        //    //else
+        //    //{
+        //    //    for (int i = 0; i < shape.numCoord; i++)
+        //    //    {
+        //    //        Console.WriteLine("{0}\t{1}\t{2}\t{3}", i, shape.geometry[shape.numCoord - 1 - i].x, shape.geometry[shape.numCoord - 1 - i].y, start_z + ((end_z - start_z) * i) / (double)(shape.numCoord - 1));
+        //    //    }
+        //    //}
+        //    //Console.WriteLine("");
+        //    //Console.WriteLine("");
 
-            return 0;
-        }
+        //    return 0;
+        //}
 
 
     }
@@ -656,6 +710,17 @@ namespace libSimpleMap
             switch ((SpMapRefType)refType)
             {
                 case SpMapRefType.NextLink:
+                    foreach (var x in connectLink)
+                    {
+                        CmnObjHdlRef refLink = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Link);
+                        refLink.nextRef.key.tileId = x.tileId;
+                        refLink.nextRef.key.objIndex = x.linkIndex;
+                        refLink.nextRef.key.objDirection = x.linkDirection;
+
+                        ret.Add(refLink);
+                    }
+                    return ret;
+
                 case SpMapRefType.BackLink:
 
                     foreach (var x in connectLink)
@@ -663,7 +728,7 @@ namespace libSimpleMap
                         CmnObjHdlRef refLink = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Link);
                         refLink.nextRef.key.tileId = x.tileId;
                         refLink.nextRef.key.objIndex = x.linkIndex;
-                        refLink.nextRef.key.objDirection = x.linkDirection;
+                        refLink.nextRef.key.objDirection = (byte)(1 - x.linkDirection);
 
                         ret.Add(refLink);
                     }

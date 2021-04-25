@@ -243,10 +243,10 @@ namespace libSimpleMap
         }
 
 
-        public int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf)
+        public int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf, byte[] attributeBuf)
         {
             SQLiteCommand cmd = con.CreateCommand();
-            cmd.CommandText = String.Format($"INSERT INTO MAP_TILE (tile_id, link, node, geometry) VALUES ({tileId}, @linkBlob, @nodeBlob, @geometryBlob);");
+            cmd.CommandText = String.Format($"INSERT INTO MAP_TILE (tile_id, link, node, geometry, attribute) VALUES ({tileId}, @linkBlob, @nodeBlob, @geometryBlob, @attributeBlob);");
 
             SQLiteParameter param1 = new SQLiteParameter("@linkBlob", System.Data.DbType.Binary);
             param1.Value = linkBuf;
@@ -259,6 +259,10 @@ namespace libSimpleMap
             SQLiteParameter param3 = new SQLiteParameter("@geometryBlob", System.Data.DbType.Binary);
             param3.Value = geometryBuf;
             cmd.Parameters.Add(param3);
+
+            SQLiteParameter param4 = new SQLiteParameter("@attributeBlob", System.Data.DbType.Binary);
+            param4.Value = geometryBuf;
+            cmd.Parameters.Add(param4);
 
             return cmd.ExecuteNonQuery();
 

@@ -208,7 +208,7 @@ namespace libSimpleMap
         }
 
 
-        public int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf)
+        public int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf, byte[] attributeBuf)
         {
             return -1;
         }
