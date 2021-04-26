@@ -547,7 +547,7 @@ namespace libSimpleMap
         private int ReadTiles(List<uint> tileIdList, bool allCache)
         {
             Console.WriteLine("tile reading");
-            int count = 0;
+            //int count = 0;
             foreach (uint tileId in tileIdList)
             {
                 byte maxRoadType = CalcMaxUsableRoadType(tileId, orgHdl.tile.tileId, destHdl.tile.tileId);

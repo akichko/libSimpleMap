@@ -110,7 +110,7 @@ namespace libSimpleMap
 
                 case SpMapContentType.LinkAttribute:
                     linkAttr = (MapLink[])objDic[objType].objArray;
-                    MergeAttribute(linkGeometry, true);
+                    MergeAttribute(linkAttr, true);
                     objGroup.isDrawable = false;
                     objGroup.isGeoSearchable = false;
                     break;
@@ -293,6 +293,8 @@ namespace libSimpleMap
         public LatLon[] geometry { get; set; }
         public LinkAttribute attribute { get; set; }
 
+        public MapLinkAttribute linkAttr;
+
         public override UInt64 Id { get { return linkId; } }
         public override UInt32 Type { get { return (UInt32)SpMapContentType.Link; } }
         public override UInt16 SubType { get { return (UInt16)roadType; } }
@@ -452,28 +454,28 @@ namespace libSimpleMap
         }
 
 
-        public int CalcCost()
-        {
-            if (geometry.Length <= 1) return -1;
+        //public int CalcCost()
+        //{
+        //    if (geometry.Length <= 1) return -1;
 
-            double tmpLength = 0;
+        //    double tmpLength = 0;
 
-            for (int i = 1; i < geometry.Length; i++)
-            {
-                tmpLength += geometry[i].GetDistanceTo(geometry[i - 1]);
-            }
+        //    for (int i = 1; i < geometry.Length; i++)
+        //    {
+        //        tmpLength += geometry[i].GetDistanceTo(geometry[i - 1]);
+        //    }
 
-            linkLength = (ushort)tmpLength;
+        //    linkLength = (ushort)tmpLength;
 
-            double weight = 1.0;
-            if (roadType <= 2) weight = 0.5;
-            else if (roadType <= 4) weight = 0.6;
-            else if (roadType <= 6) weight = 0.7;
+        //    double weight = 1.0;
+        //    if (roadType <= 2) weight = 0.5;
+        //    else if (roadType <= 4) weight = 0.6;
+        //    else if (roadType <= 6) weight = 0.7;
 
-            linkCost = (ushort)(linkLength * weight);
-            return 0;
+        //    linkCost = (ushort)(linkLength * weight);
+        //    return 0;
 
-        }
+        //}
 
 
         public override List<CmnObjRef> GetObjAllRefList(CmnTile tile, byte direction)
@@ -509,8 +511,9 @@ namespace libSimpleMap
             listItem.Add(new AttrItemInfo(new string[] { "TileId", $"{tile.tileId}" }));
             listItem.Add(new AttrItemInfo(new string[] { "Index", $"{Index}" }));
             listItem.Add(new AttrItemInfo(new string[] { "RoadType", $"{roadType}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "Oneway", $"{Oneway}" }));
             listItem.Add(new AttrItemInfo(new string[] { "linkLength", $"{linkLength}" }));
-            listItem.Add(new AttrItemInfo(new string[] { "Cost", $"{linkLength}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "Cost", $"{Cost}" }));
 
             List<CmnObjHdlRef> nextLinkList = GetObjRefHdlList((int)SpMapRefType.NextLink, tile);
             nextLinkList.ForEach(x =>
@@ -519,7 +522,7 @@ namespace libSimpleMap
             });
 
             //形状詳細表示
-            if (true)
+            if (false)
             {                
                 for (int i = 0; i < geometry.Length; i++)
                 {
@@ -663,6 +666,23 @@ namespace libSimpleMap
         public override UInt64 Id { get { return 0; } }
         public override UInt32 Type { get { return (UInt16)SpMapContentType.LinkAttribute; } }
 
+        public UInt64 linkId;
+        public UInt64 wayId;
+        public List<TagInfo> tagInfo;
+
+        //public byte link_type1;
+        //public byte link_type2;
+        //public byte link_type3;
+        //public byte road_width;
+        //public int road_name;
+        //public int road_no;
+        //public byte numLanes;
+        //public bool tunnel;
+
+        public MapLinkAttribute()
+        {
+            tagInfo = new List<TagInfo>();
+        }
     }
 
     public class MapNode : CmnObj
@@ -758,8 +778,8 @@ namespace libSimpleMap
 
     public class LinkAttribute
     {
-        public Int64 linkId;
-        public Int64 wayId;
+        public UInt64 linkId;
+        public UInt64 wayId;
         //public byte link_type1;
         //public byte link_type2;
         //public byte link_type3;

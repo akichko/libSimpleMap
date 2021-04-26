@@ -141,6 +141,27 @@ namespace libSimpleMap
             return retBytes;
         }
 
+        public byte[] GetAttributeData(uint tileId)
+        {
+            //
+            //return null;
+
+            byte[] retBytes = null;
+
+            string sql = $"select length(attribute) size, attribute from map_tile where tile_id = {tileId}";
+
+            SQLiteCommand com = new SQLiteCommand(sql, con);
+            SQLiteDataReader reader = com.ExecuteReader();
+
+            while (reader.Read() == true)
+            {
+                Int64 size = (Int64)reader["size"];
+                retBytes = (byte[])reader["attribute"];
+
+            }
+
+            return retBytes;
+        }
 
         public int SaveLinkData(uint tileId, byte[] tileBuf, int size)
         {
@@ -261,7 +282,7 @@ namespace libSimpleMap
             cmd.Parameters.Add(param3);
 
             SQLiteParameter param4 = new SQLiteParameter("@attributeBlob", System.Data.DbType.Binary);
-            param4.Value = geometryBuf;
+            param4.Value = attributeBuf;
             cmd.Parameters.Add(param4);
 
             return cmd.ExecuteNonQuery();

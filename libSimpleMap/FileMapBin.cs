@@ -246,11 +246,11 @@ namespace libSimpleMap
 
                     ms.Read(tmpBuf, 0, 4);
                     int tmpLat = BitConverter.ToInt32(tmpBuf, 0);
-                    sLatLon.lat = (double)tmpLat / 10000000.0;
+                    sLatLon.lat = (double)tmpLat / 1000000.0;
 
                     ms.Read(tmpBuf, 0, 4);
                     int tmpLon = BitConverter.ToInt32(tmpBuf, 0);
-                    sLatLon.lon = (double)tmpLon / 10000000.0;
+                    sLatLon.lon = (double)tmpLon / 1000000.0;
 
                     tmpGeometry.Add(sLatLon);
 
@@ -261,15 +261,15 @@ namespace libSimpleMap
                     {
                         LatLon tmpLatLon = new LatLon();
 
-                        ms.Read(tmpBuf, 0, 4);
-                        int tmpLatDiff = BitConverter.ToInt32(tmpBuf, 0);
-                        tmpLat = tmpLat + BitConverter.ToInt32(tmpBuf, 0);
-                        tmpLatLon.lat = tmpLat / 10000000.0;
+                        ms.Read(tmpBuf, 0, 2);
+                        short tmpLatDiff = BitConverter.ToInt16(tmpBuf, 0);
+                        tmpLat = tmpLat + BitConverter.ToInt16(tmpBuf, 0);
+                        tmpLatLon.lat = tmpLat / 1000000.0;
 
-                        ms.Read(tmpBuf, 0, 4);
-                        int tmpLonDiff = BitConverter.ToInt32(tmpBuf, 0);
-                        tmpLon = tmpLon + BitConverter.ToInt32(tmpBuf, 0);
-                        tmpLatLon.lon = tmpLon / 10000000.0;
+                        ms.Read(tmpBuf, 0, 2);
+                        short tmpLonDiff = BitConverter.ToInt16(tmpBuf, 0);
+                        tmpLon = tmpLon + BitConverter.ToInt16(tmpBuf, 0);
+                        tmpLatLon.lon = tmpLon / 1000000.0;
 
                         tmpGeometry.Add(tmpLatLon);
                     }
@@ -282,7 +282,75 @@ namespace libSimpleMap
 
         public MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF)
         {
-            return null;
+            //List<MapLink> tmpLinkAttributeList = new List<MapLink>();
+
+            byte[] tileBuf = dal.GetAttributeData(tileId);
+            if (tileBuf == null)
+                return null;
+            
+            if (compression)
+            {
+                Zlib zlib = new Zlib();
+                tileBuf = zlib.Decompress(tileBuf);
+            }
+
+            byte[] tmpBuf = new byte[32];
+            byte[] tmpStrBuf;
+
+            using (MemoryStream ms = new MemoryStream(tileBuf))
+            {
+                //データ数
+                ms.Read(tmpBuf, 0, 2);
+                ushort numLink = BitConverter.ToUInt16(tmpBuf, 0);
+
+                MapLink[] attrArray = new MapLink[numLink];
+
+                for (int i = 0; i < numLink; i++)
+                {
+                    //MapLink tmpLink = new MapLink();
+                    MapLink tmpAttr = new MapLink();
+                    tmpAttr.attribute = new LinkAttribute();
+
+                    ms.Read(tmpBuf, 0, 8);
+                    tmpAttr.attribute.linkId = BitConverter.ToUInt64(tmpBuf, 0);
+                    //tmpAttr.linkId = tmpAttr.attribute.linkId;
+                    
+                    ms.Read(tmpBuf, 0, 8);
+                    tmpAttr.attribute.wayId = BitConverter.ToUInt64(tmpBuf, 0);
+
+
+                    ms.Read(tmpBuf, 0, 2);
+                    ushort numTag = BitConverter.ToUInt16(tmpBuf, 0);
+
+
+                    for (int j = 0; j < numTag; j++)
+                    {
+                        LatLon tmpLatLon = new LatLon();
+
+                        ms.Read(tmpBuf, 0, 2);
+                        ushort tagNameSize = BitConverter.ToUInt16(tmpBuf, 0);
+
+                        tmpStrBuf = new byte[tagNameSize];
+                        ms.Read(tmpStrBuf, 0, tagNameSize);
+                        string tagName = System.Text.Encoding.UTF8.GetString(tmpStrBuf);
+
+                        ms.Read(tmpBuf, 0, 2);
+                        ushort tagValSize = BitConverter.ToUInt16(tmpBuf, 0);
+
+                        tmpStrBuf = new byte[tagValSize];
+                        ms.Read(tmpStrBuf, 0, tagValSize);
+                        string tagVal = System.Text.Encoding.UTF8.GetString(tmpStrBuf);
+
+                        System.Text.Encoding.UTF8.GetString(tmpStrBuf);
+
+                        tmpAttr.attribute.tagInfo.Add(new TagInfo(tagName, tagVal));
+
+                    }
+
+                    attrArray[i] = tmpAttr;
+                }
+                return attrArray;
+            }
         }
 
 
@@ -333,7 +401,7 @@ namespace libSimpleMap
                         geometryBuf = zlib.Compress(geometryBuf);
                         //Console.WriteLine($"{geometryBuf.Length/1024}");
 
-                        attributeBuf = zlib.Compress(geometryBuf);
+                        attributeBuf = zlib.Compress(attributeBuf);
                     }
 
                     dal.SaveAllData(tile.tileId, linkBuf, nodeBuf, geometryBuf, attributeBuf);
@@ -518,7 +586,7 @@ namespace libSimpleMap
 
             int bufLength;
 
-            byte[] tileBuf = new byte[4 * 1024 * 1024];
+            byte[] tileBuf = new byte[2 * 1024 * 1024];
             byte[] tmpBuf;
 
             TileXY baseTileXY = new TileXY(tileId);
@@ -533,10 +601,10 @@ namespace libSimpleMap
 
                 foreach (MapLink tmpLink in tmpTile.link)
                 {
-                    tmpBuf = BitConverter.GetBytes((int)(tmpLink.geometry[0].lat * 10000000));
+                    tmpBuf = BitConverter.GetBytes((int)(tmpLink.geometry[0].lat * 1000000));
                     ms.Write(tmpBuf, 0, 4);
 
-                    tmpBuf = BitConverter.GetBytes((int)(tmpLink.geometry[0].lon * 10000000));
+                    tmpBuf = BitConverter.GetBytes((int)(tmpLink.geometry[0].lon * 1000000));
                     ms.Write(tmpBuf, 0, 4);
 
                     tmpBuf = BitConverter.GetBytes((short)(tmpLink.geometry.Length - 1));
@@ -545,11 +613,11 @@ namespace libSimpleMap
                     for (int i = 1; i < tmpLink.geometry.Length; i++)
                     {
 
-                        tmpBuf = BitConverter.GetBytes((int)(tmpLink.geometry[i].lat * 10000000) - (int)(tmpLink.geometry[i - 1].lat * 10000000));
-                        ms.Write(tmpBuf, 0, 4);
+                        tmpBuf = BitConverter.GetBytes((short)(tmpLink.geometry[i].lat * 1000000) - (short)(tmpLink.geometry[i - 1].lat * 1000000));
+                        ms.Write(tmpBuf, 0, 2);
 
-                        tmpBuf = BitConverter.GetBytes((int)(tmpLink.geometry[i].lon * 10000000) - (int)(tmpLink.geometry[i - 1].lon * 10000000));
-                        ms.Write(tmpBuf, 0, 4);
+                        tmpBuf = BitConverter.GetBytes((short)(tmpLink.geometry[i].lon * 1000000) - (short)(tmpLink.geometry[i - 1].lon * 1000000));
+                        ms.Write(tmpBuf, 0, 2);
 
                     }
 
@@ -563,6 +631,26 @@ namespace libSimpleMap
             return tileBuf;
         }
 
+        //public offsetLatLon ConvertGeometryOffset(LatLon[] geometry)
+        //{
+        //    for (int i = 1; i < geometry.Length; i++)
+        //    {
+        //        int offLatInt = (int)(geometry[i].lat * 1000000) - (int)(geometry[i - 1].lat * 1000000);
+        //        int offLonInt = (int)(geometry[i].lon * 1000000) - (int)(geometry[i - 1].lon * 1000000);
+
+        //        if(offLatInt > 32767)
+        //        {
+
+        //        }
+        //    }
+
+        //}
+
+        struct offsetLatLon
+        {
+            short offsetLat;
+            short offsetLon;
+        }
 
         public byte[] MakeLinkAttributeBin(SpTile tile)
         {
@@ -583,11 +671,11 @@ namespace libSimpleMap
 
                 foreach (MapLink tmpLinkAttr in tmpTile.linkAttr)
                 {
-                    tmpBuf = BitConverter.GetBytes((long)tmpLinkAttr.linkId);
+                    tmpBuf = BitConverter.GetBytes((ulong)tmpLinkAttr.linkId);
                     ms.Write(tmpBuf, 0, 8);
 
-                    tmpBuf = BitConverter.GetBytes((int)tmpLinkAttr.attribute.wayId);
-                    ms.Write(tmpBuf, 0, 4);
+                    tmpBuf = BitConverter.GetBytes((ulong)tmpLinkAttr.attribute.wayId);
+                    ms.Write(tmpBuf, 0, 8);
 
                     int numTag = tmpLinkAttr.attribute.tagInfo.Count;
                     tmpBuf = BitConverter.GetBytes((short)numTag);
@@ -596,14 +684,22 @@ namespace libSimpleMap
                     for (int i = 0; i < numTag; i++)
                     {
                         tmpStrBuf = System.Text.Encoding.UTF8.GetBytes(tmpLinkAttr.attribute.tagInfo[i].tag);
-                        tmpBuf = BitConverter.GetBytes((short)tmpStrBuf.Length);
+                        tmpBuf = BitConverter.GetBytes((ushort)tmpStrBuf.Length);
                         ms.Write(tmpBuf, 0, 2);
                         ms.Write(tmpStrBuf, 0, tmpStrBuf.Length);
 
                         tmpStrBuf = System.Text.Encoding.UTF8.GetBytes(tmpLinkAttr.attribute.tagInfo[i].val);
-                        tmpBuf = BitConverter.GetBytes((short)tmpStrBuf.Length);
+                        if(tmpStrBuf.Length > 0xffff)
+                        {
+                            throw new NotImplementedException();
+                        }
+                        tmpBuf = BitConverter.GetBytes((ushort)tmpStrBuf.Length);
                         ms.Write(tmpBuf, 0, 2);
                         ms.Write(tmpStrBuf, 0, tmpStrBuf.Length);
+                        if (tmpStrBuf.Length > 0xffff)
+                        {
+                            throw new NotImplementedException();
+                        }
                     }
                 }
                 bufLength = (int)ms.Position;

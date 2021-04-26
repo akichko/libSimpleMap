@@ -263,7 +263,7 @@ namespace libSimpleMap
                 String fbuf;
 
                 int index = 0;
-                Int64 preLinkId = -1;
+                UInt64 preLinkId = 0xffffffffffffffff;
 
                 MapLink tmpLinkAttr = null;
 
@@ -279,15 +279,15 @@ namespace libSimpleMap
                     string sTagKey = csv_column[3];
                     string sTagValue = csv_column[4];
 
-                    Int64 tmpLinkId = Int64.Parse(sLinkId);
-                    Int64 tmpWayId = Int64.Parse(sWayId);
+                    UInt64 tmpLinkId = UInt64.Parse(sLinkId);
+                    UInt64 tmpWayId = UInt64.Parse(sWayId);
 
                     if (tmpLinkId != preLinkId)
                     {
                         tmpLinkAttr = new MapLink();
                         tmpLinkAttr.attribute = new LinkAttribute();
-                        tmpLinkAttr.attribute.linkId = Int64.Parse(sLinkId);
-                        tmpLinkAttr.attribute.wayId = Int64.Parse(sWayId);
+                        tmpLinkAttr.attribute.linkId = UInt64.Parse(sLinkId);
+                        tmpLinkAttr.attribute.wayId = UInt64.Parse(sWayId);
                         tmpLinkAttr.linkId = UInt64.Parse(sLinkId);
 
                         preLinkId = tmpLinkId;

@@ -303,35 +303,50 @@ namespace libSimpleMap
 
 
 
-        override public uint GetMapObjType(ECmnMapContentType cmnRefType)
+        //public override uint GetMapObjType(ECmnMapContentType cmnRefType)
+        //{
+        //    switch (cmnRefType)
+        //    {
+        //        case ECmnMapContentType.Link:
+        //            return (int)SpMapContentType.Link;
+        //        case ECmnMapContentType.Node:
+        //            return (int)SpMapContentType.Node;
+        //        case ECmnMapContentType.LinkGeometry:
+        //            return (int)SpMapContentType.LinkGeometry;
+        //        default:
+        //            return 0;
+        //    }
+        //}
+
+        //public override int GetMapRefType(ECmnMapRefType cmnRefType)
+        //{
+        //    switch (cmnRefType)
+        //    {
+        //        case ECmnMapRefType.NextLink:
+        //            return (int)SpMapRefType.NextLink;
+        //        case ECmnMapRefType.BackLink:
+        //            return (int)SpMapRefType.BackLink;
+        //        default:
+        //            return 0;
+        //    }
+        //}
+
+        //経路計算用
+        public override RoutingMapType RoutingMapType
         {
-            switch (cmnRefType)
+            get
             {
-                case ECmnMapContentType.Link:
-                    return (int)SpMapContentType.Link;
-                case ECmnMapContentType.Node:
-                    return (int)SpMapContentType.Node;
-                case ECmnMapContentType.LinkGeometry:
-                    return (int)SpMapContentType.LinkGeometry;
-                default:
-                    return 0;
+                RoutingMapType ret = new RoutingMapType();
+
+                ret.roadNwObjType = (uint)(SpMapContentType.Link | SpMapContentType.Node);
+                ret.roadGeometryObjType = (uint)SpMapContentType.LinkGeometry;
+                ret.linkObjType = (uint)SpMapContentType.Link;
+                ret.nextLinkRefType = (int)SpMapRefType.NextLink;
+                ret.backLinkRefType = (int)SpMapRefType.BackLink;
+
+                return ret;
             }
         }
-
-        override public int GetMapRefType(ECmnMapRefType cmnRefType)
-        {
-            switch (cmnRefType)
-            {
-                case ECmnMapRefType.NextLink:
-                    return (int)SpMapRefType.NextLink;
-                case ECmnMapRefType.BackLink:
-                    return (int)SpMapRefType.BackLink;
-                default:
-                    return 0;
-            }
-        }
-
-
 
 
         /*旧仕様 *************************************************************************************/
@@ -616,6 +631,7 @@ namespace libSimpleMap
         byte[] GetLinkData(uint tileId);
         byte[] GetNodeData(uint tileId);
         byte[] GetGeometryData(uint tileId);
+        byte[] GetAttributeData(uint tileId);
 
         int SaveLinkData(uint tileId, byte[] tileBuf, int size);
         int SaveNodeData(uint tileId, byte[] tileBuf, int size);

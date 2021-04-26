@@ -133,6 +133,10 @@ namespace libSimpleMap
             return retBytes;
         }
 
+        public byte[] GetAttributeData(uint tileId)
+        {
+            return null;
+        }
 
         public int SaveLinkData(uint tileId, byte[] tileBuf, int size)
         {
