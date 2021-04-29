@@ -122,10 +122,16 @@ namespace libSimpleMap
 
                     if (tmpLink.roadType > maxRoadType)
                         break;
+
                     tmpLinkList.Add(tmpLink);
+
+                    //test
+                    byte[] testByte = tmpLink.Serialize();
+                    MapLink testAfte = new MapLink(testByte);
                 }
 
             }
+
 
             return tmpLinkList.ToArray();
         }
@@ -276,6 +282,12 @@ namespace libSimpleMap
                     tmpLink.geometry = tmpGeometry.ToArray();
                     tmpLinkShapeList.Add(tmpLink);
                 }
+
+                //tmpLinkShapeList.ForEach(x =>
+                //{
+                //    x.geometry = LatLon.DouglasPeuker(x.geometry, 3.0, 2000.0);
+                //});
+
                 return tmpLinkShapeList.ToArray();
             }
         }
@@ -601,22 +613,26 @@ namespace libSimpleMap
 
                 foreach (MapLink tmpLink in tmpTile.link)
                 {
-                    tmpBuf = BitConverter.GetBytes((int)(tmpLink.geometry[0].lat * 1000000));
+
+                    LatLon[] tmpGeometry = tmpLink.geometry;
+                    //tmpGeometry = LatLon.DouglasPeuker(tmpLink.geometry, 3.0, 2000.0);
+
+                    tmpBuf = BitConverter.GetBytes((int)(tmpGeometry[0].lat * 1000000));
                     ms.Write(tmpBuf, 0, 4);
 
-                    tmpBuf = BitConverter.GetBytes((int)(tmpLink.geometry[0].lon * 1000000));
+                    tmpBuf = BitConverter.GetBytes((int)(tmpGeometry[0].lon * 1000000));
                     ms.Write(tmpBuf, 0, 4);
 
-                    tmpBuf = BitConverter.GetBytes((short)(tmpLink.geometry.Length - 1));
+                    tmpBuf = BitConverter.GetBytes((short)(tmpGeometry.Length - 1));
                     ms.Write(tmpBuf, 0, 2);
 
-                    for (int i = 1; i < tmpLink.geometry.Length; i++)
+                    for (int i = 1; i < tmpGeometry.Length; i++)
                     {
 
-                        tmpBuf = BitConverter.GetBytes((short)(tmpLink.geometry[i].lat * 1000000) - (short)(tmpLink.geometry[i - 1].lat * 1000000));
+                        tmpBuf = BitConverter.GetBytes((short)(tmpGeometry[i].lat * 1000000) - (short)(tmpGeometry[i - 1].lat * 1000000));
                         ms.Write(tmpBuf, 0, 2);
 
-                        tmpBuf = BitConverter.GetBytes((short)(tmpLink.geometry[i].lon * 1000000) - (short)(tmpLink.geometry[i - 1].lon * 1000000));
+                        tmpBuf = BitConverter.GetBytes((short)(tmpGeometry[i].lon * 1000000) - (short)(tmpGeometry[i - 1].lon * 1000000));
                         ms.Write(tmpBuf, 0, 2);
 
                     }
@@ -646,11 +662,11 @@ namespace libSimpleMap
 
         //}
 
-        struct offsetLatLon
-        {
-            short offsetLat;
-            short offsetLon;
-        }
+        //struct offsetLatLon
+        //{
+        //    short offsetLat;
+        //    short offsetLon;
+        //}
 
         public byte[] MakeLinkAttributeBin(SpTile tile)
         {

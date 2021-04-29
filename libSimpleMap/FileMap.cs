@@ -247,6 +247,13 @@ namespace libSimpleMap
                 }
                 tmpLinkShape.geometry = tmpGeometry.ToArray();
             }
+
+            //形状点間引き（データ生成時がいいかも）
+            //tmpLinkShapeList.ForEach(x =>
+            //{
+            //    x.geometry = LatLon.DouglasPeuker(x.geometry, 3.0, 3000.0);
+            //});
+
             return tmpLinkShapeList.ToArray();
         }
 

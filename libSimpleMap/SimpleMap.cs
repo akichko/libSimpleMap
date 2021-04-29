@@ -278,7 +278,7 @@ namespace libSimpleMap
     {
         // public SpTile tile; //消して、参照構造体で扱う？
         public UInt64 linkId; //リンク属性の方に移動
-        public ushort index;
+        public ushort index; //コスト計算管理情報など、外部テーブルを用意した場合の参照用
         public Int64[] edgeNodeId; //必ず２つ。[0]:始点側 [1]:終点側 //容量削減可能
         public ushort[] edgeNodeIndex; //必ず２つ。[0]:始点側 [1]:終点側
         public uint[] edgeNodeTileId; //オフセット位置。終点のみ
@@ -375,24 +375,41 @@ namespace libSimpleMap
             edgeNodeTileId = new uint[2];
         }
 
-        //public void PrintGeometry(int direction)
-        //{
-        //    if (direction == 0)
-        //    {
-        //        for (int i = geometry.Length - 1; i >= 0; i--)
-        //        {
-        //            Console.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
-        //        }
+        public MapLink(byte[] serialData)
+        {
+            PackData64 packData = new PackData64(serialData);
 
-        //    }
-        //    else
-        //    {
-        //        for (int i = 0; i < geometry.Length; i++)
-        //        {
-        //            Console.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
-        //        }
-        //    }
-        //}
+            //edgeNodeId = new Int64[2];
+            edgeNodeIndex = new ushort[2];
+            edgeNodeTileId = new uint[2];
+
+            edgeNodeIndex[0] = (ushort)packData.GetUInt(0, 16);
+            edgeNodeIndex[1] = (ushort)packData.GetUInt(16, 16);
+            endNodeTileOffset.offsetX = (sbyte)packData.GetInt(32, 2);
+            endNodeTileOffset.offsetY = (sbyte)packData.GetInt(34, 2);
+            linkLength = (ushort)packData.GetUInt(36, 15);
+            roadType = (byte)packData.GetUInt(51, 4);
+            fOneWay = (sbyte)packData.GetInt(55, 2);
+            linkCost = (ushort)packData.GetUInt(57, 5);
+
+        }
+
+
+        public byte[] Serialize()
+        {
+            PackData64 packData = new PackData64();
+
+            packData.SetUInt(0, 16, edgeNodeIndex[0]);
+            packData.SetUInt(16, 16, edgeNodeIndex[1]);
+            packData.SetInt(32, 2, endNodeTileOffset.offsetX);
+            packData.SetInt(34, 2, endNodeTileOffset.offsetY);
+            packData.SetUInt(36, 15, linkLength);
+            packData.SetUInt(51, 4, roadType);
+            packData.SetInt(55, 2, fOneWay);
+            packData.SetUInt(57, 5, linkCost);
+
+            return BitConverter.GetBytes(packData.rawData);
+        }
 
         public int WriteGeometry(int direction, StreamWriter sw)
         {
@@ -522,7 +539,7 @@ namespace libSimpleMap
             });
 
             //形状詳細表示
-            if (false)
+            if (true)
             {                
                 for (int i = 0; i < geometry.Length; i++)
                 {
@@ -938,6 +955,57 @@ namespace libSimpleMap
             return GisTileCode.SCalcTileId(x, y);
         }
     }
+
+
+    public struct MicroXY
+    {
+        public byte xy;
+        // 0-1 bit: y
+        // 2-3 bit: x
+        // 4-7 bit: reserved
+
+        public int X
+        {
+            get
+            {
+                if (XSignBit == 0)
+                    return XNumberBit;
+                else
+                    return XNumberBit - 2;
+            }
+            set { xy = (byte)((value << 2) | (xy & 0x03)); }
+        }
+
+        public sbyte Y
+        {
+            get { return (sbyte)(((sbyte)((xy & 0x0f) << 4)) >> 4); }
+
+            set { xy = (byte)(value & 0x0f | (xy & 0xf0)); }
+        }
+        public int XSignBit => (xy | 0x08) >> 3;
+        public int YSignBit => (xy | 0x02) >> 1;
+        public int XNumberBit => (xy | 0x04) >> 2;
+        public int YNumberBit => (xy | 0x01) >> 0;
+
+        public bool XisPositive()
+        {
+            int tmp = (xy | 0x08)>>3;
+            if (tmp == 1)
+                return false;
+            else
+                return true;
+        }
+        public bool YisPositive()
+        {
+            int tmp = (xy | 0x02);
+            if (tmp == 1)
+                return false;
+            else
+                return true;
+        }
+
+    }
+
 
 
     public struct TileOffset2
