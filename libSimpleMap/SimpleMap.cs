@@ -323,7 +323,7 @@ namespace libSimpleMap
     }
 
 
-    public class SpLinkHandle : ICmnObjHandle
+    public class SpLinkHandle : CmnObjHandle
     {
 
         public SpLinkHandle(CmnTile tile, CmnObj obj)
@@ -346,7 +346,7 @@ namespace libSimpleMap
 
             //基本属性
 
-            listItem.Add(new AttrItemInfo(new string[] { "Id", $"{Id}" }, new AttrTag(0, new CmnSearchKey((int)SpMapContentType.Link).AddObjHandle(tile, this.obj), null))
+            listItem.Add(new AttrItemInfo(new string[] { "Id", $"{ObjId}" }, new AttrTag(0, new CmnSearchKey((int)SpMapContentType.Link).AddObjHandle(tile, this.obj), null))
                 );
             listItem.Add(new AttrItemInfo(new string[] { "TileId", $"{tile.tileId}" }));
             listItem.Add(new AttrItemInfo(new string[] { "Index", $"{Index}" }));
@@ -798,7 +798,7 @@ namespace libSimpleMap
         //    return 0;
         //}
 
-        public override ICmnObjHandle ToICmnObjHandle(CmnTile tile)
+        public override CmnObjHandle ToCmnObjHandle(CmnTile tile)
         {
             return new SpLinkHandle(tile, this);
         }
