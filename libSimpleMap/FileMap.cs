@@ -257,6 +257,9 @@ namespace libSimpleMap
             return tmpLinkShapeList.ToArray();
         }
 
+
+        public MapLinkAttribute[] GetRoadAttribute2(uint tileId, ushort maxRoadType = 0xFFFF) { throw new NotImplementedException(); }
+
         public MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF)
         {
             List<MapLink> tmpLinkAttrList = new List<MapLink>();
@@ -374,12 +377,28 @@ namespace libSimpleMap
                 case SpMapContentType.LinkGeometry:
 
                     MapLink[] tmpMapLinkGeometry = GetRoadGeometry(tileId, (byte)subType);
-                    return new SpObjGroup(type, tmpMapLinkGeometry, subType);
+                    MapLinkGeometry[] tmpGeometry = tmpMapLinkGeometry.Select(x =>
+                    {
+                        MapLinkGeometry y = new MapLinkGeometry();
+                        y.id = x.Id;
+                        y.geometry = x.geometry;
+                        return y;
+                    }).ToArray();
+                        
+                    return new SpObjGroup(type, tmpGeometry, subType);
 
                 case SpMapContentType.LinkAttribute:
 
                     MapLink[] tmpMapLinkAttr = GetRoadAttribute(tileId, (byte)subType);
-                    return new SpObjGroup(type, tmpMapLinkAttr, subType);
+                    MapLinkAttribute[] tmpAttribute = tmpMapLinkAttr.Select(x =>
+                    {
+                        MapLinkAttribute y = new MapLinkAttribute();
+                        y.linkId = x.attribute.linkId;
+                        y.wayId = x.attribute.wayId;
+                        y.tagInfo = x.attribute.tagInfo;
+                        return y;
+                    }).ToArray();
+                    return new SpObjGroup(type, tmpAttribute, subType);
             }
 
             return null;

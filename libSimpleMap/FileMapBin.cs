@@ -237,12 +237,17 @@ namespace libSimpleMap
 
         public MapLink[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF)
         {
-            List<MapLink> tmpLinkShapeList = new List<MapLink>();
+            throw new NotImplementedException();
+        }
+
+        public MapLinkGeometry[] GetRoadGeometry2(uint tileId, ushort maxRoadType = 0xFFFF)
+        {
+           // List<MapLink> tmpLinkShapeList = new List<MapLink>();
 
             byte[] tileBuf = dal.GetGeometryData(tileId);
             if (tileBuf == null)
-                return tmpLinkShapeList.ToArray();
-
+                //return tmpLinkShapeList.ToArray();
+                return Array.Empty<MapLinkGeometry>();
 
             if (compression)
             {
@@ -261,11 +266,13 @@ namespace libSimpleMap
                 ms.Read(tmpBuf, 0, 2);
                 ushort numLink = BitConverter.ToUInt16(tmpBuf, 0);
 
+                MapLinkGeometry[] geometryArray = new MapLinkGeometry[numLink];
                 for (int i = 0; i < numLink; i++)
                 {
                     MapLink tmpLink = new MapLink();
                     LatLon sLatLon = new LatLon();
                     List<LatLon> tmpGeometry = new List<LatLon>();
+                    geometryArray[i] = new MapLinkGeometry();
 
                     ms.Read(tmpBuf, 0, 4);
                     int tmpLat = BitConverter.ToInt32(tmpBuf, 0);
@@ -275,29 +282,34 @@ namespace libSimpleMap
                     int tmpLon = BitConverter.ToInt32(tmpBuf, 0);
                     sLatLon.lon = (double)tmpLon / 1000000.0;
 
-                    tmpGeometry.Add(sLatLon);
+                    //tmpGeometry.Add(sLatLon);
 
                     ms.Read(tmpBuf, 0, 2);
                     ushort numGeometry = BitConverter.ToUInt16(tmpBuf, 0);
+                    geometryArray[i].geometry = new LatLon[numGeometry + 1];
+                    geometryArray[i].geometry[0] = sLatLon;
+
 
                     for (int j = 0; j < numGeometry; j++)
                     {
                         LatLon tmpLatLon = new LatLon();
 
                         ms.Read(tmpBuf, 0, 2);
-                        short tmpLatDiff = BitConverter.ToInt16(tmpBuf, 0);
+                        //short tmpLatDiff = BitConverter.ToInt16(tmpBuf, 0);
                         tmpLat = tmpLat + BitConverter.ToInt16(tmpBuf, 0);
                         tmpLatLon.lat = tmpLat / 1000000.0;
 
                         ms.Read(tmpBuf, 0, 2);
-                        short tmpLonDiff = BitConverter.ToInt16(tmpBuf, 0);
+                        //short tmpLonDiff = BitConverter.ToInt16(tmpBuf, 0);
                         tmpLon = tmpLon + BitConverter.ToInt16(tmpBuf, 0);
                         tmpLatLon.lon = tmpLon / 1000000.0;
 
-                        tmpGeometry.Add(tmpLatLon);
+                        geometryArray[i].geometry[j + 1] = tmpLatLon;
+
+                        //tmpGeometry.Add(tmpLatLon);
                     }
                     tmpLink.geometry = tmpGeometry.ToArray();
-                    tmpLinkShapeList.Add(tmpLink);
+                    //tmpLinkShapeList.Add(tmpLink);
                 }
 
                 //tmpLinkShapeList.ForEach(x =>
@@ -305,14 +317,13 @@ namespace libSimpleMap
                 //    x.geometry = LatLon.DouglasPeuker(x.geometry, 3.0, 2000.0);
                 //});
 
-                return tmpLinkShapeList.ToArray();
+                // return tmpLinkShapeList.ToArray();
+                return geometryArray;
             }
         }
 
-        public MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF)
+        public MapLinkAttribute[] GetRoadAttribute2(uint tileId, ushort maxRoadType = 0xFFFF)
         {
-            //List<MapLink> tmpLinkAttributeList = new List<MapLink>();
-
             byte[] tileBuf = dal.GetAttributeData(tileId);
             if (tileBuf == null)
                 return null;
@@ -332,20 +343,24 @@ namespace libSimpleMap
                 ms.Read(tmpBuf, 0, 2);
                 ushort numLink = BitConverter.ToUInt16(tmpBuf, 0);
 
-                MapLink[] attrArray = new MapLink[numLink];
+               // MapLink[] attrArray = new MapLink[numLink];
+                MapLinkAttribute[] attributeArray = new MapLinkAttribute[numLink];
 
                 for (int i = 0; i < numLink; i++)
                 {
                     //MapLink tmpLink = new MapLink();
-                    MapLink tmpAttr = new MapLink();
-                    tmpAttr.attribute = new LinkAttribute();
+                   // MapLink tmpAttr = new MapLink();
+                    //tmpAttr.attribute = new LinkAttribute();
+                    attributeArray[i] = new MapLinkAttribute();
 
                     ms.Read(tmpBuf, 0, 8);
-                    tmpAttr.attribute.linkId = BitConverter.ToUInt64(tmpBuf, 0);
+                    //tmpAttr.attribute.linkId = BitConverter.ToUInt64(tmpBuf, 0);
+                    attributeArray[i].linkId = BitConverter.ToUInt64(tmpBuf, 0);
                     //tmpAttr.linkId = tmpAttr.attribute.linkId;
-                    
+
                     ms.Read(tmpBuf, 0, 8);
-                    tmpAttr.attribute.wayId = BitConverter.ToUInt64(tmpBuf, 0);
+                    //tmpAttr.attribute.wayId = BitConverter.ToUInt64(tmpBuf, 0);
+                    attributeArray[i].wayId = BitConverter.ToUInt64(tmpBuf, 0);
 
 
                     ms.Read(tmpBuf, 0, 2);
@@ -372,17 +387,23 @@ namespace libSimpleMap
 
                         System.Text.Encoding.UTF8.GetString(tmpStrBuf);
 
-                        tmpAttr.attribute.tagInfo.Add(new TagInfo(tagName, tagVal));
+                        //tmpAttr.attribute.tagInfo.Add(new TagInfo(tagName, tagVal));
+                        attributeArray[i].tagInfo.Add(new TagInfo(tagName, tagVal));
 
                     }
 
-                    attrArray[i] = tmpAttr;
+                   // attrArray[i] = tmpAttr;
                 }
-                return attrArray;
+                //return attrArray;
+                return attributeArray;
             }
         }
 
 
+        public MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF)
+        {
+            throw new NotImplementedException();
+        }
 
         public List<uint> GetMapTileIdList()
         {
@@ -809,13 +830,13 @@ namespace libSimpleMap
                     return new SpObjGroup(type, tmpMapNode, subType);
 
                 case SpMapContentType.LinkGeometry:
-
-                    MapLink[] tmpMapLinkGeometry = GetRoadGeometry(tileId, (byte)subType);
+                    //MapLink[] tmpMapLinkGeometry = GetRoadGeometry(tileId, (byte)subType);
+                    MapLinkGeometry[] tmpMapLinkGeometry = GetRoadGeometry2(tileId, (byte)subType);
                     return new SpObjGroup(type, tmpMapLinkGeometry, subType);
 
                 case SpMapContentType.LinkAttribute:
 
-                    MapLink[] tmpMapLinkAttr = GetRoadAttribute(tileId, (byte)subType);
+                    MapLinkAttribute[] tmpMapLinkAttr = GetRoadAttribute2(tileId, (byte)subType);
                     return new SpObjGroup(type, tmpMapLinkAttr, subType);
             }
 

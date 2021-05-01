@@ -30,6 +30,9 @@ namespace libSimpleMap
         public MapLink[] linkGeometry;
         public MapLink[] linkAttr;
 
+        public MapLinkGeometry[] geometry;
+        public MapLinkAttribute[] attribute;
+
         override public UInt32 Type { get{return 0;} }
 
         //public byte loadedRoadType = 0;
@@ -40,8 +43,8 @@ namespace libSimpleMap
 
 
 
-        public uint x { get; private set; }
-        public uint y { get; private set; }
+        //public uint x { get; private set; }
+        //public uint y { get; private set; }
         //public SpTile tile { get; protected set; }
 
         public SpTile() { }
@@ -64,15 +67,15 @@ namespace libSimpleMap
         }
 
 
-        public MapNode GetMapNode(UInt64 nodeId)
-        {
-            foreach (MapNode mapNode in node)
-            {
-                if (mapNode.nodeId == nodeId)
-                    return mapNode;
-            }
-            return null;
-        }
+        //public MapNode GetMapNode(UInt64 nodeId)
+        //{
+        //    foreach (MapNode mapNode in node)
+        //    {
+        //        if (mapNode.nodeId == nodeId)
+        //            return mapNode;
+        //    }
+        //    return null;
+        //}
 
 
         public LinkHandle GetMapLink(int linkIndex)
@@ -116,15 +119,17 @@ namespace libSimpleMap
 
 
                 case SpMapContentType.LinkGeometry:
-                    linkGeometry = (MapLink[])objDic[objType].objArray;
-                    MergeGeometry(linkGeometry, true);
+                    //linkGeometry = (MapLink[])objDic[objType].objArray;
+                    geometry = (MapLinkGeometry[])objDic[objType].objArray;
+                    MergeGeometry2(geometry, true);
                     objGroup.isDrawable = false;
                     objGroup.isGeoSearchable = false;
                     break;
 
                 case SpMapContentType.LinkAttribute:
-                    linkAttr = (MapLink[])objDic[objType].objArray;
-                    MergeAttribute(linkAttr, true);
+                    //linkAttr = (MapLink[])objDic[objType].objArray;
+                    attribute = (MapLinkAttribute[])objDic[objType].objArray;
+                    //MergeAttribute(linkAttr, true);
                     objGroup.isDrawable = false;
                     objGroup.isGeoSearchable = false;
                     break;
@@ -144,6 +149,29 @@ namespace libSimpleMap
         }
 
 
+        public bool MergeGeometry2(MapLinkGeometry[] shapeLinkList, bool ignoreError)
+        {
+            if (!ignoreError)
+            {
+                if (link.Length != shapeLinkList.Length)
+                {
+                    Console.WriteLine("link num not match");
+                    return false;
+                }
+            }
+            //for (int i = 0; i < link.Length; i++)
+            //{
+            //    if (link[i].linkId != shapeLinkList[i].linkId)
+            //    {
+            //        return false;
+            //    }
+            //}
+            for (int i = 0; i < link.Length; i++)
+            {
+                link[i].geometry = shapeLinkList[i].geometry;
+            }
+            return true;
+        }
         public bool MergeGeometry(MapLink[] shapeLinkList, bool ignoreError)
         {
             if (!ignoreError)
@@ -169,29 +197,29 @@ namespace libSimpleMap
         }
 
 
-        public bool MergeAttribute(MapLink[] attrLinkList, bool ignoreError)
-        {
-            if (!ignoreError)
-            {
-                if (link.Length != attrLinkList.Length)
-                {
-                    Console.WriteLine("link num not match");
-                    return false;
-                }
-            }
-            for (int i = 0; i < link.Length; i++)
-            {
-                if (link[i].linkId != attrLinkList[i].linkId)
-                {
-                    return false;
-                }
-            }
-            for (int i = 0; i < link.Length; i++)
-            {
-                link[i].attribute = attrLinkList[i].attribute;
-            }
-            return true;
-        }
+        //public bool MergeAttribute(MapLink[] attrLinkList, bool ignoreError)
+        //{
+        //    if (!ignoreError)
+        //    {
+        //        if (link.Length != attrLinkList.Length)
+        //        {
+        //            Console.WriteLine("link num not match");
+        //            return false;
+        //        }
+        //    }
+        //    for (int i = 0; i < link.Length; i++)
+        //    {
+        //        if (link[i].linkId != attrLinkList[i].linkId)
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //    for (int i = 0; i < link.Length; i++)
+        //    {
+        //        link[i].attribute = attrLinkList[i].attribute;
+        //    }
+        //    return true;
+        //}
 
 
 
@@ -205,47 +233,47 @@ namespace libSimpleMap
 
         //}
 
-        public int WriteMap(string fileName, bool append)
-        {
-            StreamWriter sw = new StreamWriter(fileName, append);
-            if (sw == null)
-                return -1;
-            foreach (MapLink mapLink in link)
-            {
-                mapLink.WriteGeometry(1, sw);
-                sw.WriteLine("");
-            }
-            sw.Close();
-            return 0;
+        //public int WriteMap(string fileName, bool append)
+        //{
+        //    StreamWriter sw = new StreamWriter(fileName, append);
+        //    if (sw == null)
+        //        return -1;
+        //    foreach (MapLink mapLink in link)
+        //    {
+        //        mapLink.WriteGeometry(1, sw);
+        //        sw.WriteLine("");
+        //    }
+        //    sw.Close();
+        //    return 0;
 
-        }
-
-
-        public LinkHandle SearchNearestMapLink(LatLon latlon, byte maxRoadType = 0xFF)
-        {
-
-            MapLink tmpLink = link
-                .Where(x => x.roadType <= maxRoadType)
-                .OrderBy(x => x.GetDistance(latlon))
-                .FirstOrDefault();
-
-            return new LinkHandle(this, tmpLink);
-
-        }
+        //}
 
 
-        public LinkDistance SearchNearestMapLink2(LatLon latlon, byte maxRoadType = 0xFF)
-        {
+        //public LinkHandle SearchNearestMapLink(LatLon latlon, byte maxRoadType = 0xFF)
+        //{
 
-            MapLink tmpLink = link
-                .Where(x => x.roadType <= maxRoadType)
-                .OrderBy(x => x.GetDistance(latlon))
-                .FirstOrDefault();
+        //    MapLink tmpLink = link
+        //        .Where(x => x.roadType <= maxRoadType)
+        //        .OrderBy(x => x.GetDistance(latlon))
+        //        .FirstOrDefault();
+
+        //    return new LinkHandle(this, tmpLink);
+
+        //}
 
 
-            return tmpLink.GetDistance2(latlon);
+        //public LinkDistance SearchNearestMapLink2(LatLon latlon, byte maxRoadType = 0xFF)
+        //{
 
-        }
+        //    MapLink tmpLink = link
+        //        .Where(x => x.roadType <= maxRoadType)
+        //        .OrderBy(x => x.GetDistance(latlon))
+        //        .FirstOrDefault();
+
+
+        //    return tmpLink.GetDistance2(latlon);
+
+        //}
 
 
         public int CalcLinkCost()
@@ -270,10 +298,10 @@ namespace libSimpleMap
         }
 
 
-        public override ICmnObjHandle ToICmnObjHandle(CmnTile tile)
-        {
-            return new CmnObjHandle(tile, this);
-        }
+        //public override ICmnObjHandle ToICmnObjHandle(CmnTile tile)
+        //{
+        //    return new CmnObjHandle(tile, this);
+        //}
     }
 
     
@@ -304,7 +332,7 @@ namespace libSimpleMap
             this.obj = obj;
         }
 
-        public override LatLon[] Geometry => ((SpTile)tile).linkGeometry[obj.Index].Geometry;
+        public override LatLon[] Geometry => ((SpTile)tile).geometry[obj.Index].Geometry;
 
 
         public override List<AttrItemInfo> GetAttributeListItem()
@@ -313,7 +341,8 @@ namespace libSimpleMap
             AttrItemInfo item;
 
             MapLink link = (MapLink)obj;
-            LinkAttribute attribute = ((SpTile)tile).linkAttr[obj.Index].attribute;
+            //LinkAttribute attribute = ((SpTile)tile).linkAttr[obj.Index].attribute;
+            MapLinkAttribute attribute = ((SpTile)tile).attribute[obj.Index];
 
             //基本属性
 
@@ -326,11 +355,12 @@ namespace libSimpleMap
             listItem.Add(new AttrItemInfo(new string[] { "linkLength", $"{link.linkLength}" }));
             listItem.Add(new AttrItemInfo(new string[] { "Cost", $"{Cost}" }));
 
-            List<CmnObjHdlRef> nextLinkList = GetObjRefHdlList((int)SpMapRefType.NextLink, tile);
-            nextLinkList.ForEach(x =>
-            {
-                listItem.Add(new AttrItemInfo(new string[] { $"nextLink[]", $"" }, new AttrTag((int)SpMapRefType.NextLink, x.nextRef.key, null)));
-            });
+            //List<CmnObjHdlRef> nextLinkList = GetObjRefHdlList((int)SpMapRefType.NextLink);
+            //nextLinkList.ForEach(x =>
+            //{
+
+            //    listItem.Add(new AttrItemInfo(new string[] { $"nextLink[]", $"nodeIndex={x.nextRef.key.objIndex}" }, new AttrTag((int)SpMapRefType.NextLink, x.nextRef.key, null)));
+            //});
 
             //形状詳細表示
             if (true)
@@ -454,15 +484,15 @@ namespace libSimpleMap
         //    set {; }
         //}
 
-        public TileOffset2 GetEdgeNodeTileOffset(sbyte direction)
-        {
-            if (direction == 0)
-                return new TileOffset2(0);
-            else if (direction == 1)
-                return endNodeTileOffset;
-            else
-                return new TileOffset2(0);
-        }
+        //public TileOffset2 GetEdgeNodeTileOffset(sbyte direction)
+        //{
+        //    if (direction == 0)
+        //        return new TileOffset2(0);
+        //    else if (direction == 1)
+        //        return endNodeTileOffset;
+        //    else
+        //        return new TileOffset2(0);
+        //}
 
         //public Int64 upLinkId;
         //public Int64[] downLinkId;
@@ -512,24 +542,24 @@ namespace libSimpleMap
             return BitConverter.GetBytes(packData.rawData);
         }
 
-        public int WriteGeometry(int direction, StreamWriter sw)
-        {
-            if (direction == 0)
-            {
-                for (int i = geometry.Length - 1; i >= 0; i--)
-                {
-                    sw.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
-                }
-            }
-            else
-            {
-                for (int i = 0; i < geometry.Length; i++)
-                {
-                    sw.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
-                }
-            }
-            return 0;
-        }
+        //public int WriteGeometry(int direction, StreamWriter sw)
+        //{
+        //    if (direction == 0)
+        //    {
+        //        for (int i = geometry.Length - 1; i >= 0; i--)
+        //        {
+        //            sw.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        for (int i = 0; i < geometry.Length; i++)
+        //        {
+        //            sw.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
+        //        }
+        //    }
+        //    return 0;
+        //}
 
 
 
@@ -542,34 +572,34 @@ namespace libSimpleMap
         //}
 
 
-        public LinkDistance GetDistance2(LatLon latlon)
-        {
-            if (geometry.Count() <= 1)
-                return null;
+        //public LinkDistance GetDistance2(LatLon latlon)
+        //{
+        //    if (geometry.Count() <= 1)
+        //        return null;
 
-            double minDistance = Double.MaxValue;
-            int index = -1;
+        //    double minDistance = Double.MaxValue;
+        //    int index = -1;
 
-            for (int i = 0; i < geometry.Count() - 1; i++)
-            {
-                double tmp = latlon.GetDistanceToLine(geometry[i], geometry[i + 1]);
-                if (tmp < minDistance)
-                {
-                    minDistance = tmp;
-                    index = i;
-                }
-            }
+        //    for (int i = 0; i < geometry.Count() - 1; i++)
+        //    {
+        //        double tmp = latlon.GetDistanceToLine(geometry[i], geometry[i + 1]);
+        //        if (tmp < minDistance)
+        //        {
+        //            minDistance = tmp;
+        //            index = i;
+        //        }
+        //    }
 
-            double offset = 0;
-            for (int i = 0; i < index; i++)
-            {
-                offset += geometry[i].GetDistanceTo(geometry[i + 1]);
-            }
-            LinkPos linkPos = new LinkPos(null, this, offset);
+        //    double offset = 0;
+        //    for (int i = 0; i < index; i++)
+        //    {
+        //        offset += geometry[i].GetDistanceTo(geometry[i + 1]);
+        //    }
+        //    LinkPos linkPos = new LinkPos(null, this, offset);
 
-            return new LinkDistance(linkPos, minDistance);
+        //    return new LinkDistance(linkPos, minDistance);
 
-        }
+        //}
 
 
         //public int CalcCost()
@@ -773,6 +803,7 @@ namespace libSimpleMap
             return new SpLinkHandle(tile, this);
         }
 
+
     }
 
 
@@ -780,9 +811,13 @@ namespace libSimpleMap
 
     public class MapLinkGeometry : CmnObj
     {
-        public override UInt64 Id { get { return 0; } }
+        public UInt64 id;
+        public LatLon[] geometry { get; set; }
+
+        public override UInt64 Id => id;
         public override UInt32 Type { get { return (UInt16)SpMapContentType.LinkGeometry; } }
 
+        public override LatLon[] Geometry => geometry;
 
         override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile thisTile, byte direction = 0xff)
         {
@@ -812,8 +847,8 @@ namespace libSimpleMap
 
     public class MapLinkAttribute : CmnObj
     {
-        public override UInt64 Id { get { return 0; } }
-        public override UInt32 Type { get { return (UInt16)SpMapContentType.LinkAttribute; } }
+        public override UInt64 Id => linkId;
+        public override UInt32 Type => (UInt16)SpMapContentType.LinkAttribute;
 
         public UInt64 linkId;
         public UInt64 wayId;

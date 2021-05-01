@@ -184,184 +184,184 @@ namespace libSimpleMap
 
 
         //いずれ容量削減
-        public uint GetEdgeNodeTileId(SpTile tile, MapLink link, byte direction)
-        {
-            return link.edgeNodeTileId[direction];
-            //int nodeTileId = link.GetEdgeNodeTileOffset(direction).ToTileId(tile.tileId);
-        }
+        //public uint GetEdgeNodeTileId(SpTile tile, MapLink link, byte direction)
+        //{
+        //    return link.edgeNodeTileId[direction];
+        //    //int nodeTileId = link.GetEdgeNodeTileOffset(direction).ToTileId(tile.tileId);
+        //}
 
-        //いずれ容量削減
-        public uint GetConnectLinkTileId(SpTile tile, ConnectLink connectLink)
-        {
-            return connectLink.tileId;
+        ////いずれ容量削減
+        //public uint GetConnectLinkTileId(SpTile tile, ConnectLink connectLink)
+        //{
+        //    return connectLink.tileId;
 
-        }
+        //}
 
-        public NodeHandle GetEdgeNode(SpTile tile, MapLink link, byte direction, bool cacheOnly)
-        {
-            ushort nodeIndex = link.edgeNodeIndex[direction]; //direction=1: 順方向
+        //public NodeHandle GetEdgeNode(SpTile tile, MapLink link, byte direction, bool cacheOnly)
+        //{
+        //    ushort nodeIndex = link.edgeNodeIndex[direction]; //direction=1: 順方向
 
-            uint nodeTileId = GetEdgeNodeTileId(tile, link, direction);
+        //    uint nodeTileId = GetEdgeNodeTileId(tile, link, direction);
 
-            NodeHandle tmpNodeHdl;
+        //    NodeHandle tmpNodeHdl;
 
-            if (tile.tileId == nodeTileId)
-                tmpNodeHdl = tile.GetMapNode(nodeIndex);
-            else
-                tmpNodeHdl = SearchMapNode(nodeTileId, nodeIndex);
+        //    if (tile.tileId == nodeTileId)
+        //        tmpNodeHdl = tile.GetMapNode(nodeIndex);
+        //    else
+        //        tmpNodeHdl = SearchMapNode(nodeTileId, nodeIndex);
 
-            if (tmpNodeHdl == null && cacheOnly)
-            {
-                return null;
-            }
-            else if (tmpNodeHdl == null && !cacheOnly)
-            {
-                return new NodeHandle(tile, null, nodeTileId, nodeIndex);
-            }
-            else
-            {
-                return tmpNodeHdl;
-            }
-        }
-
-
-        public List<DLinkHandle> GetConnectLinks(NodeHandle nodeHdl, bool cacheOnly)
-        {
-            List<DLinkHandle> retList = new List<DLinkHandle>();
-            if (nodeHdl.mapNode == null)
-                return retList;
-
-            foreach (ConnectLink tmpConnectLink in nodeHdl.mapNode.connectLink)
-            {
-                uint connectTileId = GetConnectLinkTileId(nodeHdl.tile, tmpConnectLink);
-                LinkHandle tmpLinkHdl = SearchMapLink(connectTileId, tmpConnectLink.linkIndex);
-
-                if (tmpLinkHdl == null)
-                {
-                    if (cacheOnly)
-                        continue;
-                    else
-                    {
-                        retList.Add(new DLinkHandle(nodeHdl.tile, null, 2, connectTileId, 0));
-                        continue;
-                    }
-                }
-                DLinkHandle tmpDLinkHdl = new DLinkHandle(tmpLinkHdl, tmpConnectLink.linkDirection);
-
-                retList.Add(tmpDLinkHdl);
-
-            }
-            return retList;
-        }
+        //    if (tmpNodeHdl == null && cacheOnly)
+        //    {
+        //        return null;
+        //    }
+        //    else if (tmpNodeHdl == null && !cacheOnly)
+        //    {
+        //        return new NodeHandle(tile, null, nodeTileId, nodeIndex);
+        //    }
+        //    else
+        //    {
+        //        return tmpNodeHdl;
+        //    }
+        //}
 
 
-        public List<DLinkHandle> GetConnectLinkInfo(SpTile tile, MapLink link, byte direction, bool cacheOnly)
-        {
-            NodeHandle tmpNodeHdl = GetEdgeNode(tile, link, direction, cacheOnly);
+        //public List<DLinkHandle> GetConnectLinks(NodeHandle nodeHdl, bool cacheOnly)
+        //{
+        //    List<DLinkHandle> retList = new List<DLinkHandle>();
+        //    if (nodeHdl.mapNode == null)
+        //        return retList;
 
-            if (cacheOnly && tmpNodeHdl == null)
-                return new List<DLinkHandle>();
+        //    foreach (ConnectLink tmpConnectLink in nodeHdl.mapNode.connectLink)
+        //    {
+        //        uint connectTileId = GetConnectLinkTileId(nodeHdl.tile, tmpConnectLink);
+        //        LinkHandle tmpLinkHdl = SearchMapLink(connectTileId, tmpConnectLink.linkIndex);
 
-            return GetConnectLinks(tmpNodeHdl, cacheOnly);
+        //        if (tmpLinkHdl == null)
+        //        {
+        //            if (cacheOnly)
+        //                continue;
+        //            else
+        //            {
+        //                retList.Add(new DLinkHandle(nodeHdl.tile, null, 2, connectTileId, 0));
+        //                continue;
+        //            }
+        //        }
+        //        DLinkHandle tmpDLinkHdl = new DLinkHandle(tmpLinkHdl, tmpConnectLink.linkDirection);
 
-        }
+        //        retList.Add(tmpDLinkHdl);
 
-
-        public List<DLinkHandle> GetConnectLinks(SpTile tile, MapLink link, byte direction, bool cacheOnly, bool checkOneWay)
-        {
-            //未読み込みメッシュのリンクは返却しない
-            List<DLinkHandle> retList = new List<DLinkHandle>();
-
-            int nodeIndex = link.edgeNodeIndex[direction]; //direction=1: 順方向
-
-            //text版が未対応のため合わせる
-            uint nodeTileId = link.edgeNodeTileId[direction];
-            //int nodeTileId = link.GetEdgeNodeTileOffset(direction).ToTileId(tile.tileId);
-
-            NodeHandle tmpNode;
-
-            if (tile.tileId == nodeTileId)
-                tmpNode = tile.GetMapNode(nodeIndex);
-            else
-                tmpNode = SearchMapNode(nodeTileId, nodeIndex);
-
-            if (tmpNode == null)
-            {
-                if (cacheOnly)
-                    return retList;
-                else
-                {
-                    DLinkHandle tmpDlinkHdl = new DLinkHandle();
-                    tmpDlinkHdl.tileId = nodeTileId;
-
-                }
-
-            }
+        //    }
+        //    return retList;
+        //}
 
 
-            foreach (ConnectLink tmpConnectLink in tmpNode.mapNode.connectLink)
-            {
-                SpTile tmpRoad = null;
+        //public List<DLinkHandle> GetConnectLinkInfo(SpTile tile, MapLink link, byte direction, bool cacheOnly)
+        //{
+        //    NodeHandle tmpNodeHdl = GetEdgeNode(tile, link, direction, cacheOnly);
 
-                if (tile.tileId == tmpConnectLink.tileId)
-                {
-                    tmpRoad = tile;
-                }
-                else if (tmpNode.tile.tileId == tmpConnectLink.tileId)
-                {
-                    tmpRoad = tmpNode.tile;
-                }
-                else
-                {
-                    SpTile tmpTile = (SpTile)SearchTile(tmpConnectLink.tileId);
-                    if (tmpTile != null)
-                        tmpRoad = tmpTile;
-                }
+        //    if (cacheOnly && tmpNodeHdl == null)
+        //        return new List<DLinkHandle>();
 
-                if (tmpRoad == null)
-                    return retList;
+        //    return GetConnectLinks(tmpNodeHdl, cacheOnly);
 
-                DLinkHandle tmpLinkRef = new DLinkHandle();
-                LinkHandle tmpHdl = tmpRoad.GetMapLink(tmpConnectLink.linkIndex);
+        //}
 
-                if (tmpHdl == null)
-                    continue;
 
-                tmpLinkRef.tile = tmpHdl.tile;
-                tmpLinkRef.mapLink = tmpHdl.mapLink;
-                tmpLinkRef.direction = tmpConnectLink.linkDirection;
+        //public List<DLinkHandle> GetConnectLinks(SpTile tile, MapLink link, byte direction, bool cacheOnly, bool checkOneWay)
+        //{
+        //    //未読み込みメッシュのリンクは返却しない
+        //    List<DLinkHandle> retList = new List<DLinkHandle>();
 
-                //onewayチェック
-                if ((tmpLinkRef.direction == 1 && tmpLinkRef.mapLink.fOneWay != -1)
-                    || (tmpLinkRef.direction == 0 && tmpLinkRef.mapLink.fOneWay != 1)
-                    || !checkOneWay)
-                {
-                    retList.Add(tmpLinkRef);
-                }
-            }
+        //    int nodeIndex = link.edgeNodeIndex[direction]; //direction=1: 順方向
 
-            return retList;
-        }
+        //    //text版が未対応のため合わせる
+        //    uint nodeTileId = link.edgeNodeTileId[direction];
+        //    //int nodeTileId = link.GetEdgeNodeTileOffset(direction).ToTileId(tile.tileId);
 
-        public List<DLinkHandle> GetConnectLinks(LinkHandle linkRef, byte direction, bool cacheOnly, bool checkOneWay)
-        {
-            return GetConnectLinks(linkRef.tile, linkRef.mapLink, direction, cacheOnly, checkOneWay);
-        }
+        //    NodeHandle tmpNode;
 
-        public LinkHandle SearchMapLink(uint targetTileId, int targetLinkIndex)
-        {
-            SpTile tmpTile = (SpTile)SearchTile(targetTileId);
-            if (tmpTile == null)
-                return null;
+        //    if (tile.tileId == nodeTileId)
+        //        tmpNode = tile.GetMapNode(nodeIndex);
+        //    else
+        //        tmpNode = SearchMapNode(nodeTileId, nodeIndex);
 
-            return tmpTile.GetMapLink(targetLinkIndex);
+        //    if (tmpNode == null)
+        //    {
+        //        if (cacheOnly)
+        //            return retList;
+        //        else
+        //        {
+        //            DLinkHandle tmpDlinkHdl = new DLinkHandle();
+        //            tmpDlinkHdl.tileId = nodeTileId;
 
-        }
+        //        }
 
-        public LinkHandle SearchMapLink(TileObjIndex tileLinkIndex)
-        {
-            return SearchMapLink(tileLinkIndex.tileId, tileLinkIndex.index);
-        }
+        //    }
+
+
+        //    foreach (ConnectLink tmpConnectLink in tmpNode.mapNode.connectLink)
+        //    {
+        //        SpTile tmpRoad = null;
+
+        //        if (tile.tileId == tmpConnectLink.tileId)
+        //        {
+        //            tmpRoad = tile;
+        //        }
+        //        else if (tmpNode.tile.tileId == tmpConnectLink.tileId)
+        //        {
+        //            tmpRoad = tmpNode.tile;
+        //        }
+        //        else
+        //        {
+        //            SpTile tmpTile = (SpTile)SearchTile(tmpConnectLink.tileId);
+        //            if (tmpTile != null)
+        //                tmpRoad = tmpTile;
+        //        }
+
+        //        if (tmpRoad == null)
+        //            return retList;
+
+        //        DLinkHandle tmpLinkRef = new DLinkHandle();
+        //        LinkHandle tmpHdl = tmpRoad.GetMapLink(tmpConnectLink.linkIndex);
+
+        //        if (tmpHdl == null)
+        //            continue;
+
+        //        tmpLinkRef.tile = tmpHdl.tile;
+        //        tmpLinkRef.mapLink = tmpHdl.mapLink;
+        //        tmpLinkRef.direction = tmpConnectLink.linkDirection;
+
+        //        //onewayチェック
+        //        if ((tmpLinkRef.direction == 1 && tmpLinkRef.mapLink.fOneWay != -1)
+        //            || (tmpLinkRef.direction == 0 && tmpLinkRef.mapLink.fOneWay != 1)
+        //            || !checkOneWay)
+        //        {
+        //            retList.Add(tmpLinkRef);
+        //        }
+        //    }
+
+        //    return retList;
+        //}
+
+        //public List<DLinkHandle> GetConnectLinks(LinkHandle linkRef, byte direction, bool cacheOnly, bool checkOneWay)
+        //{
+        //    return GetConnectLinks(linkRef.tile, linkRef.mapLink, direction, cacheOnly, checkOneWay);
+        //}
+
+        //public LinkHandle SearchMapLink(uint targetTileId, int targetLinkIndex)
+        //{
+        //    SpTile tmpTile = (SpTile)SearchTile(targetTileId);
+        //    if (tmpTile == null)
+        //        return null;
+
+        //    return tmpTile.GetMapLink(targetLinkIndex);
+
+        //}
+
+        //public LinkHandle SearchMapLink(TileObjIndex tileLinkIndex)
+        //{
+        //    return SearchMapLink(tileLinkIndex.tileId, tileLinkIndex.index);
+        //}
 
         //public MapLink SearchMapLink(TileObjId tileLinkId)
         //{
@@ -376,80 +376,80 @@ namespace libSimpleMap
         //    return null;
         //}
 
-        public LinkHandle SearchMapLink(LatLon latlon, byte maxRoadType = 255)
-        {
-            if (!mal.IsConnected)
-                return null;
+        //public LinkHandle SearchMapLink(LatLon latlon, byte maxRoadType = 255)
+        //{
+        //    if (!mal.IsConnected)
+        //        return null;
 
-            uint tileId = CalcTileId(latlon);
-            if (tileId < 0)
-                return null;
-            List<CmnTile> tileList = SearchTiles(tileId, 1, 1);
-            if (tileList.Count == 0)
-                return null;
+        //    uint tileId = CalcTileId(latlon);
+        //    if (tileId < 0)
+        //        return null;
+        //    List<CmnTile> tileList = SearchTiles(tileId, 1, 1);
+        //    if (tileList.Count == 0)
+        //        return null;
 
-            LinkHandle nearestLinkHdl = tileList
-                .Select(x => ((SpTile)x).SearchNearestMapLink(latlon, maxRoadType))
-                .OrderBy(x => x.mapLink.GetDistance(latlon))
-                .FirstOrDefault();
+        //    LinkHandle nearestLinkHdl = tileList
+        //        .Select(x => ((SpTile)x).SearchNearestMapLink(latlon, maxRoadType))
+        //        .OrderBy(x => x.mapLink.GetDistance(latlon))
+        //        .FirstOrDefault();
 
-            return nearestLinkHdl;
-
-
-            //return tile.tile.SearchNearestMapLink(latlon, maxRoadType);
-        }
-
-        public LinkPos SearchMapLink2(LatLon latlon)
-        {
-            if (!mal.IsConnected)
-                return null;
-
-            uint tileId = CalcTileId(latlon);
-            if (tileId < 0)
-                return null;
-            List<CmnTile> tileList = SearchTiles(tileId, 1, 1);
-            if (tileList.Count == 0)
-                return null;
+        //    return nearestLinkHdl;
 
 
-            var nearestLinkPos = tileList
-                .Select(x => ((SpTile)x).SearchNearestMapLink2(latlon))
-                .OrderBy(x => x.distance)
-                .FirstOrDefault();
+        //    //return tile.tile.SearchNearestMapLink(latlon, maxRoadType);
+        //}
 
-            return nearestLinkPos.linkPos;
-            //return tile.tile.SearchNearestMapLink2(latlon).linkPos;
-        }
+        //public LinkPos SearchMapLink2(LatLon latlon)
+        //{
+        //    if (!mal.IsConnected)
+        //        return null;
 
-        public NodeHandle SearchMapNode(uint targetTileId, int targetNodeIndex)
-        {
-            SpTile tmpTile = (SpTile)SearchTile(targetTileId);
-            if (tmpTile == null)
-                return null;
+        //    uint tileId = CalcTileId(latlon);
+        //    if (tileId < 0)
+        //        return null;
+        //    List<CmnTile> tileList = SearchTiles(tileId, 1, 1);
+        //    if (tileList.Count == 0)
+        //        return null;
 
-            return tmpTile.GetMapNode(targetNodeIndex);
 
-        }
+        //    var nearestLinkPos = tileList
+        //        .Select(x => ((SpTile)x).SearchNearestMapLink2(latlon))
+        //        .OrderBy(x => x.distance)
+        //        .FirstOrDefault();
 
-        public NodeHandle SearchMapNode(TileObjIndex tileNodeIndex)
-        {
-            return SearchMapNode(tileNodeIndex.tileId, tileNodeIndex.index);
-        }
+        //    return nearestLinkPos.linkPos;
+        //    //return tile.tile.SearchNearestMapLink2(latlon).linkPos;
+        //}
 
-        public NodeHandle SearchMapNode(TileObjId tileNodeId)
-        {
-            SpTile tmpTile = (SpTile)SearchTile(tileNodeId.tileId);
-            if (tmpTile == null)
-                return null;
+        //public NodeHandle SearchMapNode(uint targetTileId, int targetNodeIndex)
+        //{
+        //    SpTile tmpTile = (SpTile)SearchTile(targetTileId);
+        //    if (tmpTile == null)
+        //        return null;
 
-            foreach (MapNode mapNode in tmpTile.node)
-            {
-                if (mapNode.nodeId == tileNodeId.id)
-                    return new NodeHandle(tmpTile, mapNode);
-            }
-            return null;
+        //    return tmpTile.GetMapNode(targetNodeIndex);
 
-        }
+        //}
+
+        //public NodeHandle SearchMapNode(TileObjIndex tileNodeIndex)
+        //{
+        //    return SearchMapNode(tileNodeIndex.tileId, tileNodeIndex.index);
+        //}
+
+        //public NodeHandle SearchMapNode(TileObjId tileNodeId)
+        //{
+        //    SpTile tmpTile = (SpTile)SearchTile(tileNodeId.tileId);
+        //    if (tmpTile == null)
+        //        return null;
+
+        //    foreach (MapNode mapNode in tmpTile.node)
+        //    {
+        //        if (mapNode.nodeId == tileNodeId.id)
+        //            return new NodeHandle(tmpTile, mapNode);
+        //    }
+        //    return null;
+
+        //}
 
 
 
@@ -496,26 +496,26 @@ namespace libSimpleMap
         //}
 
 
-        public int WriteMap(uint tileId, string filename, bool append)
-        {
-            if (tileDic.ContainsKey(tileId))
-                return ((SpTile)tileDic[tileId]).WriteMap(filename, append);
-            else
-                return -1;
-        }
+        //public int WriteMap(uint tileId, string filename, bool append)
+        //{
+        //    if (tileDic.ContainsKey(tileId))
+        //        return ((SpTile)tileDic[tileId]).WriteMap(filename, append);
+        //    else
+        //        return -1;
+        //}
 
 
-        public void WriteMap(List<uint> tileIdList, string filename)
-        {
-            foreach (uint id in tileIdList.Take(1))
-            {
-                WriteMap(id, filename, false);
-            }
-            foreach (uint id in tileIdList.Skip(1))
-            {
-                WriteMap(id, filename, true);
-            }
-        }
+        //public void WriteMap(List<uint> tileIdList, string filename)
+        //{
+        //    foreach (uint id in tileIdList.Take(1))
+        //    {
+        //        WriteMap(id, filename, false);
+        //    }
+        //    foreach (uint id in tileIdList.Skip(1))
+        //    {
+        //        WriteMap(id, filename, true);
+        //    }
+        //}
 
         public int SaveTile(SpTile tile)
         {
@@ -608,6 +608,7 @@ namespace libSimpleMap
         MapNode[] GetRoadNode(uint tileId, ushort maxRoadType = 0xFFFF);
         MapLink[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF);
         MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF);
+        MapLinkAttribute[] GetRoadAttribute2(uint tileId, ushort maxRoadType = 0xFFFF);
 
         //List<uint> GetMapTileIdList();
         //int CalcTileDistance(int tileIdA, int tileIdB);
