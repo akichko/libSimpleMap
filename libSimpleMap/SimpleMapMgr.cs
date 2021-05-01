@@ -17,7 +17,6 @@ namespace libSimpleMap
 
         public SpMapMgr(MapDataType mapDataType) : base(new GisTileCode())
         {
-            tileApi = new GisTileCode();
             
             this.mapDataType = mapDataType;
 
@@ -40,7 +39,7 @@ namespace libSimpleMap
                     break;
 
                 case MapDataType.MapManager:
-                    break;
+                    throw new NotImplementedException();
 
                 default:
                     break;
@@ -133,10 +132,55 @@ namespace libSimpleMap
         }
 
 
-        public uint CalcTileId(LatLon latlon)
+
+
+        //public override uint GetMapObjType(ECmnMapContentType cmnRefType)
+        //{
+        //    switch (cmnRefType)
+        //    {
+        //        case ECmnMapContentType.Link:
+        //            return (int)SpMapContentType.Link;
+        //        case ECmnMapContentType.Node:
+        //            return (int)SpMapContentType.Node;
+        //        case ECmnMapContentType.LinkGeometry:
+        //            return (int)SpMapContentType.LinkGeometry;
+        //        default:
+        //            return 0;
+        //    }
+        //}
+
+        //public override int GetMapRefType(ECmnMapRefType cmnRefType)
+        //{
+        //    switch (cmnRefType)
+        //    {
+        //        case ECmnMapRefType.NextLink:
+        //            return (int)SpMapRefType.NextLink;
+        //        case ECmnMapRefType.BackLink:
+        //            return (int)SpMapRefType.BackLink;
+        //        default:
+        //            return 0;
+        //    }
+        //}
+
+        /* 経路計算用 *****************************************************************/
+        public override RoutingMapType RoutingMapType
         {
-            return tileApi.CalcTileId(latlon);
+            get
+            {
+                RoutingMapType ret = new RoutingMapType();
+
+                ret.roadNwObjType = (uint)(SpMapContentType.Link | SpMapContentType.Node);
+                ret.roadGeometryObjType = (uint)SpMapContentType.LinkGeometry;
+                ret.linkObjType = (uint)SpMapContentType.Link;
+                ret.nextLinkRefType = (int)SpMapRefType.NextLink;
+                ret.backLinkRefType = (int)SpMapRefType.BackLink;
+
+                return ret;
+            }
         }
+
+
+        /*旧仕様 *************************************************************************************/
 
 
         //いずれ容量削減
@@ -303,57 +347,6 @@ namespace libSimpleMap
         {
             return GetConnectLinks(linkRef.tile, linkRef.mapLink, direction, cacheOnly, checkOneWay);
         }
-
-
-
-
-        //public override uint GetMapObjType(ECmnMapContentType cmnRefType)
-        //{
-        //    switch (cmnRefType)
-        //    {
-        //        case ECmnMapContentType.Link:
-        //            return (int)SpMapContentType.Link;
-        //        case ECmnMapContentType.Node:
-        //            return (int)SpMapContentType.Node;
-        //        case ECmnMapContentType.LinkGeometry:
-        //            return (int)SpMapContentType.LinkGeometry;
-        //        default:
-        //            return 0;
-        //    }
-        //}
-
-        //public override int GetMapRefType(ECmnMapRefType cmnRefType)
-        //{
-        //    switch (cmnRefType)
-        //    {
-        //        case ECmnMapRefType.NextLink:
-        //            return (int)SpMapRefType.NextLink;
-        //        case ECmnMapRefType.BackLink:
-        //            return (int)SpMapRefType.BackLink;
-        //        default:
-        //            return 0;
-        //    }
-        //}
-
-        //経路計算用
-        public override RoutingMapType RoutingMapType
-        {
-            get
-            {
-                RoutingMapType ret = new RoutingMapType();
-
-                ret.roadNwObjType = (uint)(SpMapContentType.Link | SpMapContentType.Node);
-                ret.roadGeometryObjType = (uint)SpMapContentType.LinkGeometry;
-                ret.linkObjType = (uint)SpMapContentType.Link;
-                ret.nextLinkRefType = (int)SpMapRefType.NextLink;
-                ret.backLinkRefType = (int)SpMapRefType.BackLink;
-
-                return ret;
-            }
-        }
-
-
-        /*旧仕様 *************************************************************************************/
 
         public LinkHandle SearchMapLink(uint targetTileId, int targetLinkIndex)
         {
@@ -530,7 +523,7 @@ namespace libSimpleMap
         }
 
 
-        //MAL-API
+        /* MAL-API ****************************************************/
 
         //public int ConnectMapData(string mapPath)
         //{
@@ -552,35 +545,35 @@ namespace libSimpleMap
         //    return 0;
         //}
 
-        public MapLink[] GetRoadLink(uint tileId, byte maxRoadType)
-        {
-            LoadTile(tileId, (UInt16)SpMapContentType.Link, maxRoadType);
+        //public MapLink[] GetRoadLink(uint tileId, byte maxRoadType)
+        //{
+        //    LoadTile(tileId, (UInt16)SpMapContentType.Link, maxRoadType);
 
-            SpTile tile = (SpTile)SearchTile(tileId);
-            return tile.link;
-        }
-        public MapNode[] GetRoadNode(uint tileId, byte maxRoadType)
-        {
-            LoadTile(tileId, (UInt16)SpMapContentType.Node, maxRoadType);
+        //    SpTile tile = (SpTile)SearchTile(tileId);
+        //    return tile.link;
+        //}
+        //public MapNode[] GetRoadNode(uint tileId, byte maxRoadType)
+        //{
+        //    LoadTile(tileId, (UInt16)SpMapContentType.Node, maxRoadType);
 
-            SpTile tile = (SpTile)SearchTile(tileId);
-            return tile.node;
+        //    SpTile tile = (SpTile)SearchTile(tileId);
+        //    return tile.node;
 
-        }
-        public MapLink[] GetRoadGeometry(uint tileId, byte maxRoadType)
-        {
-           // LoadTile(tileId, MapContentType.Link | MapContentType.LinkGeometry, maxRoadType);
+        //}
+        //public MapLink[] GetRoadGeometry(uint tileId, byte maxRoadType)
+        //{
+        //   // LoadTile(tileId, MapContentType.Link | MapContentType.LinkGeometry, maxRoadType);
 
-            SpTile tile = (SpTile)SearchTile(tileId);
-            return tile.link;
-        }
-        public MapLink[] GetRoadAttribute(uint tileId, byte maxRoadType)
-        {
-            //LoadTile(tileId, MapContentType.Link | MapContentType.LinkAttribute, maxRoadType);
+        //    SpTile tile = (SpTile)SearchTile(tileId);
+        //    return tile.link;
+        //}
+        //public MapLink[] GetRoadAttribute(uint tileId, byte maxRoadType)
+        //{
+        //    //LoadTile(tileId, MapContentType.Link | MapContentType.LinkAttribute, maxRoadType);
 
-            SpTile tile = (SpTile)SearchTile(tileId);
-            return tile.link;
-        }
+        //    SpTile tile = (SpTile)SearchTile(tileId);
+        //    return tile.link;
+        //}
 
 
         //public List<uint> GetMapTileIdList()
@@ -589,9 +582,9 @@ namespace libSimpleMap
         //}
 
         //public int SaveTile(SpTile tile) { return 0; }
-        public int SaveRoadLink(SpTile tile) { throw new NotImplementedException(); }
-        public int SaveRoadNode(SpTile tile) { throw new NotImplementedException(); }
-        public int SaveRoadGeometry(SpTile tile) { throw new NotImplementedException(); }
+        //public int SaveRoadLink(SpTile tile) { throw new NotImplementedException(); }
+        //public int SaveRoadNode(SpTile tile) { throw new NotImplementedException(); }
+        //public int SaveRoadGeometry(SpTile tile) { throw new NotImplementedException(); }
 
     }
 
@@ -626,22 +619,5 @@ namespace libSimpleMap
     }
 
 
-    public abstract class IDataAccess
-    {
-        public abstract int Connect(string mapPath, ushort port = 0, string userId = "", string pass = "", string DbName = "");
-        public abstract int Disconnect();
-        public abstract List<uint> GetMapTileIdList();
-        public abstract byte[] GetRawData(uint tileId, SpMapContentType contentType);
-        public abstract byte[] GetLinkData(uint tileId);
-        public abstract byte[] GetNodeData(uint tileId);
-        public abstract byte[] GetGeometryData(uint tileId);
-        public abstract byte[] GetAttributeData(uint tileId);
-
-        public abstract int SaveLinkData(uint tileId, byte[] tileBuf, int size);
-        public abstract int SaveNodeData(uint tileId, byte[] tileBuf, int size);
-        public abstract int SaveGeometryData(uint tileId, byte[] tileBuf, int size);
-
-        public abstract int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf, byte[] attributeBuf);
-    }
 
 }

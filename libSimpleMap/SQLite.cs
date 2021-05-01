@@ -8,7 +8,7 @@ using System.IO;
 
 namespace libSimpleMap
 {
-    public class SQLiteAccess : IDataAccess
+    public class SQLiteAccess : IBinDataAccess
     {
         string mapPath;
         //byte[] commonBuf;
@@ -21,7 +21,7 @@ namespace libSimpleMap
         public SQLiteAccess() { }
 
 
-        public override int Connect(string mapPath, ushort port = 0, string userId = "", string pass = "", string DbName = "")
+        public override int Connect(string mapPath)
         {
             this.mapPath = mapPath;
 

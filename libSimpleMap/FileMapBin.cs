@@ -10,10 +10,9 @@ namespace libSimpleMap
 {
     class BinFileMapAccess : ISpMapAccess
     {
-        string mapPath;
         bool compression = true;
         MiddleType middleType;
-        IDataAccess dal;
+        IBinDataAccess dal;
         public bool IsConnected { get; set; }
 
         public BinFileMapAccess(MiddleType middleType)
@@ -22,15 +21,15 @@ namespace libSimpleMap
             IsConnected = false;
         }
 
-        public int ConnectMapData(string mapPath, ushort port = 0, string userId = "", string pass = "", string DbName = "")
+        public int ConnectMapData(string connectStr)
         {
-            this.mapPath = mapPath + @"\";
 
             switch (middleType)
             {
-                case MiddleType.FileSystem:
-                    dal = new FileAccessLib();
-                    break;
+                //case MiddleType.FileSystem:
+                //    this.connectStr = connectStr + @"\";
+                //    dal = new FileAccessLib();
+                //    break;
 
                 case MiddleType.SQLite:
                     dal = new SQLiteAccess();
@@ -44,7 +43,7 @@ namespace libSimpleMap
                     break;
             }
 
-            int ret = dal.Connect(mapPath);//, port, userId, pass, DbName);
+            int ret = dal.Connect(connectStr);
             if (ret == 0)
                 IsConnected = true;
 
@@ -408,11 +407,11 @@ namespace libSimpleMap
         {
             switch (middleType)
             {
-                case MiddleType.FileSystem:
-                    SaveRoadLink(tile);
-                    SaveRoadNode(tile);
-                    SaveRoadGeometry(tile);
-                    break;
+                //case MiddleType.FileSystem:
+                //    SaveRoadLink(tile);
+                //    SaveRoadNode(tile);
+                //    SaveRoadGeometry(tile);
+                //    break;
 
                 case MiddleType.SQLite:
                 case MiddleType.Postgres:
@@ -427,11 +426,7 @@ namespace libSimpleMap
                         Zlib zlib = new Zlib();
                         linkBuf = zlib.Compress(linkBuf);
                         nodeBuf = zlib.Compress(nodeBuf);
-                        
-                        //Console.Write($"geometryBuf: {geometryBuf.Length/1024} -> ");
                         geometryBuf = zlib.Compress(geometryBuf);
-                        //Console.WriteLine($"{geometryBuf.Length/1024}");
-
                         attributeBuf = zlib.Compress(attributeBuf);
                     }
 
@@ -834,5 +829,24 @@ namespace libSimpleMap
                 .Select(x => LoadObjGroup(tileId, x, subType))
                 .ToList();
         }
+    }
+
+
+    public abstract class IBinDataAccess
+    {
+        public abstract int Connect(string mapPath);
+        public abstract int Disconnect();
+        public abstract List<uint> GetMapTileIdList();
+        public abstract byte[] GetRawData(uint tileId, SpMapContentType contentType);
+        public abstract byte[] GetLinkData(uint tileId);
+        public abstract byte[] GetNodeData(uint tileId);
+        public abstract byte[] GetGeometryData(uint tileId);
+        public abstract byte[] GetAttributeData(uint tileId);
+
+        public abstract int SaveLinkData(uint tileId, byte[] tileBuf, int size);
+        public abstract int SaveNodeData(uint tileId, byte[] tileBuf, int size);
+        public abstract int SaveGeometryData(uint tileId, byte[] tileBuf, int size);
+
+        public abstract int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf, byte[] attributeBuf);
     }
 }

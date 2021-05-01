@@ -20,17 +20,17 @@ namespace libSimpleMap
             IsConnected = false;
         }
 
-        public int ConnectMapData(string mapPath, ushort port = 0, string userId = "", string pass = "", string DbName = "")
+        public int ConnectMapData(string connectStr)
         {
-            if (Directory.Exists(mapPath))
+            if (Directory.Exists(connectStr))
             {
-                this.mapPath = mapPath + "\\";
+                this.mapPath = connectStr + "\\";
                 IsConnected = true;
                 return 0;
             }
             else
             {
-                Console.WriteLine("Map not exists!");
+                Console.WriteLine("Map File not exists!");
                 return -1;
             }
         }
@@ -397,6 +397,7 @@ namespace libSimpleMap
 
 
     }
+
 
 }
 

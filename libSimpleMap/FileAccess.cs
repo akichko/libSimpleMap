@@ -7,216 +7,216 @@ using System.IO;
 
 namespace libSimpleMap
 {
-    public class FileAccessLib : IDataAccess
-    {
-        string mapPath;
-        //byte[] commonBuf;
+    //public class FileAccessLib : IBinDataAccess
+    //{
+    //    string mapPath;
+    //    //byte[] commonBuf;
 
-        public FileAccessLib()
-        {
-            //byte[] commonBuf = new byte[1024 * 1024];
+    //    public FileAccessLib()
+    //    {
+    //        //byte[] commonBuf = new byte[1024 * 1024];
 
-        }
-
-
-        public override int Connect(string mapPath, ushort port = 0, string userId = "", string pass = "", string DbName = "")
-        {
-            this.mapPath = mapPath;
+    //    }
 
 
-            if (Directory.Exists(mapPath))
-            {
-                this.mapPath = mapPath + "\\";
-                return 0;
-            }
-            else
-            {
-                Console.WriteLine("Map not exists!");
-                return -1;
-            }
+    //    public override int Connect(string mapPath)
+    //    {
+    //        this.mapPath = mapPath;
 
 
-        }
-
-        public override int Disconnect()
-        {
-            return 0;
-        }
-
-
-        public override List<uint> GetMapTileIdList()
-        {
-
-            List<uint> retList = new List<uint>();
-            string[] names = Directory.GetFiles(mapPath + "NODE", "*.txt");
-            foreach (string name in names)
-            {
-                string tileName = name.Replace(mapPath + "NODE\\", "").Replace("_NODE.txt", "");
-                retList.Add(uint.Parse(tileName));
-
-            }
-            return retList;
-        }
-
-        public override byte[] GetRawData(uint tileId, SpMapContentType contentType)
-        {
-            return null;
-        }
+    //        if (Directory.Exists(mapPath))
+    //        {
+    //            this.mapPath = mapPath + "\\";
+    //            return 0;
+    //        }
+    //        else
+    //        {
+    //            Console.WriteLine("Map not exists!");
+    //            return -1;
+    //        }
 
 
-        public override byte[] GetLinkData(uint tileId)
-        {
-            byte[] retBytes;
+    //    }
 
-            uint subTileY = tileId / 10000000;
-            uint subTileX = (tileId % 100000) / 100;
-            string subTile = (subTileY * 1000 + subTileX).ToString();
-            //TileXY baseTileXY = new TileXY(tileId);
-
-            string fileName = mapPath + @"LINK\" + subTile + @"\" + tileId.ToString() + "_LINK.txt";
-            if (!File.Exists(fileName))
-                return null;
-
-            using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-            {
-                retBytes = new byte[fs.Length];
-                fs.Read(retBytes, 0, (int)fs.Length);
-            }
-
-            return retBytes;
-
-        }
-
-        public override byte[] GetNodeData(uint tileId)
-        {
-            byte[] retBytes;
-
-            uint subTileY = tileId / 10000000;
-            uint subTileX = (tileId % 100000) / 100;
-            string subTile = (subTileY * 1000 + subTileX).ToString();
-            //TileXY baseTileXY = new TileXY(tileId);
-
-            string fileName = mapPath + @"NODE\" + subTile + @"\" + tileId.ToString() + "_NODE.txt";
-            if (!File.Exists(fileName))
-                return null;
-
-            using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-            {
-                retBytes = new byte[fs.Length];
-                fs.Read(retBytes, 0, (int)fs.Length);
-            }
-
-            return retBytes;
-        }
-
-        public override byte[] GetGeometryData(uint tileId)
-        {
-
-            byte[] retBytes;
-
-            uint subTileY = tileId / 10000000;
-            uint subTileX = (tileId % 100000) / 100;
-            string subTile = (subTileY * 1000 + subTileX).ToString();
-           // TileXY baseTileXY = new TileXY(tileId);
-
-            string fileName = mapPath + @"LINKGEOMETRY\" + subTile + @"\" + tileId.ToString() + "_LINKGEOMETRY.txt";
-            if (!File.Exists(fileName))
-                return null;
-
-            using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-            {
-                retBytes = new byte[fs.Length];
-                fs.Read(retBytes, 0, (int)fs.Length);
-            }
+    //    public override int Disconnect()
+    //    {
+    //        return 0;
+    //    }
 
 
-            return retBytes;
-        }
+    //    public override List<uint> GetMapTileIdList()
+    //    {
 
-        public override byte[] GetAttributeData(uint tileId)
-        {
-            return null;
-        }
+    //        List<uint> retList = new List<uint>();
+    //        string[] names = Directory.GetFiles(mapPath + "NODE", "*.txt");
+    //        foreach (string name in names)
+    //        {
+    //            string tileName = name.Replace(mapPath + "NODE\\", "").Replace("_NODE.txt", "");
+    //            retList.Add(uint.Parse(tileName));
 
-        public override int SaveLinkData(uint tileId, byte[] tileBuf, int size)
-        {
-            uint subTileY = tileId / 10000000;
-            uint subTileX = (tileId % 100000) / 100;
-            string subTile = (subTileY * 1000 + subTileX).ToString();
+    //        }
+    //        return retList;
+    //    }
 
-            //LINK
-            if (!Directory.Exists(mapPath + @"LINK"))
-            {
-                Directory.CreateDirectory(mapPath + @"LINK");
-            }
-            if (!Directory.Exists(mapPath + @"LINK\" + subTile))
-            {
-                Directory.CreateDirectory(mapPath + @"LINK\" + subTile);
-            }
-
-            using (FileStream fs = new FileStream(mapPath + @"LINK\" + subTile + @"\" + tileId.ToString() + "_LINK.txt", FileMode.OpenOrCreate, FileAccess.Write))
-            {
-                fs.Write(tileBuf, 0, size);
-
-            }
-
-            return 0;
-        }
-
-        public override int SaveNodeData(uint tileId, byte[] tileBuf, int size)
-        {
-            uint subTileY = tileId / 10000000;
-            uint subTileX = (tileId % 100000) / 100;
-            string subTile = (subTileY * 1000 + subTileX).ToString();
+    //    public override byte[] GetRawData(uint tileId, SpMapContentType contentType)
+    //    {
+    //        return null;
+    //    }
 
 
-            if (!Directory.Exists(mapPath + @"NODE"))
-            {
-                Directory.CreateDirectory(mapPath + @"NODE");
-            }
-            if (!Directory.Exists(mapPath + @"NODE\" + subTile))
-            {
-                Directory.CreateDirectory(mapPath + @"NODE\" + subTile);
-            }
+    //    public override byte[] GetLinkData(uint tileId)
+    //    {
+    //        byte[] retBytes;
 
-            using (FileStream fs = new FileStream(mapPath + @"NODE\" + subTile + @"\" + tileId.ToString() + "_NODE.txt", FileMode.OpenOrCreate, FileAccess.Write))
-            {
-                fs.Write(tileBuf, 0, size);
-            }
+    //        uint subTileY = tileId / 10000000;
+    //        uint subTileX = (tileId % 100000) / 100;
+    //        string subTile = (subTileY * 1000 + subTileX).ToString();
+    //        //TileXY baseTileXY = new TileXY(tileId);
 
-            return 0;
-        }
+    //        string fileName = mapPath + @"LINK\" + subTile + @"\" + tileId.ToString() + "_LINK.txt";
+    //        if (!File.Exists(fileName))
+    //            return null;
 
-        public override int SaveGeometryData(uint tileId, byte[] tileBuf, int size)
-        {
-            uint subTileY = tileId / 10000000;
-            uint subTileX = (tileId % 100000) / 100;
-            string subTile = (subTileY * 1000 + subTileX).ToString();
+    //        using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+    //        {
+    //            retBytes = new byte[fs.Length];
+    //            fs.Read(retBytes, 0, (int)fs.Length);
+    //        }
+
+    //        return retBytes;
+
+    //    }
+
+    //    public override byte[] GetNodeData(uint tileId)
+    //    {
+    //        byte[] retBytes;
+
+    //        uint subTileY = tileId / 10000000;
+    //        uint subTileX = (tileId % 100000) / 100;
+    //        string subTile = (subTileY * 1000 + subTileX).ToString();
+    //        //TileXY baseTileXY = new TileXY(tileId);
+
+    //        string fileName = mapPath + @"NODE\" + subTile + @"\" + tileId.ToString() + "_NODE.txt";
+    //        if (!File.Exists(fileName))
+    //            return null;
+
+    //        using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+    //        {
+    //            retBytes = new byte[fs.Length];
+    //            fs.Read(retBytes, 0, (int)fs.Length);
+    //        }
+
+    //        return retBytes;
+    //    }
+
+    //    public override byte[] GetGeometryData(uint tileId)
+    //    {
+
+    //        byte[] retBytes;
+
+    //        uint subTileY = tileId / 10000000;
+    //        uint subTileX = (tileId % 100000) / 100;
+    //        string subTile = (subTileY * 1000 + subTileX).ToString();
+    //       // TileXY baseTileXY = new TileXY(tileId);
+
+    //        string fileName = mapPath + @"LINKGEOMETRY\" + subTile + @"\" + tileId.ToString() + "_LINKGEOMETRY.txt";
+    //        if (!File.Exists(fileName))
+    //            return null;
+
+    //        using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+    //        {
+    //            retBytes = new byte[fs.Length];
+    //            fs.Read(retBytes, 0, (int)fs.Length);
+    //        }
 
 
-            if (!Directory.Exists(mapPath + @"LINKGEOMETRY"))
-            {
-                Directory.CreateDirectory(mapPath + @"LINKGEOMETRY");
-            }
-            if (!Directory.Exists(mapPath + @"LINKGEOMETRY\" + subTile))
-            {
-                Directory.CreateDirectory(mapPath + @"LINKGEOMETRY\" + subTile);
-            }
+    //        return retBytes;
+    //    }
 
-            using (FileStream fs = new FileStream(mapPath + @"LINKGEOMETRY\" + subTile + @"\" + tileId.ToString() + "_LINKGEOMETRY.txt", FileMode.OpenOrCreate, FileAccess.Write))
-            {
-                fs.Write(tileBuf, 0, size);
-            }
+    //    public override byte[] GetAttributeData(uint tileId)
+    //    {
+    //        return null;
+    //    }
 
-            return 0;
-        }
+    //    public override int SaveLinkData(uint tileId, byte[] tileBuf, int size)
+    //    {
+    //        uint subTileY = tileId / 10000000;
+    //        uint subTileX = (tileId % 100000) / 100;
+    //        string subTile = (subTileY * 1000 + subTileX).ToString();
+
+    //        //LINK
+    //        if (!Directory.Exists(mapPath + @"LINK"))
+    //        {
+    //            Directory.CreateDirectory(mapPath + @"LINK");
+    //        }
+    //        if (!Directory.Exists(mapPath + @"LINK\" + subTile))
+    //        {
+    //            Directory.CreateDirectory(mapPath + @"LINK\" + subTile);
+    //        }
+
+    //        using (FileStream fs = new FileStream(mapPath + @"LINK\" + subTile + @"\" + tileId.ToString() + "_LINK.txt", FileMode.OpenOrCreate, FileAccess.Write))
+    //        {
+    //            fs.Write(tileBuf, 0, size);
+
+    //        }
+
+    //        return 0;
+    //    }
+
+    //    public override int SaveNodeData(uint tileId, byte[] tileBuf, int size)
+    //    {
+    //        uint subTileY = tileId / 10000000;
+    //        uint subTileX = (tileId % 100000) / 100;
+    //        string subTile = (subTileY * 1000 + subTileX).ToString();
 
 
-        public override int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf, byte[] attributeBuf)
-        {
-            return -1;
-        }
+    //        if (!Directory.Exists(mapPath + @"NODE"))
+    //        {
+    //            Directory.CreateDirectory(mapPath + @"NODE");
+    //        }
+    //        if (!Directory.Exists(mapPath + @"NODE\" + subTile))
+    //        {
+    //            Directory.CreateDirectory(mapPath + @"NODE\" + subTile);
+    //        }
 
-    }
+    //        using (FileStream fs = new FileStream(mapPath + @"NODE\" + subTile + @"\" + tileId.ToString() + "_NODE.txt", FileMode.OpenOrCreate, FileAccess.Write))
+    //        {
+    //            fs.Write(tileBuf, 0, size);
+    //        }
+
+    //        return 0;
+    //    }
+
+    //    public override int SaveGeometryData(uint tileId, byte[] tileBuf, int size)
+    //    {
+    //        uint subTileY = tileId / 10000000;
+    //        uint subTileX = (tileId % 100000) / 100;
+    //        string subTile = (subTileY * 1000 + subTileX).ToString();
+
+
+    //        if (!Directory.Exists(mapPath + @"LINKGEOMETRY"))
+    //        {
+    //            Directory.CreateDirectory(mapPath + @"LINKGEOMETRY");
+    //        }
+    //        if (!Directory.Exists(mapPath + @"LINKGEOMETRY\" + subTile))
+    //        {
+    //            Directory.CreateDirectory(mapPath + @"LINKGEOMETRY\" + subTile);
+    //        }
+
+    //        using (FileStream fs = new FileStream(mapPath + @"LINKGEOMETRY\" + subTile + @"\" + tileId.ToString() + "_LINKGEOMETRY.txt", FileMode.OpenOrCreate, FileAccess.Write))
+    //        {
+    //            fs.Write(tileBuf, 0, size);
+    //        }
+
+    //        return 0;
+    //    }
+
+
+    //    public override int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf, byte[] attributeBuf)
+    //    {
+    //        return -1;
+    //    }
+
+    //}
 
 }

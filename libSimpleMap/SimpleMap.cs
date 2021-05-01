@@ -8,6 +8,20 @@ using System.Drawing;
 
 namespace libSimpleMap
 {
+    //public abstract class SpObj : CmnObj
+    //{
+    //    //public virtual ICmnObjHandle ToICmnObjHandle(CmnTile tile)
+    //    //{
+    //    //    return new SpObjHandle(tile, this);
+    //    //}
+    //}
+
+    //共通ハンドル型
+    //public abstract class SpObjHandle : ICmnObjHandle
+    //{
+    //    public SpObjHandle() { }
+    //    public SpObjHandle(CmnTile tile, CmnObj obj) : base(tile, obj) { }
+    //}
 
     public class SpTile : CmnTile //, ITile
     {
@@ -254,6 +268,12 @@ namespace libSimpleMap
                 .Where(x => x != 0xFFFF && x != (UInt32)SpMapContentType.Tile)
                 .ToList();
         }
+
+
+        public override ICmnObjHandle ToICmnObjHandle(CmnTile tile)
+        {
+            return new CmnObjHandle(tile, this);
+        }
     }
 
     
@@ -272,6 +292,86 @@ namespace libSimpleMap
             this.loadedSubType = loadedSubType;
             this.objArray = objArray;
         }
+    }
+
+
+    public class SpLinkHandle : ICmnObjHandle
+    {
+
+        public SpLinkHandle(CmnTile tile, CmnObj obj)
+        {
+            this.tile = tile;
+            this.obj = obj;
+        }
+
+        public override LatLon[] Geometry => ((SpTile)tile).linkGeometry[obj.Index].Geometry;
+
+
+        public override List<AttrItemInfo> GetAttributeListItem()
+        {
+            List<AttrItemInfo> listItem = new List<AttrItemInfo>();
+            AttrItemInfo item;
+
+            MapLink link = (MapLink)obj;
+            LinkAttribute attribute = ((SpTile)tile).linkAttr[obj.Index].attribute;
+
+            //基本属性
+
+            listItem.Add(new AttrItemInfo(new string[] { "Id", $"{Id}" }, new AttrTag(0, new CmnSearchKey((int)SpMapContentType.Link).AddObjHandle(tile, this.obj), null))
+                );
+            listItem.Add(new AttrItemInfo(new string[] { "TileId", $"{tile.tileId}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "Index", $"{Index}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "RoadType", $"{link.roadType}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "Oneway", $"{Oneway}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "linkLength", $"{link.linkLength}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "Cost", $"{Cost}" }));
+
+            List<CmnObjHdlRef> nextLinkList = GetObjRefHdlList((int)SpMapRefType.NextLink, tile);
+            nextLinkList.ForEach(x =>
+            {
+                listItem.Add(new AttrItemInfo(new string[] { $"nextLink[]", $"" }, new AttrTag((int)SpMapRefType.NextLink, x.nextRef.key, null)));
+            });
+
+            //形状詳細表示
+            if (true)
+            {
+                for (int i = 0; i < Geometry.Length; i++)
+                {
+                    //listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({geometry[i].ToString()})" }, geometry[i]));
+                    listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({Geometry[i].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, Geometry[i])));
+                }
+            }
+            //簡易表示
+            else
+            {
+                listItem.Add(new AttrItemInfo(new string[] { $"geometry[S]", $"({Geometry[0].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, Geometry[0])));
+                listItem.Add(new AttrItemInfo(new string[] { $"geometry[E]", $"({Geometry[Geometry.Length - 1].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, Geometry[Geometry.Length - 1])));
+                //item = new AttrItemInfo(new string[] { "geometry[S]", $"({geometry[0].ToString()})" }, geometry[0]);
+                //listItem.Add(item);
+
+                //item = new AttrItemInfo(new string[] { "geometry[E]", $"({geometry[geometry.Length - 1].ToString()})"}, geometry[geometry.Length - 1]);
+                //listItem.Add(item);
+            }
+
+            if (attribute != null)
+            {
+                item = new AttrItemInfo(new string[] { "Link ID", $"{attribute.linkId}" });
+                listItem.Add(item);
+                item = new AttrItemInfo(new string[] { "Way ID", $"{attribute.wayId}" });
+                listItem.Add(item);
+                for (int i = 0; i < attribute.tagInfo.Count; i++)
+                {
+                    item = new AttrItemInfo(new string[] { $"{attribute.tagInfo[i].tag}", $"{attribute.tagInfo[i].val}" });
+                    listItem.Add(item);
+
+                }
+
+            }
+
+            return listItem;
+
+        }
+
     }
 
     public class MapLink : CmnObj
@@ -515,69 +615,69 @@ namespace libSimpleMap
             return ret;
         }
 
-        public override List<AttrItemInfo> GetAttributeListItem(CmnTile tile)
-        {
-            List<AttrItemInfo> listItem = new List<AttrItemInfo>();
-            AttrItemInfo item;
+        //public override List<AttrItemInfo> GetAttributeListItem(CmnTile tile)
+        //{
+        //    List<AttrItemInfo> listItem = new List<AttrItemInfo>();
+        //    AttrItemInfo item;
 
-            //基本属性
+        //    //基本属性
 
-            listItem.Add(new AttrItemInfo(
-                new string[] { "Id", $"{Id}" },
-                new AttrTag(0, new CmnSearchKey((int)SpMapContentType.Link).AddObjHandle(tile, this), null))
-                );
-            listItem.Add(new AttrItemInfo(new string[] { "TileId", $"{tile.tileId}" }));
-            listItem.Add(new AttrItemInfo(new string[] { "Index", $"{Index}" }));
-            listItem.Add(new AttrItemInfo(new string[] { "RoadType", $"{roadType}" }));
-            listItem.Add(new AttrItemInfo(new string[] { "Oneway", $"{Oneway}" }));
-            listItem.Add(new AttrItemInfo(new string[] { "linkLength", $"{linkLength}" }));
-            listItem.Add(new AttrItemInfo(new string[] { "Cost", $"{Cost}" }));
+        //    listItem.Add(new AttrItemInfo(
+        //        new string[] { "Id", $"{Id}" },
+        //        new AttrTag(0, new CmnSearchKey((int)SpMapContentType.Link).AddObjHandle(tile, this), null))
+        //        );
+        //    listItem.Add(new AttrItemInfo(new string[] { "TileId", $"{tile.tileId}" }));
+        //    listItem.Add(new AttrItemInfo(new string[] { "Index", $"{Index}" }));
+        //    listItem.Add(new AttrItemInfo(new string[] { "RoadType", $"{roadType}" }));
+        //    listItem.Add(new AttrItemInfo(new string[] { "Oneway", $"{Oneway}" }));
+        //    listItem.Add(new AttrItemInfo(new string[] { "linkLength", $"{linkLength}" }));
+        //    listItem.Add(new AttrItemInfo(new string[] { "Cost", $"{Cost}" }));
 
-            List<CmnObjHdlRef> nextLinkList = GetObjRefHdlList((int)SpMapRefType.NextLink, tile);
-            nextLinkList.ForEach(x =>
-            {
-                listItem.Add(new AttrItemInfo(new string[] { $"nextLink[]", $"" }, new AttrTag((int)SpMapRefType.NextLink, x.nextRef.key, null)));
-            });
+        //    List<CmnObjHdlRef> nextLinkList = GetObjRefHdlList((int)SpMapRefType.NextLink, tile);
+        //    nextLinkList.ForEach(x =>
+        //    {
+        //        listItem.Add(new AttrItemInfo(new string[] { $"nextLink[]", $"" }, new AttrTag((int)SpMapRefType.NextLink, x.nextRef.key, null)));
+        //    });
 
-            //形状詳細表示
-            if (true)
-            {                
-                for (int i = 0; i < geometry.Length; i++)
-                {
-                    //listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({geometry[i].ToString()})" }, geometry[i]));
-                    listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({geometry[i].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[i])));
-                }
-            }
-            //簡易表示
-            else
-            {
-                listItem.Add(new AttrItemInfo(new string[] { $"geometry[S]", $"({geometry[0].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[0])));
-                listItem.Add(new AttrItemInfo(new string[] { $"geometry[E]", $"({geometry[geometry.Length - 1].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[geometry.Length - 1])));
-                //item = new AttrItemInfo(new string[] { "geometry[S]", $"({geometry[0].ToString()})" }, geometry[0]);
-                //listItem.Add(item);
+        //    //形状詳細表示
+        //    if (true)
+        //    {                
+        //        for (int i = 0; i < geometry.Length; i++)
+        //        {
+        //            //listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({geometry[i].ToString()})" }, geometry[i]));
+        //            listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({geometry[i].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[i])));
+        //        }
+        //    }
+        //    //簡易表示
+        //    else
+        //    {
+        //        listItem.Add(new AttrItemInfo(new string[] { $"geometry[S]", $"({geometry[0].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[0])));
+        //        listItem.Add(new AttrItemInfo(new string[] { $"geometry[E]", $"({geometry[geometry.Length - 1].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[geometry.Length - 1])));
+        //        //item = new AttrItemInfo(new string[] { "geometry[S]", $"({geometry[0].ToString()})" }, geometry[0]);
+        //        //listItem.Add(item);
 
-                //item = new AttrItemInfo(new string[] { "geometry[E]", $"({geometry[geometry.Length - 1].ToString()})"}, geometry[geometry.Length - 1]);
-                //listItem.Add(item);
-            }
+        //        //item = new AttrItemInfo(new string[] { "geometry[E]", $"({geometry[geometry.Length - 1].ToString()})"}, geometry[geometry.Length - 1]);
+        //        //listItem.Add(item);
+        //    }
 
-            if (attribute != null)
-            {
-                item = new AttrItemInfo(new string[] { "Link ID", $"{attribute.linkId}" });
-                listItem.Add(item);
-                item = new AttrItemInfo(new string[] { "Way ID", $"{attribute.wayId}" });
-                listItem.Add(item);
-                for (int i = 0; i < attribute.tagInfo.Count; i++)
-                {
-                    item = new AttrItemInfo(new string[] { $"{attribute.tagInfo[i].tag}", $"{attribute.tagInfo[i].val}" });
-                    listItem.Add(item);
+        //    if (attribute != null)
+        //    {
+        //        item = new AttrItemInfo(new string[] { "Link ID", $"{attribute.linkId}" });
+        //        listItem.Add(item);
+        //        item = new AttrItemInfo(new string[] { "Way ID", $"{attribute.wayId}" });
+        //        listItem.Add(item);
+        //        for (int i = 0; i < attribute.tagInfo.Count; i++)
+        //        {
+        //            item = new AttrItemInfo(new string[] { $"{attribute.tagInfo[i].tag}", $"{attribute.tagInfo[i].val}" });
+        //            listItem.Add(item);
 
-                }
+        //        }
 
-            }
+        //    }
 
-            return listItem;
+        //    return listItem;
 
-        }
+        //}
 
 
 
@@ -668,8 +768,13 @@ namespace libSimpleMap
         //    return 0;
         //}
 
+        public override ICmnObjHandle ToICmnObjHandle(CmnTile tile)
+        {
+            return new SpLinkHandle(tile, this);
+        }
 
     }
+
 
 
 
@@ -677,6 +782,32 @@ namespace libSimpleMap
     {
         public override UInt64 Id { get { return 0; } }
         public override UInt32 Type { get { return (UInt16)SpMapContentType.LinkGeometry; } }
+
+
+        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile thisTile, byte direction = 0xff)
+        {
+            List<CmnObjHdlRef> ret = new List<CmnObjHdlRef>();
+
+            CmnObjHdlRef refNode;
+
+            switch ((SpMapRefType)refType)
+            {
+                case SpMapRefType.RelatedLink:
+
+                    refNode = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Link);
+                    refNode.nextRef.key.tile = thisTile;
+                    refNode.nextRef.key.objIndex = Index;
+
+                    ret.Add(refNode);
+                    return ret;
+
+                default:
+                    break;
+            }
+            return ret;
+        }
+
+
     }
 
     public class MapLinkAttribute : CmnObj
