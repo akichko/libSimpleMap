@@ -35,6 +35,10 @@ namespace libSimpleMap
                     mal = new BinFileMapAccess(MiddleType.SQLite);
                     break;
 
+                case MapDataType.Postgres:
+                    mal = new BinFileMapAccess(MiddleType.Postgres);
+                    break;
+
                 case MapDataType.MapManager:
                     break;
 
@@ -585,9 +589,9 @@ namespace libSimpleMap
         //}
 
         //public int SaveTile(SpTile tile) { return 0; }
-        public int SaveRoadLink(SpTile tile) { return 0; }
-        public int SaveRoadNode(SpTile tile) { return 0; }
-        public int SaveRoadGeometry(SpTile tile) { return 0; }
+        public int SaveRoadLink(SpTile tile) { throw new NotImplementedException(); }
+        public int SaveRoadNode(SpTile tile) { throw new NotImplementedException(); }
+        public int SaveRoadGeometry(SpTile tile) { throw new NotImplementedException(); }
 
     }
 
@@ -622,22 +626,22 @@ namespace libSimpleMap
     }
 
 
-    interface IDataAccess
+    public abstract class IDataAccess
     {
-        int Connect(string mapPath);
-        int Disconnect();
-        public List<uint> GetMapTileIdList();
-        byte[] GetRawData(uint tileId, SpMapContentType contentType);
-        byte[] GetLinkData(uint tileId);
-        byte[] GetNodeData(uint tileId);
-        byte[] GetGeometryData(uint tileId);
-        byte[] GetAttributeData(uint tileId);
+        public abstract int Connect(string mapPath, ushort port = 0, string userId = "", string pass = "", string DbName = "");
+        public abstract int Disconnect();
+        public abstract List<uint> GetMapTileIdList();
+        public abstract byte[] GetRawData(uint tileId, SpMapContentType contentType);
+        public abstract byte[] GetLinkData(uint tileId);
+        public abstract byte[] GetNodeData(uint tileId);
+        public abstract byte[] GetGeometryData(uint tileId);
+        public abstract byte[] GetAttributeData(uint tileId);
 
-        int SaveLinkData(uint tileId, byte[] tileBuf, int size);
-        int SaveNodeData(uint tileId, byte[] tileBuf, int size);
-        int SaveGeometryData(uint tileId, byte[] tileBuf, int size);
+        public abstract int SaveLinkData(uint tileId, byte[] tileBuf, int size);
+        public abstract int SaveNodeData(uint tileId, byte[] tileBuf, int size);
+        public abstract int SaveGeometryData(uint tileId, byte[] tileBuf, int size);
 
-        int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf, byte[] attributeBuf);
+        public abstract int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf, byte[] attributeBuf);
     }
 
 }

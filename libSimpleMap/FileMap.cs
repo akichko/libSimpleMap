@@ -20,7 +20,7 @@ namespace libSimpleMap
             IsConnected = false;
         }
 
-        public int ConnectMapData(string mapPath)
+        public int ConnectMapData(string mapPath, ushort port = 0, string userId = "", string pass = "", string DbName = "")
         {
             if (Directory.Exists(mapPath))
             {

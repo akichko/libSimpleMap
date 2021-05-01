@@ -19,7 +19,7 @@ namespace libSimpleMap
         }
 
 
-        public int Connect(string mapPath)
+        public override int Connect(string mapPath, ushort port = 0, string userId = "", string pass = "", string DbName = "")
         {
             this.mapPath = mapPath;
 
@@ -38,13 +38,13 @@ namespace libSimpleMap
 
         }
 
-        public int Disconnect()
+        public override int Disconnect()
         {
             return 0;
         }
 
 
-        public List<uint> GetMapTileIdList()
+        public override List<uint> GetMapTileIdList()
         {
 
             List<uint> retList = new List<uint>();
@@ -58,13 +58,13 @@ namespace libSimpleMap
             return retList;
         }
 
-        public byte[] GetRawData(uint tileId, SpMapContentType contentType)
+        public override byte[] GetRawData(uint tileId, SpMapContentType contentType)
         {
             return null;
         }
 
 
-        public byte[] GetLinkData(uint tileId)
+        public override byte[] GetLinkData(uint tileId)
         {
             byte[] retBytes;
 
@@ -87,7 +87,7 @@ namespace libSimpleMap
 
         }
 
-        public byte[] GetNodeData(uint tileId)
+        public override byte[] GetNodeData(uint tileId)
         {
             byte[] retBytes;
 
@@ -109,7 +109,7 @@ namespace libSimpleMap
             return retBytes;
         }
 
-        public byte[] GetGeometryData(uint tileId)
+        public override byte[] GetGeometryData(uint tileId)
         {
 
             byte[] retBytes;
@@ -133,12 +133,12 @@ namespace libSimpleMap
             return retBytes;
         }
 
-        public byte[] GetAttributeData(uint tileId)
+        public override byte[] GetAttributeData(uint tileId)
         {
             return null;
         }
 
-        public int SaveLinkData(uint tileId, byte[] tileBuf, int size)
+        public override int SaveLinkData(uint tileId, byte[] tileBuf, int size)
         {
             uint subTileY = tileId / 10000000;
             uint subTileX = (tileId % 100000) / 100;
@@ -163,7 +163,7 @@ namespace libSimpleMap
             return 0;
         }
 
-        public int SaveNodeData(uint tileId, byte[] tileBuf, int size)
+        public override int SaveNodeData(uint tileId, byte[] tileBuf, int size)
         {
             uint subTileY = tileId / 10000000;
             uint subTileX = (tileId % 100000) / 100;
@@ -187,7 +187,7 @@ namespace libSimpleMap
             return 0;
         }
 
-        public int SaveGeometryData(uint tileId, byte[] tileBuf, int size)
+        public override int SaveGeometryData(uint tileId, byte[] tileBuf, int size)
         {
             uint subTileY = tileId / 10000000;
             uint subTileX = (tileId % 100000) / 100;
@@ -212,7 +212,7 @@ namespace libSimpleMap
         }
 
 
-        public int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf, byte[] attributeBuf)
+        public override int SaveAllData(uint tileId, byte[] linkBuf, byte[] nodeBuf, byte[] geometryBuf, byte[] attributeBuf)
         {
             return -1;
         }

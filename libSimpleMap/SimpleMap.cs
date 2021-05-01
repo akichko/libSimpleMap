@@ -368,6 +368,7 @@ namespace libSimpleMap
         //public Int64[] downLinkId;
 
 
+
         public MapLink()
         {
             edgeNodeId = new Int64[2];
@@ -791,6 +792,32 @@ namespace libSimpleMap
         //public bool f_multilink_mid; //複合リンク規制またはコストに関連するリンク
         //public List<Regulation> transReg; //接続リンクを最終リンクとする規制
         //public List<TransCost> transCost; //接続リンクを最終リンクとするコスト
+
+        public ConnectLink() { }
+
+        public ConnectLink(byte[] serialData)
+        {
+            PackData32 packData = new PackData32(serialData);
+
+            //linkIndex = (ushort)packData.GetUInt(0, 16);
+            //tileOffset.offsetX = (sbyte)packData.GetInt(16, 2);
+            //tileOffset.offsetY = (sbyte)packData.GetInt(18, 2);
+            //linkDirection = (byte)packData.GetUInt(20, 1);
+            //roadType = (byte)packData.GetUInt(21, 4);
+            //isOnewayReverse = (byte)packData.GetInt(25, 1);
+            //hasRestrict = (byte)packData.GetInt(26, 1);
+            //outDirection = (byte)packData.GetUInt(27, 3);
+
+        }
+
+
+        public byte[] Serialize()
+        {
+            PackData32 packData = new PackData32();
+
+
+            return BitConverter.GetBytes(packData.rawData);
+        }
     }
 
     public class LinkAttribute
@@ -946,13 +973,13 @@ namespace libSimpleMap
 
         public TileXY(uint tileId)
         {
-            x = GisTileCode.GetX(tileId);
-            y = GisTileCode.GetY(tileId);
+            x = GisTileCode.S_CalcX(tileId);
+            y = GisTileCode.S_CalcY(tileId);
         }
 
         public uint ToTileId()
         {
-            return GisTileCode.SCalcTileId(x, y);
+            return GisTileCode.S_CalcTileId(x, y);
         }
     }
 
@@ -1040,13 +1067,13 @@ namespace libSimpleMap
 
         public TileOffset(uint tileId, uint baseTileId)
         {
-            offsetX = (sbyte)(GisTileCode.GetX(tileId) - GisTileCode.GetX(baseTileId));
-            offsetY = (sbyte)(GisTileCode.GetY(tileId) - GisTileCode.GetY(baseTileId));
+            offsetX = (sbyte)(GisTileCode.S_CalcX(tileId) - GisTileCode.S_CalcX(baseTileId));
+            offsetY = (sbyte)(GisTileCode.S_CalcY(tileId) - GisTileCode.S_CalcY(baseTileId));
         }
 
         public uint ToTileId(uint baseTileId)
         {
-            return GisTileCode.SCalcTileId((ushort)(GisTileCode.GetX(baseTileId) + offsetX), (ushort)(GisTileCode.GetY(baseTileId) + offsetY));
+            return GisTileCode.S_CalcTileId((ushort)(GisTileCode.S_CalcX(baseTileId) + offsetX), (ushort)(GisTileCode.S_CalcY(baseTileId) + offsetY));
         }
     }
 

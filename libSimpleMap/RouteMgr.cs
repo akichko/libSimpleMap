@@ -83,8 +83,8 @@ namespace libSimpleMap
 
         public int CalcTileDistance(uint startTileId, uint destTileId)
         {
-            DistFromStartTile = (float)GisTileCode.SCalcTileDistance(tileId, startTileId);
-            DistFromDestTile = (float)GisTileCode.SCalcTileDistance(tileId, destTileId);
+            DistFromStartTile = (float)GisTileCode.S_CalcTileDistance(tileId, startTileId);
+            DistFromDestTile = (float)GisTileCode.S_CalcTileDistance(tileId, destTileId);
 
             return 0;
         }
@@ -568,8 +568,8 @@ namespace libSimpleMap
 
         private byte CalcMaxUsableRoadType(uint targetTileId, uint startTileId, uint destTileId)
         {
-            float DistFromStartTile = (float)GisTileCode.SCalcTileDistance(targetTileId, startTileId);
-            float DistFromDestTile = (float)GisTileCode.SCalcTileDistance(targetTileId, destTileId);
+            float DistFromStartTile = (float)GisTileCode.S_CalcTileDistance(targetTileId, startTileId);
+            float DistFromDestTile = (float)GisTileCode.S_CalcTileDistance(targetTileId, destTileId);
 
             double minDist = Math.Min(DistFromStartTile, DistFromDestTile);
 

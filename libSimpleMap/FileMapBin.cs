@@ -22,7 +22,7 @@ namespace libSimpleMap
             IsConnected = false;
         }
 
-        public int ConnectMapData(string mapPath)
+        public int ConnectMapData(string mapPath, ushort port = 0, string userId = "", string pass = "", string DbName = "")
         {
             this.mapPath = mapPath + @"\";
 
@@ -36,11 +36,15 @@ namespace libSimpleMap
                     dal = new SQLiteAccess();
                     break;
 
+                case MiddleType.Postgres:
+                    dal = new PostgresAccess();
+                    break;
+
                 default:
                     break;
             }
 
-            int ret = dal.Connect(mapPath);
+            int ret = dal.Connect(mapPath);//, port, userId, pass, DbName);
             if (ret == 0)
                 IsConnected = true;
 
@@ -88,37 +92,51 @@ namespace libSimpleMap
                 ushort numLink = BitConverter.ToUInt16(tmpBuf, 0);
                 for (ushort i = 0; i < numLink; i++)
                 {
-                    MapLink tmpLink = new MapLink();
-                    tmpLink.index = i;
+                    MapLink tmpLink;
+                    if (false)
+                    {
+                        ms.Read(tmpBuf, 0, 8);
+                        tmpLink = new MapLink(tmpBuf);
+                        tmpLink.edgeNodeTileId[0] = tileId;
+                        tmpLink.edgeNodeTileId[1] = GisTileCode.S_CalcTileId((ushort)(baseTileXY.x + tmpLink.endNodeTileOffset.offsetX), (ushort)(baseTileXY.y + tmpLink.endNodeTileOffset.offsetY));
+                    }
+                    else
+                    {
+                        tmpLink = new MapLink();
+                        tmpLink.index = i;
 
-                    ms.Read(tmpBuf, 0, 2);
-                    tmpLink.edgeNodeIndex[0] = BitConverter.ToUInt16(tmpBuf, 0);
 
-                    ms.Read(tmpBuf, 0, 1);
-                    sbyte offsetX = (sbyte)tmpBuf[0];
-                    tmpLink.endNodeTileOffset.offsetX = offsetX;
+                        ms.Read(tmpBuf, 0, 2);
+                        tmpLink.edgeNodeIndex[0] = BitConverter.ToUInt16(tmpBuf, 0);
 
-                    tmpLink.edgeNodeTileId[0] = tileId;
+                        ms.Read(tmpBuf, 0, 1);
+                        sbyte offsetX = (sbyte)tmpBuf[0];
+                        tmpLink.endNodeTileOffset.offsetX = offsetX;
 
-                    ms.Read(tmpBuf, 0, 1);
-                    sbyte offsetY = (sbyte)tmpBuf[0];
-                    tmpLink.edgeNodeTileId[1] = GisTileCode.SCalcTileId((ushort)(baseTileXY.x + offsetX), (ushort)(baseTileXY.y + offsetY));
-                    tmpLink.endNodeTileOffset.offsetY = offsetY;
+                        tmpLink.edgeNodeTileId[0] = tileId;
 
-                    ms.Read(tmpBuf, 0, 2);
-                    tmpLink.edgeNodeIndex[1] = BitConverter.ToUInt16(tmpBuf, 0);
+                        ms.Read(tmpBuf, 0, 1);
+                        sbyte offsetY = (sbyte)tmpBuf[0];
+                        tmpLink.edgeNodeTileId[1] = GisTileCode.S_CalcTileId((ushort)(baseTileXY.x + offsetX), (ushort)(baseTileXY.y + offsetY));
+                        tmpLink.endNodeTileOffset.offsetY = offsetY;
 
-                    ms.Read(tmpBuf, 0, 2);
-                    tmpLink.linkCost = BitConverter.ToUInt16(tmpBuf, 0);
+                        ms.Read(tmpBuf, 0, 2);
+                        tmpLink.edgeNodeIndex[1] = BitConverter.ToUInt16(tmpBuf, 0);
 
-                    ms.Read(tmpBuf, 0, 2);
-                    tmpLink.linkLength = BitConverter.ToUInt16(tmpBuf, 0);
+                        ms.Read(tmpBuf, 0, 2);
+                        tmpLink.linkCost = BitConverter.ToUInt16(tmpBuf, 0);
 
-                    ms.Read(tmpBuf, 0, 1);
-                    tmpLink.roadType = tmpBuf[0];
+                        ms.Read(tmpBuf, 0, 2);
+                        tmpLink.linkLength = BitConverter.ToUInt16(tmpBuf, 0);
 
-                    ms.Read(tmpBuf, 0, 1);
-                    tmpLink.fOneWay = (sbyte)tmpBuf[0];
+                        ms.Read(tmpBuf, 0, 1);
+                        tmpLink.roadType = tmpBuf[0];
+
+                        ms.Read(tmpBuf, 0, 1);
+                        tmpLink.fOneWay = (sbyte)tmpBuf[0];
+
+
+                    }
 
                     if (tmpLink.roadType > maxRoadType)
                         break;
@@ -126,8 +144,8 @@ namespace libSimpleMap
                     tmpLinkList.Add(tmpLink);
 
                     //test
-                    byte[] testByte = tmpLink.Serialize();
-                    MapLink testAfte = new MapLink(testByte);
+                    //byte[] testByte = tmpLink.Serialize();
+                    //MapLink testAfte = new MapLink(testByte);
                 }
 
             }
@@ -184,7 +202,7 @@ namespace libSimpleMap
                         ms.Read(tmpBuf, 0, 1);
                         sbyte offsetY = (sbyte)tmpBuf[0];
 
-                        tmpLink.tileId = GisTileCode.SCalcTileId((ushort)(baseTileXY.x + offsetX), (ushort)(baseTileXY.y + offsetY));
+                        tmpLink.tileId = GisTileCode.S_CalcTileId((ushort)(baseTileXY.x + offsetX), (ushort)(baseTileXY.y + offsetY));
 
                         ms.Read(tmpBuf, 0, 2);
                         tmpLink.linkIndex = BitConverter.ToUInt16(tmpBuf, 0);
@@ -397,6 +415,7 @@ namespace libSimpleMap
                     break;
 
                 case MiddleType.SQLite:
+                case MiddleType.Postgres:
 
                     byte[] linkBuf = MakeRoadLinkBin(tile);
                     byte[] nodeBuf = MakeRoadNodeBin(tile);
@@ -463,32 +482,52 @@ namespace libSimpleMap
                 foreach (MapLink tmpLink in tmpTile.link)
                 {
 
-                    tmpBuf = BitConverter.GetBytes((short)tmpLink.edgeNodeIndex[0]);
-                    ms.Write(tmpBuf, 0, 2);
-
                     TileXY tileXY = new TileXY(tmpLink.edgeNodeTileId[1]);
-                    //TileXY tileXY = new TileXY(tmpLink.GetEdgeNodeTileOffset(1).ToTileId(tile.tileId));
 
-                    tmpBuf = BitConverter.GetBytes((sbyte)(tileXY.x - baseTileXY.x));
-                    ms.Write(tmpBuf, 0, 1);
+                    if (false)
+                    {
 
-                    tmpBuf = BitConverter.GetBytes((sbyte)(tileXY.y - baseTileXY.y));
-                    ms.Write(tmpBuf, 0, 1);
+                        tmpLink.endNodeTileOffset.offsetX = (sbyte)(tileXY.x - baseTileXY.x);
+                        tmpLink.endNodeTileOffset.offsetY = (sbyte)(tileXY.y - baseTileXY.y);
 
-                    tmpBuf = BitConverter.GetBytes((short)tmpLink.edgeNodeIndex[1]);
-                    ms.Write(tmpBuf, 0, 2);
+                        tmpBuf = tmpLink.Serialize();
+                        ms.Write(tmpBuf, 0, 8);
 
-                    tmpBuf = BitConverter.GetBytes((short)tmpLink.linkCost);
-                    ms.Write(tmpBuf, 0, 2);
+                        //test
+                        //MapLink testAfte = new MapLink(tmpBuf);
 
-                    tmpBuf = BitConverter.GetBytes((short)tmpLink.linkLength);
-                    ms.Write(tmpBuf, 0, 2);
 
-                    tmpBuf = BitConverter.GetBytes((byte)tmpLink.roadType);
-                    ms.Write(tmpBuf, 0, 1);
+                    }
+                    else
+                    {
 
-                    tmpBuf = BitConverter.GetBytes((sbyte)tmpLink.fOneWay);
-                    ms.Write(tmpBuf, 0, 1);
+                        tmpBuf = BitConverter.GetBytes((short)tmpLink.edgeNodeIndex[0]);
+                        ms.Write(tmpBuf, 0, 2);
+
+                        //TileXY tileXY = new TileXY(tmpLink.GetEdgeNodeTileOffset(1).ToTileId(tile.tileId));
+
+                        tmpBuf = BitConverter.GetBytes((sbyte)(tileXY.x - baseTileXY.x));
+                        ms.Write(tmpBuf, 0, 1);
+
+                        tmpBuf = BitConverter.GetBytes((sbyte)(tileXY.y - baseTileXY.y));
+                        ms.Write(tmpBuf, 0, 1);
+
+                        tmpBuf = BitConverter.GetBytes((short)tmpLink.edgeNodeIndex[1]);
+                        ms.Write(tmpBuf, 0, 2);
+
+                        tmpBuf = BitConverter.GetBytes((short)tmpLink.linkCost);
+                        ms.Write(tmpBuf, 0, 2);
+
+                        tmpBuf = BitConverter.GetBytes((short)tmpLink.linkLength);
+                        ms.Write(tmpBuf, 0, 2);
+
+                        tmpBuf = BitConverter.GetBytes((byte)tmpLink.roadType);
+                        ms.Write(tmpBuf, 0, 1);
+
+                        tmpBuf = BitConverter.GetBytes((sbyte)tmpLink.fOneWay);
+                        ms.Write(tmpBuf, 0, 1);
+                    }
+
                 }
 
                 bufLength = (int)ms.Position;
