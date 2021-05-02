@@ -326,10 +326,11 @@ namespace libSimpleMap
     public class SpLinkHandle : CmnObjHandle
     {
 
-        public SpLinkHandle(CmnTile tile, CmnObj obj)
+        public SpLinkHandle(CmnTile tile, CmnObj obj, byte direction = 0xff)
         {
             this.tile = tile;
             this.obj = obj;
+            this.direction = direction;
         }
 
         public override LatLon[] Geometry => ((SpTile)tile).geometry[obj.Index].Geometry;
@@ -798,9 +799,9 @@ namespace libSimpleMap
         //    return 0;
         //}
 
-        public override CmnObjHandle ToCmnObjHandle(CmnTile tile)
+        public override CmnObjHandle ToCmnObjHandle(CmnTile tile, byte direction = 0xff)
         {
-            return new SpLinkHandle(tile, this);
+            return new SpLinkHandle(tile, this, direction);
         }
 
 
