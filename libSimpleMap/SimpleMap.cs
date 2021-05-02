@@ -35,18 +35,6 @@ namespace libSimpleMap
 
         override public UInt32 Type { get{return 0;} }
 
-        //public byte loadedRoadType = 0;
-        //public byte loadedLinkLevel = 0;
-        //public byte loadedNodeLevel = 0;
-        //public byte loadedGeometryLevel = 0;
-        //public byte loadedAttributeLevel = 0;
-
-
-
-        //public uint x { get; private set; }
-        //public uint y { get; private set; }
-        //public SpTile tile { get; protected set; }
-
         public SpTile() { }
         public SpTile(uint tileId)
         {
@@ -78,22 +66,22 @@ namespace libSimpleMap
         //}
 
 
-        public LinkHandle GetMapLink(int linkIndex)
-        {
-            if (linkIndex >= link.Length)
-                return null;
+        //public LinkHandle GetMapLink(int linkIndex)
+        //{
+        //    if (linkIndex >= link.Length)
+        //        return null;
 
-            return new LinkHandle(this, link[linkIndex]);
-            //return link[linkIndex];
-        }
+        //    return new LinkHandle(this, link[linkIndex]);
+        //    //return link[linkIndex];
+        //}
 
-        public NodeHandle GetMapNode(int targetNodeIndex)
-        {
-            if (targetNodeIndex >= node.Length)
-                return null;
+        //public NodeHandle GetMapNode(int targetNodeIndex)
+        //{
+        //    if (targetNodeIndex >= node.Length)
+        //        return null;
 
-            return new NodeHandle(this, node[targetNodeIndex]);
-        }
+        //    return new NodeHandle(this, node[targetNodeIndex]);
+        //}
 
 
 
@@ -713,11 +701,14 @@ namespace libSimpleMap
 
 
 
-        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile tile, byte direction = 1)
+        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile tile, byte direction = 0xff)
         {
             List<CmnObjHdlRef> ret = new List<CmnObjHdlRef>();            
 
             CmnObjHdlRef refNode;
+
+            if (direction == 0xff)
+                direction = 1;
 
             switch ((SpMapRefType)refType)
             {
@@ -807,6 +798,10 @@ namespace libSimpleMap
 
     }
 
+    public class MapLinkFull : MapLink
+    {
+
+    }
 
 
 
@@ -1009,113 +1004,113 @@ namespace libSimpleMap
         }
     }
 
-    public class LinkHandle
-    {
-        public SpTile tile;
-        public MapLink mapLink;
+    //public class LinkHandle
+    //{
+    //    public SpTile tile;
+    //    public MapLink mapLink;
 
-        public LinkHandle() { }
+    //    //public LinkHandle() { }
 
-        public LinkHandle(SpTile tile, MapLink mapLink)
-        {
-            this.tile = tile;
-            this.mapLink = mapLink;
-        }
+    //    //public LinkHandle(SpTile tile, MapLink mapLink)
+    //    //{
+    //    //    this.tile = tile;
+    //    //    this.mapLink = mapLink;
+    //    //}
 
-        public DLinkHandle ToDLinkHandle(byte direction)
-        {
-            return new DLinkHandle(tile, mapLink, direction);
-        }
+    //    //public DLinkHandle ToDLinkHandle(byte direction)
+    //    //{
+    //    //    return new DLinkHandle(tile, mapLink, direction);
+    //    //}
 
-    }
-
-
-    public class DLinkHandle : LinkHandle
-    {
-        //public SpTile tile;
-        //public MapLink mapLink;
-        public byte direction;
-        public uint tileId;
-
-        public DLinkHandle() { }
-
-        public DLinkHandle(SpTile tile, MapLink mapLink, byte direction)
-        {
-            this.tile = tile;
-            this.mapLink = mapLink;
-            this.direction = direction;
-        }
-
-        public DLinkHandle(SpTile tile, MapLink mapLink, byte direction, uint tileId, short linkIndex)
-        {
-            this.tile = tile;
-            this.mapLink = mapLink;
-            this.direction = direction;
-        }
-
-        public DLinkHandle(LinkHandle linkHdl, byte direction)
-        {
-            this.tile = linkHdl.tile;
-            this.mapLink = linkHdl.mapLink;
-            this.direction = direction;
-        }
-
-    }
-
-    public class NodeHandle
-    {
-        public SpTile tile;
-        public MapNode mapNode;
-        public uint tileId;
-
-        public NodeHandle() { }
-
-        public NodeHandle(SpTile tile, MapNode mapNode)
-        {
-            this.tile = tile;
-            this.mapNode = mapNode;
-        }
-
-        public NodeHandle(SpTile tile, MapNode mapNode, uint tileId, ushort nodeIndex)
-        {
-            this.tile = tile;
-            this.mapNode = mapNode;
-        }
-
-    }
+    //}
 
 
-    public class LinkPos
-    {
-        public SpTile tile;
-        public MapLink mapLink;
-        public double offset;
+    //public class DLinkHandle : LinkHandle
+    //{
+    //    //public SpTile tile;
+    //    //public MapLink mapLink;
+    //    public byte direction;
+    //    public uint tileId;
 
-        public LinkPos(SpTile tile, MapLink mapLink, double offset)
-        {
-            this.tile = tile;
-            this.mapLink = mapLink;
-            this.offset = offset;
-        }
+    //    //public DLinkHandle() { }
 
-        public LinkHandle ToLinkHdl()
-        {
-            return new LinkHandle(tile, mapLink);
-        }
-    }
+    //    //public DLinkHandle(SpTile tile, MapLink mapLink, byte direction)
+    //    //{
+    //    //    this.tile = tile;
+    //    //    this.mapLink = mapLink;
+    //    //    this.direction = direction;
+    //    //}
 
-    public class LinkDistance
-    {
-        public LinkPos linkPos;
-        public double distance;
+    //    //public DLinkHandle(SpTile tile, MapLink mapLink, byte direction, uint tileId, short linkIndex)
+    //    //{
+    //    //    this.tile = tile;
+    //    //    this.mapLink = mapLink;
+    //    //    this.direction = direction;
+    //    //}
 
-        public LinkDistance(LinkPos linkPos, double distance)
-        {
-            this.linkPos = linkPos;
-            this.distance = distance;
-        }
+    //    //public DLinkHandle(LinkHandle linkHdl, byte direction)
+    //    //{
+    //    //    this.tile = linkHdl.tile;
+    //    //    this.mapLink = linkHdl.mapLink;
+    //    //    this.direction = direction;
+    //    //}
 
-    }
+    //}
+
+    //public class NodeHandle
+    //{
+    //    public SpTile tile;
+    //    public MapNode mapNode;
+    //    public uint tileId;
+
+    //    //public NodeHandle() { }
+
+    //    //public NodeHandle(SpTile tile, MapNode mapNode)
+    //    //{
+    //    //    this.tile = tile;
+    //    //    this.mapNode = mapNode;
+    //    //}
+
+    //    //public NodeHandle(SpTile tile, MapNode mapNode, uint tileId, ushort nodeIndex)
+    //    //{
+    //    //    this.tile = tile;
+    //    //    this.mapNode = mapNode;
+    //    //}
+
+    //}
+
+
+    //public class LinkPos
+    //{
+    //    public SpTile tile;
+    //    public MapLink mapLink;
+    //    public double offset;
+
+    //    //public LinkPos(SpTile tile, MapLink mapLink, double offset)
+    //    //{
+    //    //    this.tile = tile;
+    //    //    this.mapLink = mapLink;
+    //    //    this.offset = offset;
+    //    //}
+
+    //    //public LinkHandle ToLinkHdl()
+    //    //{
+    //    //    return new LinkHandle(tile, mapLink);
+    //    //}
+    //}
+
+    //public class LinkDistance
+    //{
+    //    public LinkPos linkPos;
+    //    public double distance;
+
+    //    //public LinkDistance(LinkPos linkPos, double distance)
+    //    //{
+    //    //    this.linkPos = linkPos;
+    //    //    this.distance = distance;
+    //    //}
+
+    //}
 
 #if false
     public struct t_condition

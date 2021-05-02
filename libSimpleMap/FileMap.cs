@@ -77,7 +77,7 @@ namespace libSimpleMap
 
         public MapLink[] GetRoadLink(uint tileId, ushort maxRoadType = 0xFFFF)
         {
-            List<MapLink> tmpLinkList = new List<MapLink>();
+            List<MapLinkFull> tmpLinkList = new List<MapLinkFull>();
 
             string fileName = string.Format($"{mapPath}LINK\\{tileId}_LINK.txt");
             if (!File.Exists(fileName))
@@ -90,7 +90,7 @@ namespace libSimpleMap
 
                 while ((fbuf = sr.ReadLine()) != null)
                 {
-                    MapLink tmpLink = new MapLink();
+                    MapLinkFull tmpLink = new MapLinkFull();
                     tmpLink.index = numLink++;
 
                     string[] csv_column = fbuf.Split('\t');
@@ -198,9 +198,9 @@ namespace libSimpleMap
         }
 
 
-        public MapLink[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF)
+        public MapLinkFull[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF)
         {
-            List<MapLink> tmpLinkShapeList = new List<MapLink>();
+            List<MapLinkFull> tmpLinkShapeList = new List<MapLinkFull>();
 
             string fileName = string.Format($"{mapPath}LINKGEOMETRY\\{tileId}_LINKGEOMETRY.txt");
             if (!File.Exists(fileName))
@@ -213,7 +213,7 @@ namespace libSimpleMap
                 int index = 0;
                 UInt64 preLinkId = UInt64.MaxValue;
 
-                MapLink tmpLinkShape = new MapLink();
+                MapLinkFull tmpLinkShape = new MapLinkFull();
                 List<LatLon> tmpGeometry = new List<LatLon>();
 
                 //データ数読み込み
@@ -231,7 +231,7 @@ namespace libSimpleMap
                     if (tmpLinkId != preLinkId)
                     {
                         tmpLinkShape.geometry = tmpGeometry.ToArray();
-                        tmpLinkShape = new MapLink();
+                        tmpLinkShape = new MapLinkFull();
 
                         tmpGeometry = new List<LatLon>();
                         tmpLinkShape.linkId = tmpLinkId;
@@ -260,9 +260,9 @@ namespace libSimpleMap
 
         public MapLinkAttribute[] GetRoadAttribute2(uint tileId, ushort maxRoadType = 0xFFFF) { throw new NotImplementedException(); }
 
-        public MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF)
+        public MapLinkFull[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF)
         {
-            List<MapLink> tmpLinkAttrList = new List<MapLink>();
+            List<MapLinkFull> tmpLinkAttrList = new List<MapLinkFull>();
 
             string fileName = string.Format($"{mapPath}LINKATTR\\{tileId}_LINKATTR.txt");
             if (!File.Exists(fileName))
@@ -275,7 +275,7 @@ namespace libSimpleMap
                 int index = 0;
                 UInt64 preLinkId = 0xffffffffffffffff;
 
-                MapLink tmpLinkAttr = null;
+                MapLinkFull tmpLinkAttr = null;
 
                 //データ数読み込み
                 while ((fbuf = sr.ReadLine()) != null)
@@ -294,7 +294,7 @@ namespace libSimpleMap
 
                     if (tmpLinkId != preLinkId)
                     {
-                        tmpLinkAttr = new MapLink();
+                        tmpLinkAttr = new MapLinkFull();
                         tmpLinkAttr.attribute = new LinkAttribute();
                         tmpLinkAttr.attribute.linkId = UInt64.Parse(sLinkId);
                         tmpLinkAttr.attribute.wayId = UInt64.Parse(sWayId);
@@ -376,7 +376,7 @@ namespace libSimpleMap
 
                 case SpMapContentType.LinkGeometry:
 
-                    MapLink[] tmpMapLinkGeometry = GetRoadGeometry(tileId, (byte)subType);
+                    MapLinkFull[] tmpMapLinkGeometry = GetRoadGeometry(tileId, (byte)subType);
                     MapLinkGeometry[] tmpGeometry = tmpMapLinkGeometry.Select(x =>
                     {
                         MapLinkGeometry y = new MapLinkGeometry();
@@ -389,7 +389,7 @@ namespace libSimpleMap
 
                 case SpMapContentType.LinkAttribute:
 
-                    MapLink[] tmpMapLinkAttr = GetRoadAttribute(tileId, (byte)subType);
+                    MapLinkFull[] tmpMapLinkAttr = GetRoadAttribute(tileId, (byte)subType);
                     MapLinkAttribute[] tmpAttribute = tmpMapLinkAttr.Select(x =>
                     {
                         MapLinkAttribute y = new MapLinkAttribute();

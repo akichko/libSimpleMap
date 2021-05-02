@@ -606,8 +606,8 @@ namespace libSimpleMap
     {
         MapLink[] GetRoadLink(uint tileId, ushort maxRoadType = 0xFFFF);
         MapNode[] GetRoadNode(uint tileId, ushort maxRoadType = 0xFFFF);
-        MapLink[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF);
-        MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF);
+        MapLinkFull[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF);
+        MapLinkFull[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF);
         MapLinkAttribute[] GetRoadAttribute2(uint tileId, ushort maxRoadType = 0xFFFF);
 
         //List<uint> GetMapTileIdList();

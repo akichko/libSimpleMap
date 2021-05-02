@@ -235,7 +235,7 @@ namespace libSimpleMap
         }
 
 
-        public MapLink[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF)
+        public MapLinkFull[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF)
         {
             throw new NotImplementedException();
         }
@@ -400,7 +400,7 @@ namespace libSimpleMap
         }
 
 
-        public MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF)
+        public MapLinkFull[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF)
         {
             throw new NotImplementedException();
         }
