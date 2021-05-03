@@ -31,11 +31,11 @@ namespace libSimpleMap
                 //    break;
 
                 case MapDataType.SQLite:
-                    mal = new BinFileMapAccess(MiddleType.SQLite);
+                    mal = new SpMapBinMapAccess(MiddleType.SQLite);
                     break;
 
                 case MapDataType.Postgres:
-                    mal = new BinFileMapAccess(MiddleType.Postgres);
+                    mal = new SpMapBinMapAccess(MiddleType.Postgres);
                     break;
 
                 case MapDataType.MapManager:
@@ -604,11 +604,11 @@ namespace libSimpleMap
 
     public interface ISpMapAccess : ICmnMapAccess
     {
-        MapLink[] GetRoadLink(uint tileId, ushort maxRoadType = 0xFFFF);
-        MapNode[] GetRoadNode(uint tileId, ushort maxRoadType = 0xFFFF);
-        MapLinkFull[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF);
-        MapLinkFull[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF);
-        MapLinkAttribute[] GetRoadAttribute2(uint tileId, ushort maxRoadType = 0xFFFF);
+        //MapLink[] GetRoadLink(uint tileId, ushort maxRoadType = 0xFFFF);
+        //MapNode[] GetRoadNode(uint tileId, ushort maxRoadType = 0xFFFF);
+        //MapLink[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF);
+        //MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF);
+        //MapLinkAttribute[] GetRoadAttribute2(uint tileId, ushort maxRoadType = 0xFFFF);
 
         //List<uint> GetMapTileIdList();
         //int CalcTileDistance(int tileIdA, int tileIdB);

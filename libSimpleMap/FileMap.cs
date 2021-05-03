@@ -113,7 +113,7 @@ namespace libSimpleMap
                     if (sEndNodeIndex == "") sEndNodeIndex = "0";
 
 
-                    tmpLink.linkId = UInt64.Parse(sLinkdId);
+                    tmpLink.LinkId = UInt64.Parse(sLinkdId);
                     tmpLink.edgeNodeId[0] = Int64.Parse(sStartNodeId);
                     tmpLink.edgeNodeId[1] = Int64.Parse(sEndNodeId);
                     tmpLink.edgeNodeTileId[0] = tileId;
@@ -198,7 +198,7 @@ namespace libSimpleMap
         }
 
 
-        public MapLinkFull[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF)
+        public MapLink[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF)
         {
             List<MapLinkFull> tmpLinkShapeList = new List<MapLinkFull>();
 
@@ -234,7 +234,7 @@ namespace libSimpleMap
                         tmpLinkShape = new MapLinkFull();
 
                         tmpGeometry = new List<LatLon>();
-                        tmpLinkShape.linkId = tmpLinkId;
+                        tmpLinkShape.LinkId = tmpLinkId;
                         preLinkId = tmpLinkId;
                         tmpLinkShapeList.Add(tmpLinkShape);
 
@@ -260,7 +260,7 @@ namespace libSimpleMap
 
         public MapLinkAttribute[] GetRoadAttribute2(uint tileId, ushort maxRoadType = 0xFFFF) { throw new NotImplementedException(); }
 
-        public MapLinkFull[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF)
+        public MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF)
         {
             List<MapLinkFull> tmpLinkAttrList = new List<MapLinkFull>();
 
@@ -298,7 +298,7 @@ namespace libSimpleMap
                         tmpLinkAttr.attribute = new LinkAttribute();
                         tmpLinkAttr.attribute.linkId = UInt64.Parse(sLinkId);
                         tmpLinkAttr.attribute.wayId = UInt64.Parse(sWayId);
-                        tmpLinkAttr.linkId = UInt64.Parse(sLinkId);
+                        tmpLinkAttr.LinkId = UInt64.Parse(sLinkId);
 
                         preLinkId = tmpLinkId;
                         tmpLinkAttrList.Add(tmpLinkAttr);
@@ -376,7 +376,7 @@ namespace libSimpleMap
 
                 case SpMapContentType.LinkGeometry:
 
-                    MapLinkFull[] tmpMapLinkGeometry = GetRoadGeometry(tileId, (byte)subType);
+                    MapLinkFull[] tmpMapLinkGeometry = (MapLinkFull[])GetRoadGeometry(tileId, (byte)subType);
                     MapLinkGeometry[] tmpGeometry = tmpMapLinkGeometry.Select(x =>
                     {
                         MapLinkGeometry y = new MapLinkGeometry();
@@ -389,7 +389,7 @@ namespace libSimpleMap
 
                 case SpMapContentType.LinkAttribute:
 
-                    MapLinkFull[] tmpMapLinkAttr = GetRoadAttribute(tileId, (byte)subType);
+                    MapLinkFull[] tmpMapLinkAttr = (MapLinkFull[])GetRoadAttribute(tileId, (byte)subType);
                     MapLinkAttribute[] tmpAttribute = tmpMapLinkAttr.Select(x =>
                     {
                         MapLinkAttribute y = new MapLinkAttribute();

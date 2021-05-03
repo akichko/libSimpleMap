@@ -27,13 +27,13 @@ namespace libSimpleMap
     {
         public MapLink[] link; //並びは道路種別
         public MapNode[] node;
-        public MapLink[] linkGeometry;
-        public MapLink[] linkAttr;
+        public MapLinkFull[] linkGeometry;
+        public MapLinkFull[] linkAttr;
 
         public MapLinkGeometry[] geometry;
         public MapLinkAttribute[] attribute;
 
-        override public UInt32 Type { get{return 0;} }
+        override public UInt32 Type { get { return 0; } }
 
         public SpTile() { }
         public SpTile(uint tileId)
@@ -172,7 +172,7 @@ namespace libSimpleMap
             }
             for (int i = 0; i < link.Length; i++)
             {
-                if (link[i].linkId != shapeLinkList[i].linkId)
+                if (link[i].LinkId != shapeLinkList[i].LinkId)
                 {
                     return false;
                 }
@@ -292,7 +292,7 @@ namespace libSimpleMap
         //}
     }
 
-    
+
     public class SpObjGroup : CmnObjGroup
     {
         public override UInt32 Type { get; }
@@ -314,14 +314,9 @@ namespace libSimpleMap
     public class SpLinkHandle : CmnObjHandle
     {
 
-        public SpLinkHandle(CmnTile tile, CmnObj obj, byte direction = 0xff)
-        {
-            this.tile = tile;
-            this.obj = obj;
-            this.direction = direction;
-        }
+        public SpLinkHandle(CmnTile tile, MapLink obj, byte direction = 0xff) : base(tile, obj, direction) { }
 
-        public override LatLon[] Geometry => ((SpTile)tile).geometry[obj.Index].Geometry;
+        public override LatLon[] Geometry => ((SpTile)tile).geometry?[obj.Index].Geometry;
 
 
         public override List<AttrItemInfo> GetAttributeListItem()
@@ -393,36 +388,58 @@ namespace libSimpleMap
 
     }
 
+    public class MapLinkFull : MapLink
+    {
+        public override UInt64 LinkId { get; set; } //リンク属性の方に移動
+        public Int64[] edgeNodeId; //必ず２つ。[0]:始点側 [1]:終点側 //容量削減可能
+        public uint[] edgeNodeTileId; //オフセット位置。終点のみ
+        public LinkAttribute attribute;
+
+        public MapLinkFull()
+        {
+            edgeNodeId = new Int64[2];
+            edgeNodeTileId = new uint[2];
+        }
+
+
+        public override uint EdgeNodeTileId(CmnTile tile, int index)
+        {
+            if (index == 0)
+                return edgeNodeTileId[0];
+            else if (index == 1)
+                return edgeNodeTileId[1];
+            else
+                throw new ArgumentException();
+        }
+        public override LinkAttribute Attribute { get { return attribute; } set { attribute = value; } }
+
+    }
+
     public class MapLink : CmnObj
     {
-        // public SpTile tile; //消して、参照構造体で扱う？
-        public UInt64 linkId; //リンク属性の方に移動
         public ushort index; //コスト計算管理情報など、外部テーブルを用意した場合の参照用
-        public Int64[] edgeNodeId; //必ず２つ。[0]:始点側 [1]:終点側 //容量削減可能
         public ushort[] edgeNodeIndex; //必ず２つ。[0]:始点側 [1]:終点側
-        public uint[] edgeNodeTileId; //オフセット位置。終点のみ
-
         public TileOffset2 endNodeTileOffset;
+
+      // public uint[] edgeNodeTileId; //オフセット位置。終点のみ
 
         public byte roadType; //4bit
         public ushort linkLength;
         public ushort linkCost;
         public sbyte fOneWay; //表示用にここにも
 
-        public LatLon[] geometry { get; set; }
-        public LinkAttribute attribute { get; set; }
+        public virtual LatLon[] geometry { get; set; }
 
-        public MapLinkAttribute linkAttr;
+        //public MapLinkAttribute linkAttr;
 
-        public override UInt64 Id { get { return linkId; } }
-        public override UInt32 Type { get { return (UInt32)SpMapContentType.Link; } }
-        public override UInt16 SubType { get { return (UInt16)roadType; } }
-        public override LatLon[] Geometry { get { return geometry; }  }
-
+        public override UInt64 Id => LinkId;
+        public override UInt32 Type => (UInt32)SpMapContentType.Link;
+        public override UInt16 SubType => (UInt16)roadType;
+        public override LatLon[] Geometry => geometry;
         public override double Length => linkLength;
 
 
-        public override int Cost { 
+        public override int Cost {
             get {
                 double tmpCost;
                 switch (roadType)
@@ -458,41 +475,28 @@ namespace libSimpleMap
                     return 0;
                 else
                     return 0xff;
-            } 
-        } 
+            }
+        }
 
-        //public Int64 linkId
-        //{
-        //    get{ return 0; }
-        //    set{; }
-        //}
+        public virtual UInt64 LinkId { get { return 0; } set { return; } } //リンク属性の方に移動
+        public virtual LinkAttribute Attribute { get { return null; } set { return; } }
 
-        //public Int64[] edgeNodeId
-        //{
-        //    get { return null; }
-        //    set {; }
-        //}
 
-        //public TileOffset2 GetEdgeNodeTileOffset(sbyte direction)
-        //{
-        //    if (direction == 0)
-        //        return new TileOffset2(0);
-        //    else if (direction == 1)
-        //        return endNodeTileOffset;
-        //    else
-        //        return new TileOffset2(0);
-        //}
-
-        //public Int64 upLinkId;
-        //public Int64[] downLinkId;
-
+        public virtual uint EdgeNodeTileId(CmnTile tile, int index) 
+        {
+            if (index == 0)
+                return tile.tileInfo.TileId;
+            else if (index == 1)
+                return tile.tileInfo.CalcOffsetTileId(endNodeTileOffset.offsetX, endNodeTileOffset.offsetY);
+            else
+                throw new ArgumentException();
+        }
 
 
         public MapLink()
         {
-            edgeNodeId = new Int64[2];
             edgeNodeIndex = new ushort[2];
-            edgeNodeTileId = new uint[2];
+            //edgeNodeTileId = new uint[2];
         }
 
         public MapLink(byte[] serialData)
@@ -501,7 +505,7 @@ namespace libSimpleMap
 
             //edgeNodeId = new Int64[2];
             edgeNodeIndex = new ushort[2];
-            edgeNodeTileId = new uint[2];
+            //edgeNodeTileId = new uint[2];
 
             edgeNodeIndex[0] = (ushort)packData.GetUInt(0, 16);
             edgeNodeIndex[1] = (ushort)packData.GetUInt(16, 16);
@@ -627,7 +631,8 @@ namespace libSimpleMap
 
             //始点ノード側接続リンク
             nodeRef = new CmnObjRef((int)SpMapRefType.NextLink,  (UInt32)SpMapContentType.Node, false);
-            nodeRef.key.tileId = edgeNodeTileId[1];
+            nodeRef.key.tileId = EdgeNodeTileId(tile, 1);
+            //nodeRef.key.tileId = edgeNodeTileId[1];
             nodeRef.key.objIndex = edgeNodeIndex[1];
             ret.Add(nodeRef);
 
@@ -715,7 +720,8 @@ namespace libSimpleMap
                 case SpMapRefType.NextLink:
 
                     refNode = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Node);
-                    refNode.nextRef.key.tileId = edgeNodeTileId[direction];
+                    refNode.nextRef.key.tileId = EdgeNodeTileId(tile, direction);
+                    //refNode.nextRef.key.tileId = edgeNodeTileId[direction];
                     refNode.nextRef.key.objIndex = edgeNodeIndex[direction];
                     refNode.nextRef.final = false;
 
@@ -725,7 +731,8 @@ namespace libSimpleMap
                 case SpMapRefType.BackLink:
 
                     refNode = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Node);
-                    refNode.nextRef.key.tileId = edgeNodeTileId[1 - direction];
+                    refNode.nextRef.key.tileId = EdgeNodeTileId(tile, 1 - direction);
+                    //refNode.nextRef.key.tileId = edgeNodeTileId[1 - direction];
                     refNode.nextRef.key.objIndex = edgeNodeIndex[1 - direction];
                     refNode.nextRef.final = false;
 
@@ -795,11 +802,6 @@ namespace libSimpleMap
             return new SpLinkHandle(tile, this, direction);
         }
 
-
-    }
-
-    public class MapLinkFull : MapLink
-    {
 
     }
 
