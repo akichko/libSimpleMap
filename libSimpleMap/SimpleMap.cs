@@ -105,10 +105,22 @@ namespace libSimpleMap
                     objGroup.isGeoSearchable = false;
                     break;
 
-
                 case SpMapContentType.LinkGeometry:
+
+                    //リンクがないものは読み込まない
+                    int loadObjNum = objGroup.objArray.Length;
+                    int linkNum = link?.Length ?? 0;
+
+                    if (loadObjNum > linkNum)
+                    {
+                        loadObjNum = linkNum;
+                    }
+
                     //linkGeometry = (MapLink[])objDic[objType].objArray;
                     geometry = (MapLinkGeometry[])objDic[objType].objArray;
+
+                    //geometry = geometry.Take(loadObjNum).ToArray();
+                    Array.Resize(ref geometry, loadObjNum);
                     MergeGeometry2(geometry, true);
                     objGroup.isDrawable = false;
                     objGroup.isGeoSearchable = false;
