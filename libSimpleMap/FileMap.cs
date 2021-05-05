@@ -365,14 +365,14 @@ namespace libSimpleMap
                 case SpMapContentType.Link:
 
                     MapLink[] tmpMapLink = GetRoadLink(tileId, (byte)subType);
-                    SpObjGroup tmp = new SpObjGroup(type, tmpMapLink, subType);
+                    CmnObjGroup tmp = new CmnObjGroup(type, tmpMapLink, subType);
                     tmp.isDrawReverse = true;
                     return tmp;
 
                 case SpMapContentType.Node:
 
                     MapNode[] tmpMapNode = GetRoadNode(tileId, (byte)subType);
-                    return new SpObjGroup(type, tmpMapNode, subType);
+                    return new CmnObjGroup(type, tmpMapNode, subType);
 
                 case SpMapContentType.LinkGeometry:
 
@@ -385,7 +385,7 @@ namespace libSimpleMap
                         return y;
                     }).ToArray();
                         
-                    return new SpObjGroup(type, tmpGeometry, subType);
+                    return new CmnObjGroup(type, tmpGeometry, subType);
 
                 case SpMapContentType.LinkAttribute:
 
@@ -398,7 +398,7 @@ namespace libSimpleMap
                         y.tagInfo = x.attribute.tagInfo;
                         return y;
                     }).ToArray();
-                    return new SpObjGroup(type, tmpAttribute, subType);
+                    return new CmnObjGroup(type, tmpAttribute, subType);
             }
 
             return null;

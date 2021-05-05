@@ -305,22 +305,18 @@ namespace libSimpleMap
     }
 
 
-    public class SpObjGroup : CmnObjGroup
-    {
-        public override UInt32 Type { get; }
+    //public class SpObjGroup : CmnObjGroup
+    //{
+    //    //public override UInt32 Type { get; }
 
-        public SpObjGroup(UInt32 type)
-        {
-            Type = type;
-        }
+    //    public SpObjGroup(UInt32 type) : base(type) { }
 
-        public SpObjGroup(UInt32 type, CmnObj[] objArray, UInt16 loadedSubType)
-        {
-            Type = type;
-            this.loadedSubType = loadedSubType;
-            this.objArray = objArray;
-        }
-    }
+    //    public SpObjGroup(UInt32 type, CmnObj[] objArray, UInt16 loadedSubType) : base(type, objArray, loadedSubType) { }
+    //    //{
+    //    //    this.loadedSubType = loadedSubType;
+    //    //    this.objArray = objArray;
+    //    //}
+    //}
 
 
     public class SpLinkHandle : CmnObjHandle
