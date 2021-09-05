@@ -19,10 +19,6 @@ namespace libSimpleMap
         {
             this.middleType = middleType;
             IsConnected = false;
-        }
-
-        public int ConnectMapData(string connectStr)
-        {
 
             switch (middleType)
             {
@@ -42,6 +38,10 @@ namespace libSimpleMap
                 default:
                     break;
             }
+        }
+
+        public int ConnectMap(string connectStr)
+        {
 
             int ret = dal.Connect(connectStr);
             if (ret == 0)
@@ -50,7 +50,7 @@ namespace libSimpleMap
             return ret;
         }
 
-        public int DisconnectMapData()
+        public int DisconnectMap()
         {
             return 0;
         }
@@ -63,12 +63,18 @@ namespace libSimpleMap
 
         public MapLink[] GetRoadLink(uint tileId, ushort maxRoadType = 0xFFFF)
         {
-            List<MapLink> tmpLinkList = new List<MapLink>();
+            //List<MapLink> tmpLinkList = new List<MapLink>();
 
             byte[] tileBuf = dal.GetLinkData(tileId);
             if (tileBuf == null)
-                return tmpLinkList.ToArray();
+                return new MapLink[0];
+            else
+                return ConvertLink(tileBuf, tileId, maxRoadType);
+        }
 
+        MapLink[] ConvertLink(byte[] tileBuf, uint tileId, ushort maxRoadType = 0xFFFF)
+        {
+            List<MapLink> tmpLinkList = new List<MapLink>();
 
             if (compression)
             {
@@ -156,11 +162,18 @@ namespace libSimpleMap
 
         public MapNode[] GetRoadNode(uint tileId, ushort maxRoadType = 0xFFFF)
         {
-            List<MapNode> tmpNodeList = new List<MapNode>();
 
             byte[] tileBuf = dal.GetNodeData(tileId);
             if (tileBuf == null)
-                return tmpNodeList.ToArray();
+                return new MapNode[0];
+            else
+                return ConvertNode(tileBuf, tileId, maxRoadType);
+
+        }
+
+        MapNode[] ConvertNode(byte[] tileBuf, uint tileId, ushort maxRoadType = 0xFFFF)
+        {
+            List<MapNode> tmpNodeList = new List<MapNode>();
 
             if (compression)
             {
@@ -221,7 +234,7 @@ namespace libSimpleMap
                     }
 
                     tmpNode.connectLink = tmpConnectLinkList.ToArray();
-                    
+
 
                     if (tmpMinRoadType > maxRoadType)
                     {
@@ -233,7 +246,6 @@ namespace libSimpleMap
                 return tmpNodeList.ToArray();
             }
         }
-
 
         public MapLink[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF)
         {
@@ -248,6 +260,13 @@ namespace libSimpleMap
             if (tileBuf == null)
                 //return tmpLinkShapeList.ToArray();
                 return Array.Empty<MapLinkGeometry>();
+            else
+                return ConvertRoadGeometry(tileBuf, tileId, maxRoadType);
+
+        }
+
+        MapLinkGeometry[] ConvertRoadGeometry(byte[] tileBuf, uint tileId, ushort maxRoadType = 0xFFFF)
+        {
 
             if (compression)
             {
@@ -327,7 +346,14 @@ namespace libSimpleMap
             byte[] tileBuf = dal.GetAttributeData(tileId);
             if (tileBuf == null)
                 return null;
-            
+            else
+                return ConvertRoadAttribute(tileBuf, tileId, maxRoadType);
+
+
+        }
+
+        MapLinkAttribute[] ConvertRoadAttribute(byte[] tileBuf, uint tileId, ushort maxRoadType = 0xFFFF)
+        {
             if (compression)
             {
                 Zlib zlib = new Zlib();
@@ -343,13 +369,13 @@ namespace libSimpleMap
                 ms.Read(tmpBuf, 0, 2);
                 ushort numLink = BitConverter.ToUInt16(tmpBuf, 0);
 
-               // MapLink[] attrArray = new MapLink[numLink];
+                // MapLink[] attrArray = new MapLink[numLink];
                 MapLinkAttribute[] attributeArray = new MapLinkAttribute[numLink];
 
                 for (int i = 0; i < numLink; i++)
                 {
                     //MapLink tmpLink = new MapLink();
-                   // MapLink tmpAttr = new MapLink();
+                    // MapLink tmpAttr = new MapLink();
                     //tmpAttr.attribute = new LinkAttribute();
                     attributeArray[i] = new MapLinkAttribute();
 
@@ -392,13 +418,13 @@ namespace libSimpleMap
 
                     }
 
-                   // attrArray[i] = tmpAttr;
+                    // attrArray[i] = tmpAttr;
                 }
                 //return attrArray;
                 return attributeArray;
             }
-        }
 
+        }
 
         public MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF)
         {
@@ -451,7 +477,7 @@ namespace libSimpleMap
                         attributeBuf = zlib.Compress(attributeBuf);
                     }
 
-                    dal.SaveAllData(tile.tileId, linkBuf, nodeBuf, geometryBuf, attributeBuf);
+                    dal.SaveAllData(tile.TileId, linkBuf, nodeBuf, geometryBuf, attributeBuf);
 
                     break;
 
@@ -473,7 +499,7 @@ namespace libSimpleMap
                 Zlib zlib = new Zlib();
                 tileBuf = zlib.Compress(tileBuf);
             }
-            dal.SaveLinkData(tile.tileId, tileBuf, tileBuf.Length);
+            dal.SaveLinkData(tile.TileId, tileBuf, tileBuf.Length);
 
             return 0;
         }
@@ -483,7 +509,7 @@ namespace libSimpleMap
             byte[] tileBuf = new byte[1024 * 1024];
             int bufLength;
             byte[] tmpBuf;
-            uint tileId = tile.tileId;
+            uint tileId = tile.TileId;
             SpTile tmpTile = tile;
 
             TileXY baseTileXY = new TileXY(tileId);
@@ -566,14 +592,14 @@ namespace libSimpleMap
                 tileBuf = zlib.Compress(tileBuf);
             }
 
-            dal.SaveNodeData(tile.tileId, tileBuf, tileBuf.Length);
+            dal.SaveNodeData(tile.TileId, tileBuf, tileBuf.Length);
 
             return 0;
         }
 
         public byte[] MakeRoadNodeBin(SpTile tile)
         {
-            uint tileId = tile.tileId;
+            uint tileId = tile.TileId;
             SpTile tmpTile = tile;
             int bufLength;
 
@@ -642,14 +668,14 @@ namespace libSimpleMap
                 Zlib zlib = new Zlib();
                 tileBuf = zlib.Compress(tileBuf);
             }
-            dal.SaveGeometryData(tile.tileId, tileBuf, tileBuf.Length);
+            dal.SaveGeometryData(tile.TileId, tileBuf, tileBuf.Length);
 
             return 0;
         }
 
         public byte[] MakeRoadGeometryBin(SpTile tile)
         {
-            uint tileId = tile.tileId;
+            uint tileId = tile.TileId;
             SpTile tmpTile = tile;
 
             int bufLength;
@@ -671,7 +697,7 @@ namespace libSimpleMap
                 {
 
                     LatLon[] tmpGeometry = tmpLink.geometry;
-                    //tmpGeometry = LatLon.DouglasPeuker(tmpLink.geometry, 3.0, 2000.0);
+                    tmpGeometry = LatLon.DouglasPeuker(tmpLink.geometry, 3.0, 2000.0);
 
                     tmpBuf = BitConverter.GetBytes((int)(tmpGeometry[0].lat * 1000000));
                     ms.Write(tmpBuf, 0, 4);
@@ -726,7 +752,7 @@ namespace libSimpleMap
 
         public byte[] MakeLinkAttributeBin(SpTile tile)
         {
-            uint tileId = tile.tileId;
+            uint tileId = tile.TileId;
             SpTile tmpTile = tile;
 
             int bufLength;
@@ -820,36 +846,75 @@ namespace libSimpleMap
             {
                 case SpMapContentType.Link:
 
-                    MapLink[] tmpMapLink = GetRoadLink(tileId, (byte)subType);
-                    CmnObjGroup tmp = new CmnObjGroup(type, tmpMapLink, subType);
+                    MapLink[] tmpMapLink = GetRoadLink(tileId, subType);
+                    CmnObjGroup tmp = new CmnObjGroupArray(type, tmpMapLink, subType);
                     tmp.isDrawReverse = true;
                     return tmp;
 
                 case SpMapContentType.Node:
 
-                    MapNode[] tmpMapNode = GetRoadNode(tileId, (byte)subType);
-                    return new CmnObjGroup(type, tmpMapNode, subType);
+                    MapNode[] tmpMapNode = GetRoadNode(tileId, subType);
+                    return new CmnObjGroupArray(type, tmpMapNode, subType);
 
                 case SpMapContentType.LinkGeometry:
                     //MapLink[] tmpMapLinkGeometry = GetRoadGeometry(tileId, (byte)subType);
-                    MapLinkGeometry[] tmpMapLinkGeometry = GetRoadGeometry2(tileId, (byte)subType);
-                    return new CmnObjGroup(type, tmpMapLinkGeometry, subType);
+                    MapLinkGeometry[] tmpMapLinkGeometry = GetRoadGeometry2(tileId, subType);
+                    return new CmnObjGroupArray(type, tmpMapLinkGeometry, subType);
 
                 case SpMapContentType.LinkAttribute:
 
-                    MapLinkAttribute[] tmpMapLinkAttr = GetRoadAttribute2(tileId, (byte)subType);
-                    return new CmnObjGroup(type, tmpMapLinkAttr, subType);
+                    MapLinkAttribute[] tmpMapLinkAttr = GetRoadAttribute2(tileId, subType);
+                    return new CmnObjGroupArray(type, tmpMapLinkAttr, subType);
             }
 
             return null;
         }
 
+        //public List<CmnObjGroup> LoadObjGroupList(uint tileId, UInt32 type = 0xffffffff, ushort subType = ushort.MaxValue)
+        //{
+        //    var test =  this.GetMapContentTypeList()
+        //        .Where(x => (x & type) == x)
+        //        .Select(x => LoadObjGroup(tileId, x, subType))
+        //        .ToList();
+
+        //    var test2 = LoadObjGroupList2(tileId, type, subType);
+
+        //    return test;
+        //}
+
         public List<CmnObjGroup> LoadObjGroupList(uint tileId, UInt32 type = 0xffffffff, ushort subType = ushort.MaxValue)
         {
-            return this.GetMapContentTypeList()
-                .Where(x => (x & type) == x)
-                .Select(x => LoadObjGroup(tileId, x, subType))
-                .ToList();
+            List<CmnObjGroup> ret = new List<CmnObjGroup>();
+
+            //DALからデータ取得
+            dal.GetTileData(tileId, type, out byte[] linkData, out byte[] nodeData, out byte[] geometryData, out byte[] attributeData);
+
+            //ObjGroup生成
+            if (linkData != null)
+            {
+                MapLink[] tmpMapLink = ConvertLink(linkData, tileId, subType);
+                CmnObjGroup tmp = new CmnObjGroupArray((uint)SpMapContentType.Link, tmpMapLink, subType);
+                tmp.isDrawReverse = true;
+                ret.Add(tmp);
+            }
+            if(nodeData != null)
+            {
+                MapNode[] tmpMapNode = ConvertNode(nodeData, tileId, subType);
+                ret.Add(new CmnObjGroupArray((uint)SpMapContentType.Node, tmpMapNode, subType));
+            }
+            if(geometryData != null)
+            {
+                MapLinkGeometry[] tmpMapLinkGeometry = ConvertRoadGeometry(geometryData, tileId, subType);
+                ret.Add(new CmnObjGroupArray((uint)SpMapContentType.LinkGeometry, tmpMapLinkGeometry, subType));
+            }
+            if(attributeData != null)
+            {
+                MapLinkAttribute[] tmpMapLinkAttr = GetRoadAttribute2(tileId, subType);
+                ret.Add(new CmnObjGroupArray((uint)SpMapContentType.LinkAttribute, tmpMapLinkAttr, subType));
+            }
+
+            return ret;
+
         }
     }
 
@@ -864,6 +929,32 @@ namespace libSimpleMap
         public abstract byte[] GetNodeData(uint tileId);
         public abstract byte[] GetGeometryData(uint tileId);
         public abstract byte[] GetAttributeData(uint tileId);
+
+        public virtual int GetTileData(uint tileId, uint reqObjType, out byte[] outLinkData, out byte[] outNodeData, out byte[] outGeometryData, out byte[] outAttributeData)
+        {
+            if ((reqObjType & (uint)SpMapContentType.Link) != 0)
+                outLinkData = GetLinkData(tileId);
+            else
+                outLinkData = null;
+
+            if ((reqObjType & (uint)SpMapContentType.Node) != 0)
+                outNodeData = GetNodeData(tileId);
+            else
+                outNodeData = null;
+
+            if ((reqObjType & (uint)SpMapContentType.LinkGeometry) != 0)
+                outGeometryData = GetGeometryData(tileId);
+            else
+                outGeometryData = null;
+
+            if ((reqObjType & (uint)SpMapContentType.LinkAttribute) != 0)
+
+                outAttributeData = GetAttributeData(tileId);
+            else
+                outAttributeData = null;
+
+            return 0;
+        }
 
         public abstract int SaveLinkData(uint tileId, byte[] tileBuf, int size);
         public abstract int SaveNodeData(uint tileId, byte[] tileBuf, int size);

@@ -23,7 +23,7 @@ namespace libSimpleMap
             switch (mapDataType)
             {
                 case MapDataType.TextFile:
-                    mal = new FileMapAccess();
+                    mal = new SpTextMapAccess();
                     break;
 
                 //case MapDataType.BinaryFile:
@@ -163,6 +163,14 @@ namespace libSimpleMap
         //}
 
         /* 経路計算用 *****************************************************************/
+
+
+        public override CmnRouteMgr CreateRouteMgr()
+        {
+            return new SpRouteMgr(this);
+        }
+
+
         public override RoutingMapType RoutingMapType
         {
             get

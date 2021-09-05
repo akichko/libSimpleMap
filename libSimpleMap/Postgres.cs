@@ -29,7 +29,7 @@ namespace libSimpleMap
 
             //データベース接続
             con.Open();
-            Console.WriteLine("接続開始");
+            //Console.WriteLine("接続開始");
 
             return 0;
         }
@@ -157,6 +157,45 @@ namespace libSimpleMap
 
             reader.Close();
             return retBytes;
+        }
+
+
+        public override int GetTileData(uint tileId, uint reqObjType, out byte[] outLinkData, out byte[] outNodeData, out byte[] outGeometryData, out byte[] outAttributeData)
+        {
+            outLinkData = null;
+            outNodeData = null;
+            outGeometryData = null;
+            outAttributeData = null;
+
+            string sqlStr = "select tile_id";
+
+            if ((reqObjType & (uint)SpMapContentType.Link) != 0)
+                sqlStr += ", link";
+            if ((reqObjType & (uint)SpMapContentType.Node) != 0)
+                sqlStr += ", node";
+            if ((reqObjType & (uint)SpMapContentType.LinkGeometry) != 0)
+                sqlStr += ", geometry";
+            if ((reqObjType & (uint)SpMapContentType.LinkAttribute) != 0)
+                sqlStr += ", attribute";
+            sqlStr += $" from map_tile where tile_id = {tileId}";
+
+            NpgsqlCommand com = new NpgsqlCommand(sqlStr, con);
+            NpgsqlDataReader reader = com.ExecuteReader();
+
+            while (reader.Read() == true)
+            {
+                if ((reqObjType & (uint)SpMapContentType.Link) != 0)
+                    outLinkData = (byte[])reader["link"];
+                if ((reqObjType & (uint)SpMapContentType.Node) != 0)
+                    outNodeData = (byte[])reader["node"];
+                if ((reqObjType & (uint)SpMapContentType.LinkGeometry) != 0)
+                    outGeometryData = (byte[])reader["geometry"];
+                if ((reqObjType & (uint)SpMapContentType.LinkAttribute) != 0)
+                    outAttributeData = (byte[])reader["attribute"];
+            }
+
+            reader.Close();
+            return 0;
         }
 
         public override int SaveLinkData(uint tileId, byte[] tileBuf, int size)

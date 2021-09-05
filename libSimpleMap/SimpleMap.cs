@@ -38,7 +38,7 @@ namespace libSimpleMap
         public SpTile() { }
         public SpTile(uint tileId)
         {
-            tileInfo = new GisTileCode(tileId);
+            tileCode = new GisTileCode(tileId);
 
 
             //objDic = new Dictionary<UInt16, CmnObjGroup>();
@@ -95,12 +95,12 @@ namespace libSimpleMap
             switch ((SpMapContentType)objType)
             {
                 case SpMapContentType.Link:
-                    link = (MapLink[])objDic[objType].objArray;
+                    link = (MapLink[])objDic[objType].ObjArray;
 
                     break;
 
                 case SpMapContentType.Node:
-                    node = (MapNode[])objDic[objType].objArray;
+                    node = (MapNode[])objDic[objType].ObjArray;
                     objGroup.isDrawable = false;
                     objGroup.isGeoSearchable = false;
                     break;
@@ -108,7 +108,7 @@ namespace libSimpleMap
                 case SpMapContentType.LinkGeometry:
 
                     //リンクがないものは読み込まない
-                    int loadObjNum = objGroup.objArray.Length;
+                    int loadObjNum = objGroup.ObjArray.Length;
                     int linkNum = link?.Length ?? 0;
 
                     if (loadObjNum > linkNum)
@@ -117,7 +117,7 @@ namespace libSimpleMap
                     }
 
                     //linkGeometry = (MapLink[])objDic[objType].objArray;
-                    geometry = (MapLinkGeometry[])objDic[objType].objArray;
+                    geometry = (MapLinkGeometry[])objDic[objType].ObjArray;
 
                     //geometry = geometry.Take(loadObjNum).ToArray();
                     Array.Resize(ref geometry, loadObjNum);
@@ -128,7 +128,7 @@ namespace libSimpleMap
 
                 case SpMapContentType.LinkAttribute:
                     //linkAttr = (MapLink[])objDic[objType].objArray;
-                    attribute = (MapLinkAttribute[])objDic[objType].objArray;
+                    attribute = (MapLinkAttribute[])objDic[objType].ObjArray;
                     //MergeAttribute(linkAttr, true);
                     objGroup.isDrawable = false;
                     objGroup.isGeoSearchable = false;
@@ -338,9 +338,8 @@ namespace libSimpleMap
 
             //基本属性
 
-            listItem.Add(new AttrItemInfo(new string[] { "Id", $"{ObjId}" }, new AttrTag(0, new CmnSearchKey((int)SpMapContentType.Link).AddObjHandle(tile, this.obj), null))
-                );
-            listItem.Add(new AttrItemInfo(new string[] { "TileId", $"{tile.tileId}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "Id", $"{ObjId}" }, new AttrTag(0, new CmnSearchKey((int)SpMapContentType.Link).AddObjHandle(tile, this.obj), null)) );
+            listItem.Add(new AttrItemInfo(new string[] { "TileId", $"{tile.TileId}" }));
             listItem.Add(new AttrItemInfo(new string[] { "Index", $"{Index}" }));
             listItem.Add(new AttrItemInfo(new string[] { "RoadType", $"{link.roadType}" }));
             listItem.Add(new AttrItemInfo(new string[] { "Oneway", $"{Oneway}" }));
@@ -493,9 +492,9 @@ namespace libSimpleMap
         public virtual uint EdgeNodeTileId(CmnTile tile, int index) 
         {
             if (index == 0)
-                return tile.tileInfo.TileId;
+                return tile.TileId;
             else if (index == 1)
-                return tile.tileInfo.CalcOffsetTileId(endNodeTileOffset.offsetX, endNodeTileOffset.offsetY);
+                return tile.tileCode.CalcOffsetTileId(endNodeTileOffset.offsetX, endNodeTileOffset.offsetY);
             else
                 throw new ArgumentException();
         }
@@ -1014,81 +1013,6 @@ namespace libSimpleMap
         }
     }
 
-    //public class LinkHandle
-    //{
-    //    public SpTile tile;
-    //    public MapLink mapLink;
-
-    //    //public LinkHandle() { }
-
-    //    //public LinkHandle(SpTile tile, MapLink mapLink)
-    //    //{
-    //    //    this.tile = tile;
-    //    //    this.mapLink = mapLink;
-    //    //}
-
-    //    //public DLinkHandle ToDLinkHandle(byte direction)
-    //    //{
-    //    //    return new DLinkHandle(tile, mapLink, direction);
-    //    //}
-
-    //}
-
-
-    //public class DLinkHandle : LinkHandle
-    //{
-    //    //public SpTile tile;
-    //    //public MapLink mapLink;
-    //    public byte direction;
-    //    public uint tileId;
-
-    //    //public DLinkHandle() { }
-
-    //    //public DLinkHandle(SpTile tile, MapLink mapLink, byte direction)
-    //    //{
-    //    //    this.tile = tile;
-    //    //    this.mapLink = mapLink;
-    //    //    this.direction = direction;
-    //    //}
-
-    //    //public DLinkHandle(SpTile tile, MapLink mapLink, byte direction, uint tileId, short linkIndex)
-    //    //{
-    //    //    this.tile = tile;
-    //    //    this.mapLink = mapLink;
-    //    //    this.direction = direction;
-    //    //}
-
-    //    //public DLinkHandle(LinkHandle linkHdl, byte direction)
-    //    //{
-    //    //    this.tile = linkHdl.tile;
-    //    //    this.mapLink = linkHdl.mapLink;
-    //    //    this.direction = direction;
-    //    //}
-
-    //}
-
-    //public class NodeHandle
-    //{
-    //    public SpTile tile;
-    //    public MapNode mapNode;
-    //    public uint tileId;
-
-    //    //public NodeHandle() { }
-
-    //    //public NodeHandle(SpTile tile, MapNode mapNode)
-    //    //{
-    //    //    this.tile = tile;
-    //    //    this.mapNode = mapNode;
-    //    //}
-
-    //    //public NodeHandle(SpTile tile, MapNode mapNode, uint tileId, ushort nodeIndex)
-    //    //{
-    //    //    this.tile = tile;
-    //    //    this.mapNode = mapNode;
-    //    //}
-
-    //}
-
 
     //public class LinkPos
     //{
@@ -1109,18 +1033,6 @@ namespace libSimpleMap
     //    //}
     //}
 
-    //public class LinkDistance
-    //{
-    //    public LinkPos linkPos;
-    //    public double distance;
-
-    //    //public LinkDistance(LinkPos linkPos, double distance)
-    //    //{
-    //    //    this.linkPos = linkPos;
-    //    //    this.distance = distance;
-    //    //}
-
-    //}
 
 #if false
     public struct t_condition

@@ -9,18 +9,18 @@ using libGis;
 
 namespace libSimpleMap
 {
-    class FileMapAccess : ISpMapAccess
+    class SpTextMapAccess : ISpMapAccess
     {
         string mapPath;
         //bool isConnencted = false;
         public bool IsConnected { get; set; }
 
-        public FileMapAccess()
+        public SpTextMapAccess()
         {
             IsConnected = false;
         }
 
-        public int ConnectMapData(string connectStr)
+        public int ConnectMap(string connectStr)
         {
             if (Directory.Exists(connectStr))
             {
@@ -36,7 +36,7 @@ namespace libSimpleMap
         }
 
 
-        public int DisconnectMapData()
+        public int DisconnectMap()
         {
             return 0;
         }
@@ -324,17 +324,17 @@ namespace libSimpleMap
 
         public int SaveRoadLink(SpTile tile)
         {
-            return -1;
+            throw new NotImplementedException();
         }
 
         public int SaveRoadNode(SpTile tile)
         {
-            return -1;
+            throw new NotImplementedException();
         }
 
         public int SaveRoadGeometry(SpTile tile)
         {
-            return -1;
+            throw new NotImplementedException();
         }
 
         public List<uint> GetMapTileIdList()
@@ -365,14 +365,14 @@ namespace libSimpleMap
                 case SpMapContentType.Link:
 
                     MapLink[] tmpMapLink = GetRoadLink(tileId, (byte)subType);
-                    CmnObjGroup tmp = new CmnObjGroup(type, tmpMapLink, subType);
+                    CmnObjGroup tmp = new CmnObjGroupArray(type, tmpMapLink, subType);
                     tmp.isDrawReverse = true;
                     return tmp;
 
                 case SpMapContentType.Node:
 
                     MapNode[] tmpMapNode = GetRoadNode(tileId, (byte)subType);
-                    return new CmnObjGroup(type, tmpMapNode, subType);
+                    return new CmnObjGroupArray(type, tmpMapNode, subType);
 
                 case SpMapContentType.LinkGeometry:
 
@@ -385,7 +385,7 @@ namespace libSimpleMap
                         return y;
                     }).ToArray();
                         
-                    return new CmnObjGroup(type, tmpGeometry, subType);
+                    return new CmnObjGroupArray(type, tmpGeometry, subType);
 
                 case SpMapContentType.LinkAttribute:
 
@@ -398,7 +398,7 @@ namespace libSimpleMap
                         y.tagInfo = x.attribute.tagInfo;
                         return y;
                     }).ToArray();
-                    return new CmnObjGroup(type, tmpAttribute, subType);
+                    return new CmnObjGroupArray(type, tmpAttribute, subType);
             }
 
             return null;

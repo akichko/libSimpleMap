@@ -7,7 +7,6 @@
   <ItemGroup>
     <Compile Remove="FileAccess - コピー.cs" />
     <Compile Remove="FileAccess.cs" />
-    <Compile Remove="RouteMgr.cs" />
   </ItemGroup>
 
   <ItemGroup>
