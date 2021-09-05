@@ -1,0 +1,5 @@
+libSimpleMap/bin
+libSimpleMap/obj
+dotNet4/.vs
+dotNet4/obj
+dotNet4/packages
