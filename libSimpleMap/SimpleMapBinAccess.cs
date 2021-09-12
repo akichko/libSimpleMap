@@ -220,7 +220,7 @@ namespace libSimpleMap
                         tmpLink.linkIndex = BitConverter.ToUInt16(tmpBuf, 0);
 
                         ms.Read(tmpBuf, 0, 1);
-                        tmpLink.linkDirection = (byte)tmpBuf[0];
+                        tmpLink.linkDirection = (DirectionCode)tmpBuf[0];
 
                         ms.Read(tmpBuf, 0, 1);
                         tmpLink.roadType = (byte)tmpBuf[0];
@@ -524,7 +524,7 @@ namespace libSimpleMap
                 foreach (MapLink tmpLink in tmpTile.link)
                 {
 
-                    TileXY tileXY = new TileXY(tmpLink.EdgeNodeTileId(tile, 1));
+                    TileXY tileXY = new TileXY(tmpLink.EdgeNodeTileId(tile, DirectionCode.Positive));
                     //TileXY tileXY = new TileXY(tmpLink.edgeNodeTileId[1]);
 
                     if (false)

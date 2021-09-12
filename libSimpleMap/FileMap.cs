@@ -187,7 +187,7 @@ namespace libSimpleMap
                         tmpConnectLink.tileId = tileId;
                     tmpConnectLink.linkId = Int64.Parse(sConnLinkId);
                     tmpConnectLink.linkIndex = ushort.Parse(sConnLinkIndex);
-                    tmpConnectLink.linkDirection = byte.Parse(sConnLinkDirection);
+                    tmpConnectLink.linkDirection = (DirectionCode)byte.Parse(sConnLinkDirection);
                     tmpConnectLink.roadType = byte.Parse(sConnLinkRoadType);
 
                     tmpConnectLinkList.Add(tmpConnectLink);

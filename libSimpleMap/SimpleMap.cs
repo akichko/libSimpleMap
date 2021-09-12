@@ -90,17 +90,17 @@ namespace libSimpleMap
             UInt32 objType = objGroup.Type;
 
             //上書き
-            objDic[objType] = objGroup;
+            objGroupDic[objType] = objGroup;
 
             switch ((SpMapContentType)objType)
             {
                 case SpMapContentType.Link:
-                    link = (MapLink[])objDic[objType].ObjArray;
+                    link = (MapLink[])objGroupDic[objType].ObjArray;
 
                     break;
 
                 case SpMapContentType.Node:
-                    node = (MapNode[])objDic[objType].ObjArray;
+                    node = (MapNode[])objGroupDic[objType].ObjArray;
                     objGroup.isDrawable = false;
                     objGroup.isGeoSearchable = false;
                     break;
@@ -117,7 +117,7 @@ namespace libSimpleMap
                     }
 
                     //linkGeometry = (MapLink[])objDic[objType].objArray;
-                    geometry = (MapLinkGeometry[])objDic[objType].ObjArray;
+                    geometry = (MapLinkGeometry[])objGroupDic[objType].ObjArray;
 
                     //geometry = geometry.Take(loadObjNum).ToArray();
                     Array.Resize(ref geometry, loadObjNum);
@@ -128,7 +128,7 @@ namespace libSimpleMap
 
                 case SpMapContentType.LinkAttribute:
                     //linkAttr = (MapLink[])objDic[objType].objArray;
-                    attribute = (MapLinkAttribute[])objDic[objType].ObjArray;
+                    attribute = (MapLinkAttribute[])objGroupDic[objType].ObjArray;
                     //MergeAttribute(linkAttr, true);
                     objGroup.isDrawable = false;
                     objGroup.isGeoSearchable = false;
@@ -322,7 +322,7 @@ namespace libSimpleMap
     public class SpLinkHandle : CmnObjHandle
     {
 
-        public SpLinkHandle(CmnTile tile, MapLink obj, byte direction = 0xff) : base(tile, obj, direction) { }
+        public SpLinkHandle(CmnTile tile, MapLink obj, DirectionCode direction = DirectionCode.None) : base(tile, obj, direction) { }
 
         public override LatLon[] Geometry => ((SpTile)tile).geometry?[obj.Index].Geometry;
 
@@ -353,26 +353,8 @@ namespace libSimpleMap
             //    listItem.Add(new AttrItemInfo(new string[] { $"nextLink[]", $"nodeIndex={x.nextRef.key.objIndex}" }, new AttrTag((int)SpMapRefType.NextLink, x.nextRef.key, null)));
             //});
 
-            //形状詳細表示
-            if (true)
-            {
-                for (int i = 0; i < Geometry.Length; i++)
-                {
-                    //listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({geometry[i].ToString()})" }, geometry[i]));
-                    listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({Geometry[i].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, Geometry[i])));
-                }
-            }
-            //簡易表示
-            else
-            {
-                listItem.Add(new AttrItemInfo(new string[] { $"geometry[S]", $"({Geometry[0].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, Geometry[0])));
-                listItem.Add(new AttrItemInfo(new string[] { $"geometry[E]", $"({Geometry[Geometry.Length - 1].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, Geometry[Geometry.Length - 1])));
-                //item = new AttrItemInfo(new string[] { "geometry[S]", $"({geometry[0].ToString()})" }, geometry[0]);
-                //listItem.Add(item);
+            listItem.AddRange(obj.GetAttributeListItemGeometry(tile, true));
 
-                //item = new AttrItemInfo(new string[] { "geometry[E]", $"({geometry[geometry.Length - 1].ToString()})"}, geometry[geometry.Length - 1]);
-                //listItem.Add(item);
-            }
 
             if (attribute != null)
             {
@@ -409,11 +391,11 @@ namespace libSimpleMap
         }
 
 
-        public override uint EdgeNodeTileId(CmnTile tile, int index)
+        public override uint EdgeNodeTileId(CmnTile tile, DirectionCode direction)
         {
-            if (index == 0)
+            if (direction == DirectionCode.Negative)
                 return edgeNodeTileId[0];
-            else if (index == 1)
+            else if (direction == DirectionCode.Positive)
                 return edgeNodeTileId[1];
             else
                 throw new ArgumentException();
@@ -474,31 +456,40 @@ namespace libSimpleMap
             }
         }
 
-        public override byte Oneway {
+        public override DirectionCode Oneway {
             get {
                 if (fOneWay == 1)
-                    return 1;
+                    return DirectionCode.Positive;
                 else if (fOneWay == -1)
-                    return 0;
+                    return DirectionCode.Negative;
                 else
-                    return 0xff;
+                    return DirectionCode.None;
             }
         }
+
 
         public virtual UInt64 LinkId { get { return 0; } set { return; } } //リンク属性の方に移動
         public virtual LinkAttribute Attribute { get { return null; } set { return; } }
 
 
-        public virtual uint EdgeNodeTileId(CmnTile tile, int index) 
+        public virtual uint EdgeNodeTileId(CmnTile tile, DirectionCode direction) 
         {
-            if (index == 0)
+            if (direction == DirectionCode.Negative)
                 return tile.TileId;
-            else if (index == 1)
+            else if (direction == DirectionCode.Positive)
                 return tile.tileCode.CalcOffsetTileId(endNodeTileOffset.offsetX, endNodeTileOffset.offsetY);
             else
                 throw new ArgumentException();
         }
 
+        public ushort EdgeNodeIndex(DirectionCode direction) {
+            if (direction == DirectionCode.Positive)
+                return edgeNodeIndex[1];
+            else if (direction == DirectionCode.Negative)
+                return edgeNodeIndex[0];
+            else
+                return edgeNodeIndex[1];
+        }
 
         public MapLink()
         {
@@ -626,7 +617,7 @@ namespace libSimpleMap
         //}
 
 
-        public override List<CmnObjRef> GetObjAllRefList(CmnTile tile, byte direction)
+        public override List<CmnObjRef> GetObjAllRefList(CmnTile tile, DirectionCode direction)
         {
             List<CmnObjRef> ret = new List<CmnObjRef>();
 
@@ -638,7 +629,7 @@ namespace libSimpleMap
 
             //始点ノード側接続リンク
             nodeRef = new CmnObjRef((int)SpMapRefType.NextLink,  (UInt32)SpMapContentType.Node, false);
-            nodeRef.key.tileId = EdgeNodeTileId(tile, 1);
+            nodeRef.key.tileId = EdgeNodeTileId(tile, DirectionCode.Positive);
             //nodeRef.key.tileId = edgeNodeTileId[1];
             nodeRef.key.objIndex = edgeNodeIndex[1];
             ret.Add(nodeRef);
@@ -646,81 +637,18 @@ namespace libSimpleMap
             return ret;
         }
 
-        //public override List<AttrItemInfo> GetAttributeListItem(CmnTile tile)
-        //{
-        //    List<AttrItemInfo> listItem = new List<AttrItemInfo>();
-        //    AttrItemInfo item;
-
-        //    //基本属性
-
-        //    listItem.Add(new AttrItemInfo(
-        //        new string[] { "Id", $"{Id}" },
-        //        new AttrTag(0, new CmnSearchKey((int)SpMapContentType.Link).AddObjHandle(tile, this), null))
-        //        );
-        //    listItem.Add(new AttrItemInfo(new string[] { "TileId", $"{tile.tileId}" }));
-        //    listItem.Add(new AttrItemInfo(new string[] { "Index", $"{Index}" }));
-        //    listItem.Add(new AttrItemInfo(new string[] { "RoadType", $"{roadType}" }));
-        //    listItem.Add(new AttrItemInfo(new string[] { "Oneway", $"{Oneway}" }));
-        //    listItem.Add(new AttrItemInfo(new string[] { "linkLength", $"{linkLength}" }));
-        //    listItem.Add(new AttrItemInfo(new string[] { "Cost", $"{Cost}" }));
-
-        //    List<CmnObjHdlRef> nextLinkList = GetObjRefHdlList((int)SpMapRefType.NextLink, tile);
-        //    nextLinkList.ForEach(x =>
-        //    {
-        //        listItem.Add(new AttrItemInfo(new string[] { $"nextLink[]", $"" }, new AttrTag((int)SpMapRefType.NextLink, x.nextRef.key, null)));
-        //    });
-
-        //    //形状詳細表示
-        //    if (true)
-        //    {                
-        //        for (int i = 0; i < geometry.Length; i++)
-        //        {
-        //            //listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({geometry[i].ToString()})" }, geometry[i]));
-        //            listItem.Add(new AttrItemInfo(new string[] { $"geometry[{i}]", $"({geometry[i].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[i])));
-        //        }
-        //    }
-        //    //簡易表示
-        //    else
-        //    {
-        //        listItem.Add(new AttrItemInfo(new string[] { $"geometry[S]", $"({geometry[0].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[0])));
-        //        listItem.Add(new AttrItemInfo(new string[] { $"geometry[E]", $"({geometry[geometry.Length - 1].ToString()})" }, new AttrTag((int)SpMapRefType.LatLon, null, geometry[geometry.Length - 1])));
-        //        //item = new AttrItemInfo(new string[] { "geometry[S]", $"({geometry[0].ToString()})" }, geometry[0]);
-        //        //listItem.Add(item);
-
-        //        //item = new AttrItemInfo(new string[] { "geometry[E]", $"({geometry[geometry.Length - 1].ToString()})"}, geometry[geometry.Length - 1]);
-        //        //listItem.Add(item);
-        //    }
-
-        //    if (attribute != null)
-        //    {
-        //        item = new AttrItemInfo(new string[] { "Link ID", $"{attribute.linkId}" });
-        //        listItem.Add(item);
-        //        item = new AttrItemInfo(new string[] { "Way ID", $"{attribute.wayId}" });
-        //        listItem.Add(item);
-        //        for (int i = 0; i < attribute.tagInfo.Count; i++)
-        //        {
-        //            item = new AttrItemInfo(new string[] { $"{attribute.tagInfo[i].tag}", $"{attribute.tagInfo[i].val}" });
-        //            listItem.Add(item);
-
-        //        }
-
-        //    }
-
-        //    return listItem;
-
-        //}
 
 
 
 
-        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile tile, byte direction = 0xff)
+        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile tile, DirectionCode direction = DirectionCode.None)
         {
             List<CmnObjHdlRef> ret = new List<CmnObjHdlRef>();            
 
             CmnObjHdlRef refNode;
 
-            if (direction == 0xff)
-                direction = 1;
+            if (direction == DirectionCode.None)
+                direction = DirectionCode.Positive;
 
             switch ((SpMapRefType)refType)
             {
@@ -729,7 +657,8 @@ namespace libSimpleMap
                     refNode = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Node);
                     refNode.nextRef.key.tileId = EdgeNodeTileId(tile, direction);
                     //refNode.nextRef.key.tileId = edgeNodeTileId[direction];
-                    refNode.nextRef.key.objIndex = edgeNodeIndex[direction];
+                    //refNode.nextRef.key.objIndex = edgeNodeIndex[(int)direction];
+                    refNode.nextRef.key.objIndex = EdgeNodeIndex(direction);
                     refNode.nextRef.final = false;
 
                     ret.Add(refNode);
@@ -740,7 +669,8 @@ namespace libSimpleMap
                     refNode = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Node);
                     refNode.nextRef.key.tileId = EdgeNodeTileId(tile, 1 - direction);
                     //refNode.nextRef.key.tileId = edgeNodeTileId[1 - direction];
-                    refNode.nextRef.key.objIndex = edgeNodeIndex[1 - direction];
+                    //refNode.nextRef.key.objIndex = edgeNodeIndex[1 - (int)direction];
+                    refNode.nextRef.key.objIndex = EdgeNodeIndex(direction.Reverse());
                     refNode.nextRef.final = false;
 
                     ret.Add(refNode);
@@ -752,59 +682,7 @@ namespace libSimpleMap
         }
 
 
-        //デバッグ・その他
-
-        //public int show_geometry()
-        //{
-        //    //    Console.WriteLine("◆LINK Id={0}", linkId);
-        //    //    for (int i = 0; i < shape.numCoord; i++)
-        //    //    {
-        //    //        Console.WriteLine("  {0}:\tX:{1}\ty:{2}", i, shape.geometry[i].x, shape.geometry[i].y);
-
-        //    //    }
-        //    return 0;
-        //}
-
-        //public int show_geometry_for_plot()
-        //{
-        //    //for (int i = 0; i < shape.numCoord; i++)
-        //    //{
-        //    //    Console.WriteLine("{0}\t{1}\t{2}\t0", i, shape.geometry[i].x, shape.geometry[i].y);
-
-        //    //}
-        //    Console.WriteLine("");
-        //    Console.WriteLine("");
-
-        //    //Console.Write("\n\n");
-
-        //    return 0;
-        //}
-
-        //public int show_geometry_for_plot3D(int direction, int start_z, int end_z)
-        //{
-        //    //Console.WriteLine("<{0}\t{1}\t{2}>", direction, start_z, end_z);
-
-        //    //if (direction == 1)
-        //    //{
-        //    //    for (int i = 0; i < shape.numCoord; i++)
-        //    //    {
-        //    //        Console.WriteLine("{0}\t{1}\t{2}\t{3}", i, shape.geometry[i].x, shape.geometry[i].y, start_z + (end_z - start_z) * i / (double)(shape.numCoord - 1));
-        //    //    }
-        //    //}
-        //    //else
-        //    //{
-        //    //    for (int i = 0; i < shape.numCoord; i++)
-        //    //    {
-        //    //        Console.WriteLine("{0}\t{1}\t{2}\t{3}", i, shape.geometry[shape.numCoord - 1 - i].x, shape.geometry[shape.numCoord - 1 - i].y, start_z + ((end_z - start_z) * i) / (double)(shape.numCoord - 1));
-        //    //    }
-        //    //}
-        //    //Console.WriteLine("");
-        //    //Console.WriteLine("");
-
-        //    return 0;
-        //}
-
-        public override CmnObjHandle ToCmnObjHandle(CmnTile tile, byte direction = 0xff)
+        public override CmnObjHandle ToCmnObjHandle(CmnTile tile, DirectionCode direction = DirectionCode.None)
         {
             return new SpLinkHandle(tile, this, direction);
         }
@@ -824,7 +702,7 @@ namespace libSimpleMap
 
         public override LatLon[] Geometry => geometry;
 
-        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile thisTile, byte direction = 0xff)
+        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile thisTile, DirectionCode direction = DirectionCode.None)
         {
             List<CmnObjHdlRef> ret = new List<CmnObjHdlRef>();
 
@@ -894,7 +772,7 @@ namespace libSimpleMap
         
         public override UInt32 Type { get { return (UInt32)SpMapContentType.LinkAttribute; } }
 
-        public override List<CmnObjRef> GetObjAllRefList(CmnTile tile, byte direction = 1)
+        public override List<CmnObjRef> GetObjAllRefList(CmnTile tile, DirectionCode direction = DirectionCode.Positive)
         {
             List<CmnObjRef> ret = new List<CmnObjRef>();
 
@@ -912,7 +790,7 @@ namespace libSimpleMap
 
 
 
-        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile tile, byte direction = 1)
+        override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile tile, DirectionCode direction = DirectionCode.Positive)
         {
             List<CmnObjHdlRef> ret = new List<CmnObjHdlRef>();
 
@@ -937,7 +815,7 @@ namespace libSimpleMap
                         CmnObjHdlRef refLink = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Link);
                         refLink.nextRef.key.tileId = x.tileId;
                         refLink.nextRef.key.objIndex = x.linkIndex;
-                        refLink.nextRef.key.objDirection = (byte)(1 - x.linkDirection);
+                        refLink.nextRef.key.objDirection = x.linkDirection.Reverse();
 
                         ret.Add(refLink);
                     }
@@ -952,7 +830,7 @@ namespace libSimpleMap
         public uint tileId; //いずれオフセット位置にする？
         public Int64 linkId; //接続リンクId。不要となる予定
         public ushort linkIndex; //接続リンク。メッシュ内リンク番号。評価用
-        public byte linkDirection; //接続リンクへ退出する方向がリンクの順逆方向かどうか。１：順方向。遷移禁止フラグ？いずれbool型
+        public DirectionCode linkDirection; //接続リンクへ退出する方向がリンクの順逆方向かどうか。１：順方向。遷移禁止フラグ？いずれbool型
         public byte roadType;
 
         //public byte angle; //接続角度。評価用。４ビット？

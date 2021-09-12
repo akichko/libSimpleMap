@@ -178,6 +178,14 @@ namespace libSimpleMap
                 RoutingMapType ret = new RoutingMapType();
 
                 ret.roadNwObjType = (uint)(SpMapContentType.Link | SpMapContentType.Node);
+                //ret.roadNwObjReqType = new ReqType[]{
+                //    new ReqType((uint)(SpMapContentType.Link)),
+                //    new ReqType((uint)(SpMapContentType.Node))
+                //    };
+                ret.roadNwObjFilter = new CmnObjFilter();
+                ret.roadNwObjFilter
+                    .AddRule((uint)(SpMapContentType.Link), null)
+                    .AddRule((uint)(SpMapContentType.Node), null);
                 ret.roadGeometryObjType = (uint)SpMapContentType.LinkGeometry;
                 ret.linkObjType = (uint)SpMapContentType.Link;
                 ret.nextLinkRefType = (int)SpMapRefType.NextLink;
