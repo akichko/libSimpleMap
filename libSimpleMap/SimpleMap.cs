@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using libGis;
+using Akichko.libGis;
 using System.Drawing;
 
 
@@ -33,6 +33,8 @@ namespace libSimpleMap
         public MapLinkGeometry[] geometry;
         public MapLinkAttribute[] attribute;
 
+        static List<UInt32> mapContentTypeList;
+
         override public UInt32 Type { get { return 0; } }
 
         public SpTile() { }
@@ -47,6 +49,13 @@ namespace libSimpleMap
 
 
 
+        }
+
+        static SpTile()
+        {
+            mapContentTypeList = ((uint[])Enum.GetValues(typeof(SpMapContentType)))
+                .Where(x => x != 0xFFFF && x != (UInt32)SpMapContentType.Tile)
+                .ToList();
         }
 
         override public CmnTile CreateTile(uint tileId)
@@ -289,13 +298,13 @@ namespace libSimpleMap
 
 
 
-        public static List<UInt32> GetMapContentTypeList()
-        {
-            return ((uint[])Enum.GetValues(typeof(SpMapContentType)))
-                .Select(x => (UInt32)x)
-                .Where(x => x != 0xFFFF && x != (UInt32)SpMapContentType.Tile)
-                .ToList();
-        }
+        public static List<UInt32> GetMapContentTypeList() => mapContentTypeList;
+        //{
+        //    return ((uint[])Enum.GetValues(typeof(SpMapContentType)))
+        //        .Select(x => (UInt32)x)
+        //        .Where(x => x != 0xFFFF && x != (UInt32)SpMapContentType.Tile)
+        //        .ToList();
+        //}
 
 
         //public override ICmnObjHandle ToICmnObjHandle(CmnTile tile)

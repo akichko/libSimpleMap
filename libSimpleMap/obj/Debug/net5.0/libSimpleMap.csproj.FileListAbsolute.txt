@@ -34,7 +34,6 @@ D:\Git\akichko\libSimpleMap\libSimpleMap\bin\Debug\net5.0\ref\libSimpleMap.dll
 D:\Git\akichko\libSimpleMap\libSimpleMap\bin\Debug\net5.0\libSimpleMap.pdb
 D:\Git\akichko\libSimpleMap\libSimpleMap\bin\Debug\net5.0\libGis.dll
 D:\Git\akichko\libSimpleMap\libSimpleMap\bin\Debug\net5.0\libGis.pdb
-D:\Git\akichko\libSimpleMap\libSimpleMap\obj\Debug\net5.0\libSimpleMap.csprojAssemblyReference.cache
 D:\Git\akichko\libSimpleMap\libSimpleMap\obj\Debug\net5.0\libSimpleMap.GeneratedMSBuildEditorConfig.editorconfig
 D:\Git\akichko\libSimpleMap\libSimpleMap\obj\Debug\net5.0\libSimpleMap.AssemblyInfoInputs.cache
 D:\Git\akichko\libSimpleMap\libSimpleMap\obj\Debug\net5.0\libSimpleMap.AssemblyInfo.cs
@@ -43,3 +42,4 @@ D:\Git\akichko\libSimpleMap\libSimpleMap\obj\Debug\net5.0\libSimpleMap.csproj.Co
 D:\Git\akichko\libSimpleMap\libSimpleMap\obj\Debug\net5.0\libSimpleMap.dll
 D:\Git\akichko\libSimpleMap\libSimpleMap\obj\Debug\net5.0\ref\libSimpleMap.dll
 D:\Git\akichko\libSimpleMap\libSimpleMap\obj\Debug\net5.0\libSimpleMap.pdb
+D:\Git\akichko\libSimpleMap\libSimpleMap\obj\Debug\net5.0\libSimpleMap.csproj.AssemblyReference.cache

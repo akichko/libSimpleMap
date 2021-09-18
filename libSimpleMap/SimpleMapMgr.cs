@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using libGis;
+using Akichko.libGis;
 
 namespace libSimpleMap
 {
@@ -178,6 +178,12 @@ namespace libSimpleMap
                 RoutingMapType ret = new RoutingMapType();
 
                 ret.roadNwObjType = (uint)(SpMapContentType.Link | SpMapContentType.Node);
+
+                ret.roadNwObjTypeList = new List<uint>{
+                    (uint)SpMapContentType.Link,
+                    (uint)SpMapContentType.Node
+                };
+                
                 //ret.roadNwObjReqType = new ReqType[]{
                 //    new ReqType((uint)(SpMapContentType.Link)),
                 //    new ReqType((uint)(SpMapContentType.Node))

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.IO.Compression;
-using libGis;
+using Akichko.libGis;
 
 namespace libSimpleMap
 {
@@ -414,7 +414,10 @@ namespace libSimpleMap
                 .ToList();
         }
 
-
+        public List<CmnObjGroup> LoadObjGroupList(uint tileId, uint type, Filter<ushort> filter)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 
