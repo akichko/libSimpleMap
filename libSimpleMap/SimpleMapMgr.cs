@@ -11,9 +11,6 @@ namespace libSimpleMap
     public class SpMapMgr : CmnMapMgr //, IMapAccess
     {
         MapDataType mapDataType;
-        //new IMapAccess mal;
-        //public bool IsConnected { get; set; } = false;
-        //bool isConnected;
 
         public SpMapMgr(MapDataType mapDataType) : base(new GisTileCode())
         {
@@ -23,7 +20,7 @@ namespace libSimpleMap
             switch (mapDataType)
             {
                 case MapDataType.TextFile:
-                    mal = new SpTextMapAccess();
+                    mapAccess = new SpTextMapAccess();
                     break;
 
                 //case MapDataType.BinaryFile:
@@ -31,11 +28,11 @@ namespace libSimpleMap
                 //    break;
 
                 case MapDataType.SQLite:
-                    mal = new SpMapBinMapAccess(MiddleType.SQLite);
+                    mapAccess = new SpMapBinMapAccess(MiddleType.SQLite);
                     break;
 
                 case MapDataType.Postgres:
-                    mal = new SpMapBinMapAccess(MiddleType.Postgres);
+                    mapAccess = new SpMapBinMapAccess(MiddleType.Postgres);
                     break;
 
                 case MapDataType.MapManager:
@@ -541,7 +538,7 @@ namespace libSimpleMap
 
         public int SaveTile(SpTile tile)
         {
-            return ((ISpMapAccess)mal).SaveTile(tile);
+            return ((SpMapAccess)mapAccess).SaveTile(tile);
         }
 
 
@@ -624,21 +621,31 @@ namespace libSimpleMap
     }
 
 
-    public interface ISpMapAccess : ICmnMapAccess
+    public abstract class SpMapAccess : ICmnMapAccess
     {
-        //MapLink[] GetRoadLink(uint tileId, ushort maxRoadType = 0xFFFF);
-        //MapNode[] GetRoadNode(uint tileId, ushort maxRoadType = 0xFFFF);
-        //MapLink[] GetRoadGeometry(uint tileId, ushort maxRoadType = 0xFFFF);
-        //MapLink[] GetRoadAttribute(uint tileId, ushort maxRoadType = 0xFFFF);
-        //MapLinkAttribute[] GetRoadAttribute2(uint tileId, ushort maxRoadType = 0xFFFF);
+        public abstract bool IsConnected { get; set; }
 
-        //List<uint> GetMapTileIdList();
-        //int CalcTileDistance(int tileIdA, int tileIdB);
+        public abstract int SaveTile(SpTile tile);
+        public abstract int SaveRoadLink(SpTile tile);
+        public abstract int SaveRoadNode(SpTile tile);
+        public abstract int SaveRoadGeometry(SpTile tile);
 
-        int SaveTile(SpTile tile);
-        int SaveRoadLink(SpTile tile);
-        int SaveRoadNode(SpTile tile);
-        int SaveRoadGeometry(SpTile tile);
+        //ICmnMapAccess I/F
+        public abstract int ConnectMap(string connectStr);
+        public abstract int DisconnectMap();
+        public abstract List<uint> GetMapTileIdList();
+        public abstract List<uint> GetMapContentTypeList();
+        //public abstract List<CmnObjGroup> LoadObjGroupList(uint tileId, uint type = uint.MaxValue, ushort subType = ushort.MaxValue);
+        public abstract List<CmnObjGroup> LoadObjGroup(uint tileId, uint type, ushort subType = ushort.MaxValue);
+
+
+        public async Task<List<CmnObjGroup>> LoadObjGroupAsync(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
+        {
+            Task<List<CmnObjGroup>> taskRet = Task.Run(() => LoadObjGroup(tileId, type, subType));
+            List<CmnObjGroup> ret = await taskRet.ConfigureAwait(false);
+            return ret;
+        }
+
     }
 
 

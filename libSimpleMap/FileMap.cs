@@ -9,18 +9,18 @@ using Akichko.libGis;
 
 namespace libSimpleMap
 {
-    class SpTextMapAccess : ISpMapAccess
+    class SpTextMapAccess : SpMapAccess
     {
         string mapPath;
         //bool isConnencted = false;
-        public bool IsConnected { get; set; }
+        public override bool IsConnected { get; set; }
 
         public SpTextMapAccess()
         {
             IsConnected = false;
         }
 
-        public int ConnectMap(string connectStr)
+        public override int ConnectMap(string connectStr)
         {
             if (Directory.Exists(connectStr))
             {
@@ -36,7 +36,7 @@ namespace libSimpleMap
         }
 
 
-        public int DisconnectMap()
+        public override int DisconnectMap()
         {
             return 0;
         }
@@ -70,10 +70,10 @@ namespace libSimpleMap
 
 
 
-        public CmnTile CreateTile(uint tileId)
-        {
-            return new SpTile(tileId);
-        }
+        //public CmnTile CreateTile(uint tileId)
+        //{
+        //    return new SpTile(tileId);
+        //}
 
         public MapLink[] GetRoadLink(uint tileId, ushort maxRoadType = 0xFFFF)
         {
@@ -312,7 +312,7 @@ namespace libSimpleMap
             return tmpLinkAttrList.ToArray();
         }
 
-        public int SaveTile(SpTile tile)
+        public override int SaveTile(SpTile tile)
         {
             SaveRoadLink(tile);
             SaveRoadNode(tile);
@@ -322,22 +322,22 @@ namespace libSimpleMap
         }
 
 
-        public int SaveRoadLink(SpTile tile)
+        public override int SaveRoadLink(SpTile tile)
         {
             throw new NotImplementedException();
         }
 
-        public int SaveRoadNode(SpTile tile)
+        public override int SaveRoadNode(SpTile tile)
         {
             throw new NotImplementedException();
         }
 
-        public int SaveRoadGeometry(SpTile tile)
+        public override int SaveRoadGeometry(SpTile tile)
         {
             throw new NotImplementedException();
         }
 
-        public List<uint> GetMapTileIdList()
+        public override List<uint> GetMapTileIdList()
         {
             List<uint> retList = new List<uint>();
             string[] names = Directory.GetFiles(mapPath + "NODE", "*.txt");
@@ -351,13 +351,13 @@ namespace libSimpleMap
         }
 
 
-        public List<UInt32> GetMapContentTypeList()
+        public override List<UInt32> GetMapContentTypeList()
         {
             return SpTile.GetMapContentTypeList();
         }
 
 
-        public CmnObjGroup LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
+        public override List<CmnObjGroup> LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
         {
 
             switch ((SpMapContentType)type)
@@ -367,12 +367,12 @@ namespace libSimpleMap
                     MapLink[] tmpMapLink = GetRoadLink(tileId, (byte)subType);
                     CmnObjGroup tmp = new CmnObjGroupArray(type, tmpMapLink, subType);
                     tmp.isDrawReverse = true;
-                    return tmp;
+                    return new List<CmnObjGroup> { tmp };
 
                 case SpMapContentType.Node:
 
                     MapNode[] tmpMapNode = GetRoadNode(tileId, (byte)subType);
-                    return new CmnObjGroupArray(type, tmpMapNode, subType);
+                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpMapNode, subType) };
 
                 case SpMapContentType.LinkGeometry:
 
@@ -385,7 +385,7 @@ namespace libSimpleMap
                         return y;
                     }).ToArray();
                         
-                    return new CmnObjGroupArray(type, tmpGeometry, subType);
+                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpGeometry, subType) };
 
                 case SpMapContentType.LinkAttribute:
 
@@ -398,7 +398,7 @@ namespace libSimpleMap
                         y.tagInfo = x.attribute.tagInfo;
                         return y;
                     }).ToArray();
-                    return new CmnObjGroupArray(type, tmpAttribute, subType);
+                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpAttribute, subType) };
             }
 
             return null;
@@ -406,18 +406,23 @@ namespace libSimpleMap
 
 
 
-        public List<CmnObjGroup> LoadObjGroupList(uint tileId, UInt32 type = 0xffffffff, ushort subType = 0xffff)
-        {
-            return this.GetMapContentTypeList()
-                .Where(x => (x & type) == x)
-                .Select(x => LoadObjGroup(tileId, x, subType))
-                .ToList();
-        }
+        //public override List<CmnObjGroup> LoadObjGroupList(uint tileId, UInt32 type = 0xffffffff, ushort subType = 0xffff)
+        //{
+        //    return this.GetMapContentTypeList()
+        //        .Where(x => (x & type) == x)
+        //        .SelectMany(x => LoadObjGroup(tileId, x, subType))
+        //        .ToList();
+        //}
 
         public List<CmnObjGroup> LoadObjGroupList(uint tileId, uint type, Filter<ushort> filter)
         {
             throw new NotImplementedException();
         }
+
+        //public override List<CmnObjGroup> LoadObjGroup(uint tileId, uint type, ushort subType)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 
 

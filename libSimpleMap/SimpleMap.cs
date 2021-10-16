@@ -287,7 +287,8 @@ namespace libSimpleMap
 
         public int CalcLinkCost()
         {
-            Array.ForEach(link, x => {
+            Array.ForEach(link, x =>
+            {
                 x.linkLength = (ushort)LatLon.CalcLength(x.Geometry);
             });
             //Array.ForEach(link, x => x.CalcCost());
@@ -347,7 +348,7 @@ namespace libSimpleMap
 
             //基本属性
 
-            listItem.Add(new AttrItemInfo(new string[] { "Id", $"{ObjId}" }, new AttrTag(0, new CmnSearchKey((int)SpMapContentType.Link).AddObjHandle(tile, this.obj), null)) );
+            listItem.Add(new AttrItemInfo(new string[] { "Id", $"{ObjId}" }, new AttrTag(0, new CmnSearchKey((int)SpMapContentType.Link).AddObjHandle(tile, this.obj), null)));
             listItem.Add(new AttrItemInfo(new string[] { "TileId", $"{tile.TileId}" }));
             listItem.Add(new AttrItemInfo(new string[] { "Index", $"{Index}" }));
             listItem.Add(new AttrItemInfo(new string[] { "RoadType", $"{link.roadType}" }));
@@ -419,7 +420,7 @@ namespace libSimpleMap
         public ushort[] edgeNodeIndex; //必ず２つ。[0]:始点側 [1]:終点側
         public TileOffset2 endNodeTileOffset;
 
-      // public uint[] edgeNodeTileId; //オフセット位置。終点のみ
+        // public uint[] edgeNodeTileId; //オフセット位置。終点のみ
 
         public byte roadType; //4bit
         public ushort linkLength;
@@ -437,8 +438,10 @@ namespace libSimpleMap
         public override double Length => linkLength;
 
 
-        public override int Cost {
-            get {
+        public override int Cost
+        {
+            get
+            {
                 double tmpCost;
                 switch (roadType)
                 {
@@ -465,8 +468,10 @@ namespace libSimpleMap
             }
         }
 
-        public override DirectionCode Oneway {
-            get {
+        public override DirectionCode Oneway
+        {
+            get
+            {
                 if (fOneWay == 1)
                     return DirectionCode.Positive;
                 else if (fOneWay == -1)
@@ -481,7 +486,17 @@ namespace libSimpleMap
         public virtual LinkAttribute Attribute { get { return null; } set { return; } }
 
 
-        public virtual uint EdgeNodeTileId(CmnTile tile, DirectionCode direction) 
+        public virtual CmnTile EdgeNodeTile(CmnTile tile, DirectionCode direction)
+        {
+            if (direction == DirectionCode.Negative)
+                return tile;
+            if (endNodeTileOffset.offsetX == 0 && endNodeTileOffset.offsetY == 0)
+                return tile;
+            else
+                return null;
+        }
+
+        public virtual uint EdgeNodeTileId(CmnTile tile, DirectionCode direction)
         {
             if (direction == DirectionCode.Negative)
                 return tile.TileId;
@@ -491,7 +506,8 @@ namespace libSimpleMap
                 throw new ArgumentException();
         }
 
-        public ushort EdgeNodeIndex(DirectionCode direction) {
+        public ushort EdgeNodeIndex(DirectionCode direction)
+        {
             if (direction == DirectionCode.Positive)
                 return edgeNodeIndex[1];
             else if (direction == DirectionCode.Negative)
@@ -637,7 +653,7 @@ namespace libSimpleMap
             ret.Add(nodeRef);
 
             //始点ノード側接続リンク
-            nodeRef = new CmnObjRef((int)SpMapRefType.NextLink,  (UInt32)SpMapContentType.Node, false);
+            nodeRef = new CmnObjRef((int)SpMapRefType.NextLink, (UInt32)SpMapContentType.Node, false);
             nodeRef.key.tileId = EdgeNodeTileId(tile, DirectionCode.Positive);
             //nodeRef.key.tileId = edgeNodeTileId[1];
             nodeRef.key.objIndex = edgeNodeIndex[1];
@@ -652,7 +668,7 @@ namespace libSimpleMap
 
         override public List<CmnObjHdlRef> GetObjRefHdlList(int refType, CmnTile tile, DirectionCode direction = DirectionCode.None)
         {
-            List<CmnObjHdlRef> ret = new List<CmnObjHdlRef>();            
+            List<CmnObjHdlRef> ret = new List<CmnObjHdlRef>();
 
             CmnObjHdlRef refNode;
 
@@ -664,6 +680,7 @@ namespace libSimpleMap
                 case SpMapRefType.NextLink:
 
                     refNode = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Node);
+                    refNode.nextRef.key.tile = EdgeNodeTile(tile, direction);
                     refNode.nextRef.key.tileId = EdgeNodeTileId(tile, direction);
                     //refNode.nextRef.key.tileId = edgeNodeTileId[direction];
                     //refNode.nextRef.key.objIndex = edgeNodeIndex[(int)direction];
@@ -676,6 +693,7 @@ namespace libSimpleMap
                 case SpMapRefType.BackLink:
 
                     refNode = new CmnObjHdlRef(null, refType, (UInt32)SpMapContentType.Node);
+                    refNode.nextRef.key.tile = EdgeNodeTile(tile, 1 - direction);
                     refNode.nextRef.key.tileId = EdgeNodeTileId(tile, 1 - direction);
                     //refNode.nextRef.key.tileId = edgeNodeTileId[1 - direction];
                     //refNode.nextRef.key.objIndex = edgeNodeIndex[1 - (int)direction];
@@ -696,6 +714,14 @@ namespace libSimpleMap
             return new SpLinkHandle(tile, this, direction);
         }
 
+
+        public override bool CheckTimeStamp(int timeStamp)
+        {
+            if (timeStamp >= 1000 && timeStamp <= 2000)
+                return false;
+            else
+                return true;
+        }
 
     }
 
@@ -778,14 +804,15 @@ namespace libSimpleMap
 
 
         public override UInt64 Id => nodeId;
-        
+
         public override UInt32 Type { get { return (UInt32)SpMapContentType.LinkAttribute; } }
 
         public override List<CmnObjRef> GetObjAllRefList(CmnTile tile, DirectionCode direction = DirectionCode.Positive)
         {
             List<CmnObjRef> ret = new List<CmnObjRef>();
 
-            foreach (var connLink in connectLink) {
+            foreach (var connLink in connectLink)
+            {
 
                 CmnObjRef linkRef = new CmnObjRef((int)SpMapRefType.RelatedLink, (UInt32)SpMapContentType.Link);
                 linkRef.key.tileId = connLink.tileId;
@@ -987,7 +1014,7 @@ namespace libSimpleMap
 
         public bool XisPositive()
         {
-            int tmp = (xy | 0x08)>>3;
+            int tmp = (xy | 0x08) >> 3;
             if (tmp == 1)
                 return false;
             else
@@ -1065,7 +1092,7 @@ namespace libSimpleMap
         Postgres
     }
 
-    public enum SpMapContentType
+    public enum SpMapContentType : uint
     {
         Link = 0x0001,
         Node = 0x0002,

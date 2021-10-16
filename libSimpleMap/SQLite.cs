@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Data.SQLite;
 using System.IO;
 
@@ -17,8 +18,12 @@ namespace libSimpleMap
         //string dbPath;
         SQLiteConnection con;
         //SQLite handle;
+        SemaphoreSlim semaphore;
 
-        public SQLiteAccess() { }
+        public SQLiteAccess()
+        {
+            semaphore = new SemaphoreSlim(1, 1);
+        }
 
 
         public override int Connect(string mapPath)
@@ -82,6 +87,7 @@ namespace libSimpleMap
             string sql = $"select length(link) size, link from map_tile where tile_id = {tileId}";
 
             SQLiteCommand com = new SQLiteCommand(sql, con);
+            semaphore.Wait();
             SQLiteDataReader reader = com.ExecuteReader();
 
             while (reader.Read() == true)
@@ -92,6 +98,8 @@ namespace libSimpleMap
                 //Console.WriteLine($"tileID = {tileId}, size(link) = {size}");
                 //reader.GetBytes()
             }
+            reader.Close();
+            semaphore.Release();
 
 
             return retBytes;
@@ -105,6 +113,7 @@ namespace libSimpleMap
             string sql = $"select length(node) size, node from map_tile where tile_id = {tileId}";
 
             SQLiteCommand com = new SQLiteCommand(sql, con);
+            semaphore.Wait();
             SQLiteDataReader reader = com.ExecuteReader();
 
             while (reader.Read() == true)
@@ -115,6 +124,9 @@ namespace libSimpleMap
                 // Console.WriteLine($"tileID = {tileId}, size(node) = {size}");
                 //reader.GetBytes()
             }
+
+            reader.Close();
+            semaphore.Release();
 
             return retBytes;
         }
@@ -127,6 +139,7 @@ namespace libSimpleMap
             string sql = $"select length(geometry) size, geometry from map_tile where tile_id = {tileId}";
 
             SQLiteCommand com = new SQLiteCommand(sql, con);
+            semaphore.Wait();
             SQLiteDataReader reader = com.ExecuteReader();
 
             while (reader.Read() == true)
@@ -137,6 +150,8 @@ namespace libSimpleMap
                 //Console.WriteLine($"tileID = {tileId}, size(geometry) = {size}");
                 //reader.GetBytes()
             }
+            reader.Close();
+            semaphore.Release();
 
             return retBytes;
         }
@@ -151,6 +166,7 @@ namespace libSimpleMap
             string sql = $"select length(attribute) size, attribute from map_tile where tile_id = {tileId}";
 
             SQLiteCommand com = new SQLiteCommand(sql, con);
+            semaphore.Wait();
             SQLiteDataReader reader = com.ExecuteReader();
 
             while (reader.Read() == true)
@@ -159,6 +175,8 @@ namespace libSimpleMap
                 retBytes = (byte[])reader["attribute"];
 
             }
+            reader.Close();
+            semaphore.Release();
 
             return retBytes;
         }
@@ -183,6 +201,7 @@ namespace libSimpleMap
             sqlStr += $" from map_tile where tile_id = {tileId}";
 
             SQLiteCommand com = new SQLiteCommand(sqlStr, con);
+            semaphore.Wait();
             SQLiteDataReader reader = com.ExecuteReader();
 
             while (reader.Read() == true)
@@ -196,6 +215,8 @@ namespace libSimpleMap
                 if ((reqObjType & (uint)SpMapContentType.LinkAttribute) != 0)
                     outAttributeData = (byte[])reader["attribute"];
             }
+            reader.Close();
+            semaphore.Release();
 
             return 0;
         }

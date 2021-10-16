@@ -8,12 +8,18 @@ using Akichko.libGis;
 
 namespace libSimpleMap
 {
-    class SpMapBinMapAccess : ISpMapAccess
+    class SpMapBinMapAccess : SpMapAccess
     {
         bool compression = true;
         MiddleType middleType;
         IBinDataAccess dal;
-        public bool IsConnected { get; set; }
+
+
+        public SpMapBinMapAccess()
+        {
+        }
+
+        public override bool IsConnected { get; set; }
 
         public SpMapBinMapAccess(MiddleType middleType)
         {
@@ -40,7 +46,7 @@ namespace libSimpleMap
             }
         }
 
-        public int ConnectMap(string connectStr)
+        public override int ConnectMap(string connectStr)
         {
 
             int ret = dal.Connect(connectStr);
@@ -50,7 +56,7 @@ namespace libSimpleMap
             return ret;
         }
 
-        public int DisconnectMap()
+        public override int DisconnectMap()
         {
             return 0;
         }
@@ -98,6 +104,7 @@ namespace libSimpleMap
                 for (ushort i = 0; i < numLink; i++)
                 {
                     MapLink tmpLink;
+
                     if (false)
                     {
                         ms.Read(tmpBuf, 0, 8);
@@ -254,7 +261,7 @@ namespace libSimpleMap
 
         public MapLinkGeometry[] GetRoadGeometry2(uint tileId, ushort maxRoadType = 0xFFFF)
         {
-           // List<MapLink> tmpLinkShapeList = new List<MapLink>();
+            // List<MapLink> tmpLinkShapeList = new List<MapLink>();
 
             byte[] tileBuf = dal.GetGeometryData(tileId);
             if (tileBuf == null)
@@ -431,7 +438,7 @@ namespace libSimpleMap
             throw new NotImplementedException();
         }
 
-        public List<uint> GetMapTileIdList()
+        public override List<uint> GetMapTileIdList()
         {
             //SQLite
             return dal.GetMapTileIdList();
@@ -450,7 +457,7 @@ namespace libSimpleMap
         }
 
 
-        public int SaveTile(SpTile tile)
+        public override int SaveTile(SpTile tile)
         {
             switch (middleType)
             {
@@ -489,7 +496,7 @@ namespace libSimpleMap
         }
 
 
-        public int SaveRoadLink(SpTile tile)
+        public override int SaveRoadLink(SpTile tile)
         {
 
             byte[] tileBuf = MakeRoadLinkBin(tile);
@@ -582,7 +589,7 @@ namespace libSimpleMap
         }
 
 
-        public int SaveRoadNode(SpTile tile)
+        public override int SaveRoadNode(SpTile tile)
         {
             byte[] tileBuf = MakeRoadNodeBin(tile);
 
@@ -659,7 +666,7 @@ namespace libSimpleMap
         }
 
 
-        public int SaveRoadGeometry(SpTile tile)
+        public override int SaveRoadGeometry(SpTile tile)
         {
             byte[] tileBuf = MakeRoadGeometryBin(tile);
 
@@ -787,7 +794,7 @@ namespace libSimpleMap
                         ms.Write(tmpStrBuf, 0, tmpStrBuf.Length);
 
                         tmpStrBuf = System.Text.Encoding.UTF8.GetBytes(tmpLinkAttr.tagInfo[i].val);
-                        if(tmpStrBuf.Length > 0xffff)
+                        if (tmpStrBuf.Length > 0xffff)
                         {
                             throw new NotImplementedException();
                         }
@@ -811,7 +818,7 @@ namespace libSimpleMap
 
 
 
-        public List<UInt32> GetMapContentTypeList()
+        public override List<UInt32> GetMapContentTypeList()
         {
             return SpTile.GetMapContentTypeList();
 
@@ -821,54 +828,57 @@ namespace libSimpleMap
             //    .ToList();
         }
 
-        CmnTile LoadTile(uint tileId, UInt32 reqType = 0xFFFFFFFF, UInt16 reqMaxSubType = 0xFFFF)
+        //CmnTile LoadTile(uint tileId, UInt32 reqType = 0xFFFFFFFF, UInt16 reqMaxSubType = 0xFFFF)
+        //{
+        //    List<UInt32> objTypeList = GetMapContentTypeList();
+        //    SpTile tmpTile = new SpTile(tileId);
+
+        //    foreach (UInt32 objType in objTypeList)
+        //    {
+        //        if ((reqType & objType) == objType)
+        //        {
+        //            foreach(var objGroup in LoadObjGroup(tileId, objType, reqMaxSubType)){
+        //                //読み込み
+        //                tmpTile.UpdateObjGroup(objGroup);
+        //            }
+        //        }
+        //    }
+
+        //    return tmpTile;
+
+        //}
+
+        public override List<CmnObjGroup> LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
         {
-            List<UInt32> objTypeList = GetMapContentTypeList();
-            SpTile tmpTile = new SpTile(tileId);
 
-            foreach (UInt32 objType in objTypeList)
-            {
-                if ((reqType & objType) == objType)
-                {
-                    //読み込み
-                    tmpTile.UpdateObjGroup(LoadObjGroup(tileId, objType, reqMaxSubType));
-                }
-            }
-
-            return tmpTile;
-
-        }
-
-        public CmnObjGroup LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
-        {
-           
-            switch((SpMapContentType)type)
+            switch ((SpMapContentType)type)
             {
                 case SpMapContentType.Link:
 
                     MapLink[] tmpMapLink = GetRoadLink(tileId, subType);
                     CmnObjGroup tmp = new CmnObjGroupArray(type, tmpMapLink, subType);
                     tmp.isDrawReverse = true;
-                    return tmp;
+                    return new List<CmnObjGroup> { tmp };
 
                 case SpMapContentType.Node:
 
                     MapNode[] tmpMapNode = GetRoadNode(tileId, subType);
-                    return new CmnObjGroupArray(type, tmpMapNode, subType);
+                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpMapNode, subType) };
 
                 case SpMapContentType.LinkGeometry:
                     //MapLink[] tmpMapLinkGeometry = GetRoadGeometry(tileId, (byte)subType);
                     MapLinkGeometry[] tmpMapLinkGeometry = GetRoadGeometry2(tileId, subType);
-                    return new CmnObjGroupArray(type, tmpMapLinkGeometry, subType);
+                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpMapLinkGeometry, subType) };
 
                 case SpMapContentType.LinkAttribute:
 
                     MapLinkAttribute[] tmpMapLinkAttr = GetRoadAttribute2(tileId, subType);
-                    return new CmnObjGroupArray(type, tmpMapLinkAttr, subType);
+                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpMapLinkAttr, subType) };
             }
 
             return null;
         }
+
 
         //public List<CmnObjGroup> LoadObjGroupList(uint tileId, UInt32 type = 0xffffffff, ushort subType = ushort.MaxValue)
         //{
@@ -882,46 +892,46 @@ namespace libSimpleMap
         //    return test;
         //}
 
-        public List<CmnObjGroup> LoadObjGroupList(uint tileId, UInt32 type = 0xffffffff, ushort subType = ushort.MaxValue)
-        {
-            List<CmnObjGroup> ret = new List<CmnObjGroup>();
+        //public override List<CmnObjGroup> LoadObjGroupList(uint tileId, UInt32 type = 0xffffffff, ushort subType = ushort.MaxValue)
+        //{
+        //    List<CmnObjGroup> ret = new List<CmnObjGroup>();
 
-            //DALからデータ取得
-            dal.GetTileData(tileId, type, out byte[] linkData, out byte[] nodeData, out byte[] geometryData, out byte[] attributeData);
+        //    //DALからデータ取得
+        //    dal.GetTileData(tileId, type, out byte[] linkData, out byte[] nodeData, out byte[] geometryData, out byte[] attributeData);
 
-            //ObjGroup生成
-            if (linkData != null)
-            {
-                MapLink[] tmpMapLink = ConvertLink(linkData, tileId, subType);
-                CmnObjGroup tmp = new CmnObjGroupArray((uint)SpMapContentType.Link, tmpMapLink, subType);
-                tmp.isDrawReverse = true;
-                ret.Add(tmp);
-            }
-            if(nodeData != null)
-            {
-                MapNode[] tmpMapNode = ConvertNode(nodeData, tileId, subType);
-                ret.Add(new CmnObjGroupArray((uint)SpMapContentType.Node, tmpMapNode, subType));
-            }
-            if(geometryData != null)
-            {
-                MapLinkGeometry[] tmpMapLinkGeometry = ConvertRoadGeometry(geometryData, tileId, subType);
-                ret.Add(new CmnObjGroupArray((uint)SpMapContentType.LinkGeometry, tmpMapLinkGeometry, subType));
-            }
-            if(attributeData != null)
-            {
-                MapLinkAttribute[] tmpMapLinkAttr = GetRoadAttribute2(tileId, subType);
-                ret.Add(new CmnObjGroupArray((uint)SpMapContentType.LinkAttribute, tmpMapLinkAttr, subType));
-            }
+        //    //ObjGroup生成
+        //    if (linkData != null)
+        //    {
+        //        MapLink[] tmpMapLink = ConvertLink(linkData, tileId, subType);
+        //        CmnObjGroup tmp = new CmnObjGroupArray((uint)SpMapContentType.Link, tmpMapLink, subType);
+        //        tmp.isDrawReverse = true;
+        //        ret.Add(tmp);
+        //    }
+        //    if(nodeData != null)
+        //    {
+        //        MapNode[] tmpMapNode = ConvertNode(nodeData, tileId, subType);
+        //        ret.Add(new CmnObjGroupArray((uint)SpMapContentType.Node, tmpMapNode, subType));
+        //    }
+        //    if(geometryData != null)
+        //    {
+        //        MapLinkGeometry[] tmpMapLinkGeometry = ConvertRoadGeometry(geometryData, tileId, subType);
+        //        ret.Add(new CmnObjGroupArray((uint)SpMapContentType.LinkGeometry, tmpMapLinkGeometry, subType));
+        //    }
+        //    if(attributeData != null)
+        //    {
+        //        MapLinkAttribute[] tmpMapLinkAttr = GetRoadAttribute2(tileId, subType);
+        //        ret.Add(new CmnObjGroupArray((uint)SpMapContentType.LinkAttribute, tmpMapLinkAttr, subType));
+        //    }
 
-            return ret;
+        //    return ret;
 
-        }
+        //}
 
 
-        public List<CmnObjGroup> LoadObjGroupList(uint tileId, CmnObjFilter filter)
-        {
-            throw new NotImplementedException();
-        }
+        //public List<CmnObjGroup> LoadObjGroupList(uint tileId, CmnObjFilter filter)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 
 

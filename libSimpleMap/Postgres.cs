@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using Npgsql;
 
 namespace libSimpleMap
@@ -12,8 +13,12 @@ namespace libSimpleMap
     {
         NpgsqlConnection con;
         string connectInfo;
+        SemaphoreSlim semaphore;
 
-        public PostgresAccess() { }
+        public PostgresAccess()
+        {
+            semaphore = new SemaphoreSlim(1, 1);
+        }
 
 
         public override int Connect(string connectStr)
@@ -50,6 +55,7 @@ namespace libSimpleMap
             string sql = $"select distinct tile_id from map_tile";
 
             NpgsqlCommand com = new NpgsqlCommand(sql, con);
+            semaphore.Wait();
             NpgsqlDataReader reader = com.ExecuteReader();
 
             while (reader.Read() == true)
@@ -58,6 +64,8 @@ namespace libSimpleMap
 
                 retList.Add((uint)tileId);
             }
+            reader.Close();
+            semaphore.Release();
 
 
             return retList;
@@ -77,6 +85,7 @@ namespace libSimpleMap
             string sql = $"select length(link) size, link from map_tile where tile_id = {tileId}";
 
             NpgsqlCommand cmd = new NpgsqlCommand(sql, con);
+            semaphore.Wait();
             NpgsqlDataReader reader = cmd.ExecuteReader();
 
             while (reader.Read() == true)
@@ -86,6 +95,7 @@ namespace libSimpleMap
 
             }
             reader.Close();
+            semaphore.Release();
 
             return retBytes;
 
@@ -98,6 +108,7 @@ namespace libSimpleMap
             string sql = $"select length(node) size, node from map_tile where tile_id = {tileId}";
 
             NpgsqlCommand cmd = new NpgsqlCommand(sql, con);
+            semaphore.Wait();
             NpgsqlDataReader reader = cmd.ExecuteReader();
 
             while (reader.Read() == true)
@@ -109,6 +120,7 @@ namespace libSimpleMap
                 //reader.GetBytes()
             }
             reader.Close();
+            semaphore.Release();
 
             return retBytes;
         }
@@ -121,6 +133,7 @@ namespace libSimpleMap
             string sql = $"select length(geometry) size, geometry from map_tile where tile_id = {tileId}";
 
             NpgsqlCommand cmd = new NpgsqlCommand(sql, con);
+            semaphore.Wait();
             NpgsqlDataReader reader = cmd.ExecuteReader();
 
             while (reader.Read() == true)
@@ -131,8 +144,9 @@ namespace libSimpleMap
                 //Console.WriteLine($"tileID = {tileId}, size(geometry) = {size}");
                 //reader.GetBytes()
             }
-
             reader.Close();
+            semaphore.Release();
+
             return retBytes;
         }
 
@@ -146,6 +160,7 @@ namespace libSimpleMap
             string sql = $"select length(attribute) size, attribute from map_tile where tile_id = {tileId}";
 
             NpgsqlCommand cmd = new NpgsqlCommand(sql, con);
+            semaphore.Wait();
             NpgsqlDataReader reader = cmd.ExecuteReader();
 
             while (reader.Read() == true)
@@ -154,8 +169,9 @@ namespace libSimpleMap
                 retBytes = (byte[])reader["attribute"];
 
             }
-
             reader.Close();
+            semaphore.Release();
+
             return retBytes;
         }
 
@@ -180,6 +196,7 @@ namespace libSimpleMap
             sqlStr += $" from map_tile where tile_id = {tileId}";
 
             NpgsqlCommand com = new NpgsqlCommand(sqlStr, con);
+            semaphore.Wait();
             NpgsqlDataReader reader = com.ExecuteReader();
 
             while (reader.Read() == true)
@@ -195,6 +212,8 @@ namespace libSimpleMap
             }
 
             reader.Close();
+            semaphore.Release();
+
             return 0;
         }
 
