@@ -208,7 +208,8 @@ namespace libSimpleMap
 
                     ms.Read(tmpBuf, 0, 2);
                     ushort numConnectLink = BitConverter.ToUInt16(tmpBuf, 0);
-                    List<ConnectLink> tmpConnectLinkList = new List<ConnectLink>();
+                    //List<ConnectLink> tmpConnectLinkList = new List<ConnectLink>();
+                    ConnectLink[] tmpConnectLinkArray = new ConnectLink[numConnectLink];
 
                     byte tmpMinRoadType = 0xff;
                     for (int j = 0; j < numConnectLink; j++)
@@ -237,10 +238,12 @@ namespace libSimpleMap
                         ms.Read(tmpBuf, 0, 1);
                         ms.Read(tmpBuf, 0, 1);
 
-                        tmpConnectLinkList.Add(tmpLink);
+                        //tmpConnectLinkList.Add(tmpLink);
+                        tmpConnectLinkArray[j] = tmpLink;
                     }
 
-                    tmpNode.connectLink = tmpConnectLinkList.ToArray();
+                    //tmpNode.connectLink = tmpConnectLinkList.ToArray();
+                    tmpNode.connectLink = tmpConnectLinkArray;
 
 
                     if (tmpMinRoadType > maxRoadType)
@@ -858,6 +861,7 @@ namespace libSimpleMap
                     MapLink[] tmpMapLink = GetRoadLink(tileId, subType);
                     CmnObjGroup tmp = new CmnObjGroupArray(type, tmpMapLink, subType);
                     tmp.isDrawReverse = true;
+                    tmp.SetIndex();
                     return new List<CmnObjGroup> { tmp };
 
                 case SpMapContentType.Node:

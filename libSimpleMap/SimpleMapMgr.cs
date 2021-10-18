@@ -636,13 +636,13 @@ namespace libSimpleMap
         public abstract List<uint> GetMapTileIdList();
         public abstract List<uint> GetMapContentTypeList();
         //public abstract List<CmnObjGroup> LoadObjGroupList(uint tileId, uint type = uint.MaxValue, ushort subType = ushort.MaxValue);
-        public abstract List<CmnObjGroup> LoadObjGroup(uint tileId, uint type, ushort subType = ushort.MaxValue);
+        public abstract IEnumerable<CmnObjGroup> LoadObjGroup(uint tileId, uint type, ushort subType = ushort.MaxValue);
 
 
-        public async Task<List<CmnObjGroup>> LoadObjGroupAsync(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
+        public async Task<IEnumerable<CmnObjGroup>> LoadObjGroupAsync(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
         {
-            Task<List<CmnObjGroup>> taskRet = Task.Run(() => LoadObjGroup(tileId, type, subType));
-            List<CmnObjGroup> ret = await taskRet.ConfigureAwait(false);
+            Task<IEnumerable<CmnObjGroup>> taskRet = Task.Run(() => LoadObjGroup(tileId, type, subType));
+            IEnumerable<CmnObjGroup> ret = await taskRet.ConfigureAwait(false);
             return ret;
         }
 

@@ -436,6 +436,7 @@ namespace libSimpleMap
         public override UInt16 SubType => (UInt16)roadType;
         public override LatLon[] Geometry => geometry;
         public override double Length => linkLength;
+        public override UInt16 Index => index;
 
 
         public override int Cost
