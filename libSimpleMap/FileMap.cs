@@ -32,7 +32,7 @@ using Akichko.libGis;
 
 namespace libSimpleMap
 {
-    class SpTextMapAccess : SpMapAccess
+    public class SpTextMapAccess : SpMapAccess
     {
         string mapPath;
         //bool isConnencted = false;
@@ -295,7 +295,7 @@ namespace libSimpleMap
             {
                 String fbuf;
 
-                int index = 0;
+                //int index = 0;
                 UInt64 preLinkId = 0xffffffffffffffff;
 
                 MapLinkFull tmpLinkAttr = null;
@@ -374,10 +374,10 @@ namespace libSimpleMap
         }
 
 
-        public override List<UInt32> GetMapContentTypeList()
-        {
-            return SpTile.GetMapContentTypeList();
-        }
+        //public override List<UInt32> GetMapContentTypeList()
+        //{
+        //    return SpTile.GetMapContentTypeList();
+        //}
 
 
         public override List<CmnObjGroup> LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)

@@ -56,7 +56,7 @@ namespace libSimpleMap
         public MapLinkGeometry[] geometry;
         public MapLinkAttribute[] attribute;
 
-        static List<UInt32> mapContentTypeList;
+        //static List<UInt32> mapContentTypeList;
 
         override public UInt32 Type { get { return 0; } }
 
@@ -74,46 +74,17 @@ namespace libSimpleMap
 
         }
 
-        static SpTile()
-        {
-            mapContentTypeList = ((uint[])Enum.GetValues(typeof(SpMapContentType)))
-                .Where(x => x != 0xFFFF && x != (UInt32)SpMapContentType.Tile)
-                .ToList();
-        }
+        //static SpTile()
+        //{
+        //    mapContentTypeList = ((uint[])Enum.GetValues(typeof(SpMapContentType)))
+        //        .Where(x => x != 0xFFFF && x != (UInt32)SpMapContentType.Tile)
+        //        .ToList();
+        //}
 
         override public CmnTile CreateTile(uint tileId)
         {
             return new SpTile(tileId);
         }
-
-
-        //public MapNode GetMapNode(UInt64 nodeId)
-        //{
-        //    foreach (MapNode mapNode in node)
-        //    {
-        //        if (mapNode.nodeId == nodeId)
-        //            return mapNode;
-        //    }
-        //    return null;
-        //}
-
-
-        //public LinkHandle GetMapLink(int linkIndex)
-        //{
-        //    if (linkIndex >= link.Length)
-        //        return null;
-
-        //    return new LinkHandle(this, link[linkIndex]);
-        //    //return link[linkIndex];
-        //}
-
-        //public NodeHandle GetMapNode(int targetNodeIndex)
-        //{
-        //    if (targetNodeIndex >= node.Length)
-        //        return null;
-
-        //    return new NodeHandle(this, node[targetNodeIndex]);
-        //}
 
 
 
@@ -322,7 +293,7 @@ namespace libSimpleMap
 
 
 
-        public static List<UInt32> GetMapContentTypeList() => mapContentTypeList;
+        //public static List<UInt32> GetMapContentTypeList() => mapContentTypeList;
         //{
         //    return ((uint[])Enum.GetValues(typeof(SpMapContentType)))
         //        .Select(x => (UInt32)x)
@@ -739,7 +710,7 @@ namespace libSimpleMap
         }
 
 
-        public override bool CheckTimeStamp(int timeStamp)
+        public override bool CheckTimeStamp(long timeStamp)
         {
             if (timeStamp >= 1000 && timeStamp <= 2000)
                 return false;
@@ -1118,20 +1089,18 @@ namespace libSimpleMap
 
     public enum SpMapContentType : uint
     {
-        Link = 0x0001,
-        Node = 0x0002,
-        LinkGeometry = 0x0004,
-        LinkAttribute = 0x0008,
-        Tile = 0x0010,
-        All = 0xffff
+        Link = 1,
+        Node = 2,
+        LinkGeometry = 3,
+        LinkAttribute = 4,
+        Tile = 5
 
     }
 
 
-
-    public enum SpMapRefType
+    public enum SpMapRefType : uint
     {
-        Selected,
+        Selected = 1,
         NextLink,
         BackLink,
         StartNode,

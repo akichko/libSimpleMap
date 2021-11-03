@@ -40,8 +40,8 @@ namespace libSimpleMap
             if (targetTileId == orgHdl.TileId || targetTileId == dstHdl.TileId)
                 return 9;
 
-            float DistFromStartTile = (float)mapMgr.tileApi.CalcTileDistance(targetTileId, orgHdl.TileId);
-            float DistFromDestTile = (float)mapMgr.tileApi.CalcTileDistance(targetTileId, dstHdl.TileId);
+            double DistFromStartTile = mapMgr.tileApi.CalcTileDistance(targetTileId, orgHdl.TileId);
+            double DistFromDestTile = mapMgr.tileApi.CalcTileDistance(targetTileId, dstHdl.TileId);
 
             double minDist = Math.Min(DistFromStartTile, DistFromDestTile);
 

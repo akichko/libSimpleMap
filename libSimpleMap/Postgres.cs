@@ -35,7 +35,7 @@ namespace libSimpleMap
     public class PostgresAccess : IBinDataAccess
     {
         NpgsqlConnection con;
-        string connectInfo;
+        //string connectInfo;
         SemaphoreSlim semaphore;
 
         public PostgresAccess()

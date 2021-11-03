@@ -31,16 +31,11 @@ using Akichko.libGis;
 
 namespace libSimpleMap
 {
-    class SpMapBinMapAccess : SpMapAccess
+    public class SpMapBinMapAccess : SpMapAccess
     {
         bool compression = true;
         MiddleType middleType;
         IBinDataAccess dal;
-
-
-        public SpMapBinMapAccess()
-        {
-        }
 
         public override bool IsConnected { get; set; }
 
@@ -49,24 +44,13 @@ namespace libSimpleMap
             this.middleType = middleType;
             IsConnected = false;
 
-            switch (middleType)
+            dal = middleType switch
             {
-                //case MiddleType.FileSystem:
-                //    this.connectStr = connectStr + @"\";
-                //    dal = new FileAccessLib();
-                //    break;
-
-                case MiddleType.SQLite:
-                    dal = new SQLiteAccess();
-                    break;
-
-                case MiddleType.Postgres:
-                    dal = new PostgresAccess();
-                    break;
-
-                default:
-                    break;
-            }
+                //MiddleType.FileSystem => new FileAccessLib(),
+                MiddleType.SQLite => new SQLiteAccess(),
+                MiddleType.Postgres => new PostgresAccess(),
+                _ => throw new NotImplementedException()
+            };
         }
 
         public override int ConnectMap(string connectStr)
@@ -128,6 +112,7 @@ namespace libSimpleMap
                 {
                     MapLink tmpLink;
 
+#if false
                     if (false)
                     {
                         ms.Read(tmpBuf, 0, 8);
@@ -137,42 +122,43 @@ namespace libSimpleMap
                     }
                     else
                     {
-                        tmpLink = new MapLink();
-                        tmpLink.index = i;
+#else
+                    tmpLink = (MapLink)CreateObj(SpMapContentType.Link);// new MapLink();
+                    tmpLink.index = i;
 
 
-                        ms.Read(tmpBuf, 0, 2);
-                        tmpLink.edgeNodeIndex[0] = BitConverter.ToUInt16(tmpBuf, 0);
+                    ms.Read(tmpBuf, 0, 2);
+                    tmpLink.edgeNodeIndex[0] = BitConverter.ToUInt16(tmpBuf, 0);
 
-                        ms.Read(tmpBuf, 0, 1);
-                        sbyte offsetX = (sbyte)tmpBuf[0];
-                        tmpLink.endNodeTileOffset.offsetX = offsetX;
+                    ms.Read(tmpBuf, 0, 1);
+                    sbyte offsetX = (sbyte)tmpBuf[0];
+                    tmpLink.endNodeTileOffset.offsetX = offsetX;
 
-                        //tmpLink.edgeNodeTileId[0] = tileId;
+                    //tmpLink.edgeNodeTileId[0] = tileId;
 
-                        ms.Read(tmpBuf, 0, 1);
-                        sbyte offsetY = (sbyte)tmpBuf[0];
-                        //tmpLink.edgeNodeTileId[1] = GisTileCode.S_CalcTileId((ushort)(baseTileXY.x + offsetX), (ushort)(baseTileXY.y + offsetY));
-                        tmpLink.endNodeTileOffset.offsetY = offsetY;
+                    ms.Read(tmpBuf, 0, 1);
+                    sbyte offsetY = (sbyte)tmpBuf[0];
+                    //tmpLink.edgeNodeTileId[1] = GisTileCode.S_CalcTileId((ushort)(baseTileXY.x + offsetX), (ushort)(baseTileXY.y + offsetY));
+                    tmpLink.endNodeTileOffset.offsetY = offsetY;
 
-                        ms.Read(tmpBuf, 0, 2);
-                        tmpLink.edgeNodeIndex[1] = BitConverter.ToUInt16(tmpBuf, 0);
+                    ms.Read(tmpBuf, 0, 2);
+                    tmpLink.edgeNodeIndex[1] = BitConverter.ToUInt16(tmpBuf, 0);
 
-                        ms.Read(tmpBuf, 0, 2);
-                        tmpLink.linkCost = BitConverter.ToUInt16(tmpBuf, 0);
+                    ms.Read(tmpBuf, 0, 2);
+                    tmpLink.linkCost = BitConverter.ToUInt16(tmpBuf, 0);
 
-                        ms.Read(tmpBuf, 0, 2);
-                        tmpLink.linkLength = BitConverter.ToUInt16(tmpBuf, 0);
+                    ms.Read(tmpBuf, 0, 2);
+                    tmpLink.linkLength = BitConverter.ToUInt16(tmpBuf, 0);
 
-                        ms.Read(tmpBuf, 0, 1);
-                        tmpLink.roadType = tmpBuf[0];
+                    ms.Read(tmpBuf, 0, 1);
+                    tmpLink.roadType = tmpBuf[0];
 
-                        ms.Read(tmpBuf, 0, 1);
-                        tmpLink.fOneWay = (sbyte)tmpBuf[0];
+                    ms.Read(tmpBuf, 0, 1);
+                    tmpLink.fOneWay = (sbyte)tmpBuf[0];
 
 
-                    }
-
+                    //}
+#endif
                     if (tmpLink.roadType > maxRoadType)
                         break;
 
@@ -321,7 +307,7 @@ namespace libSimpleMap
                 MapLinkGeometry[] geometryArray = new MapLinkGeometry[numLink];
                 for (int i = 0; i < numLink; i++)
                 {
-                    MapLink tmpLink = new MapLink();
+                    MapLink tmpLink = (MapLink)CreateObj(SpMapContentType.Link);// new MapLink();
                     LatLon sLatLon = new LatLon();
                     List<LatLon> tmpGeometry = new List<LatLon>();
                     geometryArray[i] = new MapLinkGeometry();
@@ -560,6 +546,7 @@ namespace libSimpleMap
                     TileXY tileXY = new TileXY(tmpLink.EdgeNodeTileId(tile, DirectionCode.Positive));
                     //TileXY tileXY = new TileXY(tmpLink.edgeNodeTileId[1]);
 
+#if false
                     if (false)
                     {
 
@@ -576,34 +563,34 @@ namespace libSimpleMap
                     }
                     else
                     {
+#else
+                    tmpBuf = BitConverter.GetBytes((short)tmpLink.edgeNodeIndex[0]);
+                    ms.Write(tmpBuf, 0, 2);
 
-                        tmpBuf = BitConverter.GetBytes((short)tmpLink.edgeNodeIndex[0]);
-                        ms.Write(tmpBuf, 0, 2);
+                    //TileXY tileXY = new TileXY(tmpLink.GetEdgeNodeTileOffset(1).ToTileId(tile.tileId));
 
-                        //TileXY tileXY = new TileXY(tmpLink.GetEdgeNodeTileOffset(1).ToTileId(tile.tileId));
+                    tmpBuf = BitConverter.GetBytes((sbyte)(tileXY.x - baseTileXY.x));
+                    ms.Write(tmpBuf, 0, 1);
 
-                        tmpBuf = BitConverter.GetBytes((sbyte)(tileXY.x - baseTileXY.x));
-                        ms.Write(tmpBuf, 0, 1);
+                    tmpBuf = BitConverter.GetBytes((sbyte)(tileXY.y - baseTileXY.y));
+                    ms.Write(tmpBuf, 0, 1);
 
-                        tmpBuf = BitConverter.GetBytes((sbyte)(tileXY.y - baseTileXY.y));
-                        ms.Write(tmpBuf, 0, 1);
+                    tmpBuf = BitConverter.GetBytes((short)tmpLink.edgeNodeIndex[1]);
+                    ms.Write(tmpBuf, 0, 2);
 
-                        tmpBuf = BitConverter.GetBytes((short)tmpLink.edgeNodeIndex[1]);
-                        ms.Write(tmpBuf, 0, 2);
+                    tmpBuf = BitConverter.GetBytes((short)tmpLink.linkCost);
+                    ms.Write(tmpBuf, 0, 2);
 
-                        tmpBuf = BitConverter.GetBytes((short)tmpLink.linkCost);
-                        ms.Write(tmpBuf, 0, 2);
+                    tmpBuf = BitConverter.GetBytes((short)tmpLink.linkLength);
+                    ms.Write(tmpBuf, 0, 2);
 
-                        tmpBuf = BitConverter.GetBytes((short)tmpLink.linkLength);
-                        ms.Write(tmpBuf, 0, 2);
+                    tmpBuf = BitConverter.GetBytes((byte)tmpLink.roadType);
+                    ms.Write(tmpBuf, 0, 1);
 
-                        tmpBuf = BitConverter.GetBytes((byte)tmpLink.roadType);
-                        ms.Write(tmpBuf, 0, 1);
-
-                        tmpBuf = BitConverter.GetBytes((sbyte)tmpLink.fOneWay);
-                        ms.Write(tmpBuf, 0, 1);
-                    }
-
+                    tmpBuf = BitConverter.GetBytes((sbyte)tmpLink.fOneWay);
+                    ms.Write(tmpBuf, 0, 1);
+                    //}
+#endif
                 }
 
                 bufLength = (int)ms.Position;
@@ -844,15 +831,15 @@ namespace libSimpleMap
 
 
 
-        public override List<UInt32> GetMapContentTypeList()
-        {
-            return SpTile.GetMapContentTypeList();
+        //public override List<UInt32> GetMapContentTypeList()
+        //{
+        //    return SpTile.GetMapContentTypeList();
 
-            //return ((uint[])Enum.GetValues(typeof(SpMapContentType)))
-            //    .Select(x => (UInt16)x)
-            //    .Where(x => (UInt16)x != 0xFFFF)
-            //    .ToList();
-        }
+        //    //return ((uint[])Enum.GetValues(typeof(SpMapContentType)))
+        //    //    .Select(x => (UInt16)x)
+        //    //    .Where(x => (UInt16)x != 0xFFFF)
+        //    //    .ToList();
+        //}
 
         //CmnTile LoadTile(uint tileId, UInt32 reqType = 0xFFFFFFFF, UInt16 reqMaxSubType = 0xFFFF)
         //{
