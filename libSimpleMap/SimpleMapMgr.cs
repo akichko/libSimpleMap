@@ -34,6 +34,7 @@ namespace libSimpleMap
     public class SpMapMgr : CmnMapMgr //, IMapAccess
     {
         protected MapDataType mapDataType;
+        DykstraSetting setting;
 
         public SpMapMgr(MapDataType mapDataType) : base(new GisTileCode())
         {            
@@ -48,6 +49,9 @@ namespace libSimpleMap
                 MapDataType.MapManager => throw new NotImplementedException(),
                 _ => throw new NotImplementedException()
             };
+
+
+            DykstraSetting setting = new DykstraSetting(6, 8000);
         }
 
 
@@ -59,9 +63,9 @@ namespace libSimpleMap
 
         /* 経路計算用 *****************************************************************/
 
-        public override CmnRouteMgr CreateRouteMgr()
+        public override CmnRouteMgr CreateRouteMgr(DykstraSetting setting = null)
         {
-            return new SpRouteMgr(this);
+            return new SpRouteMgr(this, setting == null ? this.setting : null);
         }
 
 

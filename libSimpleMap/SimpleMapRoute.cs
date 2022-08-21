@@ -32,7 +32,10 @@ namespace libSimpleMap
 {
     public class SpRouteMgr : CmnRouteMgr
     {
-        public SpRouteMgr(SpMapMgr mapMgr) : base(mapMgr) { }
+        public SpRouteMgr(SpMapMgr mapMgr, DykstraSetting setting) : base(mapMgr, setting)
+        {
+            //this.setting = setting;
+        }
 
         //地図仕様に応じてオーバーライド
         protected override byte CalcMaxUsableRoadType(uint targetTileId)
