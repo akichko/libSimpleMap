@@ -366,6 +366,10 @@ namespace libSimpleMap
 
         }
 
+        public override SimpleMapDbRecord GetTileData(uint tileId, IEnumerable<uint> reqTypes)
+        {
+            throw new NotImplementedException();
+        }
     }
     
 

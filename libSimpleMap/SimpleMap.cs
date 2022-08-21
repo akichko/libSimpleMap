@@ -309,19 +309,6 @@ namespace libSimpleMap
     }
 
 
-    //public class SpObjGroup : CmnObjGroup
-    //{
-    //    //public override UInt32 Type { get; }
-
-    //    public SpObjGroup(UInt32 type) : base(type) { }
-
-    //    public SpObjGroup(UInt32 type, CmnObj[] objArray, UInt16 loadedSubType) : base(type, objArray, loadedSubType) { }
-    //    //{
-    //    //    this.loadedSubType = loadedSubType;
-    //    //    this.objArray = objArray;
-    //    //}
-    //}
-
 
     public class SpLinkHandle : CmnObjHandle
     {
@@ -337,8 +324,9 @@ namespace libSimpleMap
             AttrItemInfo item;
 
             MapLink link = (MapLink)obj;
+            SpTile spTile = (SpTile)tile;
             //LinkAttribute attribute = ((SpTile)tile).linkAttr[obj.Index].attribute;
-            MapLinkAttribute attribute = ((SpTile)tile).attribute[obj.Index];
+            MapLinkAttribute attribute = spTile.attribute?[obj.Index];
 
             //基本属性
 
@@ -349,6 +337,32 @@ namespace libSimpleMap
             listItem.Add(new AttrItemInfo(new string[] { "Oneway", $"{Oneway}" }));
             listItem.Add(new AttrItemInfo(new string[] { "linkLength", $"{link.linkLength}" }));
             listItem.Add(new AttrItemInfo(new string[] { "Cost", $"{Cost}" }));
+
+
+            listItem.Add(new AttrItemInfo(new string[] { "NodeIndex S", $"{link.edgeNodeIndex[0]}" }));
+            listItem.Add(new AttrItemInfo(new string[] { "NodeIndex E", $"{link.edgeNodeIndex[1]}" }));
+
+            CmnObjHandle nodeHdlS = tile.GetObjHandles((uint)SpMapContentType.Node, x => x.Index == link.edgeNodeIndex[0]).FirstOrDefault();
+            MapNode nodeS = (MapNode)nodeHdlS?.obj;
+            //listItem.Add(new AttrItemInfo(new string[] { "Node S Connect", $"{nodeS?.Index ?? -1}" }));
+
+            for (int i = 0; i < (nodeS?.connectLink?.Length ?? 0); i++) {
+                if (nodeS.connectLink[i].tileId == tile.TileId && nodeS.connectLink[i].linkIndex == Index)
+                    continue;
+                listItem.Add(new AttrItemInfo(new string[] { $"SLinkIdx[{i}]", $"{nodeS.connectLink[i].tileId}-{nodeS.connectLink[i].linkIndex}" }));
+            }
+
+            CmnObjHandle nodeHdlE = tile.GetObjHandles((uint)SpMapContentType.Node, x => x.Index == link.edgeNodeIndex[1]).FirstOrDefault();
+            MapNode nodeE = (MapNode)nodeHdlE?.obj;
+            //listItem.Add(new AttrItemInfo(new string[] { "Node S Connect", $"{nodeS?.Index ?? -1}" }));
+
+            for (int i = 0; i < (nodeE?.connectLink?.Length ?? 0); i++)
+            {
+                if (nodeE.connectLink[i].tileId == tile.TileId && nodeE.connectLink[i].linkIndex == Index)
+                    continue;
+                listItem.Add(new AttrItemInfo(new string[] { $"ELinkIdx[{i}]", $"{nodeE.connectLink[i].tileId}-{nodeE.connectLink[i].linkIndex}" }));
+            }
+
 
             //List<CmnObjHdlRef> nextLinkList = GetObjRefHdlList((int)SpMapRefType.NextLink);
             //nextLinkList.ForEach(x =>
@@ -642,9 +656,10 @@ namespace libSimpleMap
             List<CmnObjRef> ret = new List<CmnObjRef>();
 
             //始点ノード側接続リンク
-            CmnObjRef nodeRef = new CmnObjRef((int)SpMapRefType.BackLink, (UInt32)SpMapContentType.Node, false);
+            CmnObjRef nodeRef = new CmnObjRef((int)SpMapRefType.BackLink, (UInt32)SpMapContentType.Node,false);
             nodeRef.key.tile = tile;
-            nodeRef.key.objIndex = edgeNodeIndex[0];
+            nodeRef.key.selector = (x => x.Index == edgeNodeIndex[0]);
+            //nodeRef.key.objIndex = edgeNodeIndex[0];
             ret.Add(nodeRef);
 
             //始点ノード側接続リンク
@@ -1110,5 +1125,38 @@ namespace libSimpleMap
         RelatedLine,
         RelatedNode,
         LatLon
+    }
+
+
+    public static class SpMapExtend
+    {
+        public static uint ToUInt(this SpMapContentType contentType)
+        {
+            return (uint)contentType;
+        }
+
+
+        public static SpMapContentType ToSpMapContentType(this uint typeCode)
+        {
+            return (SpMapContentType)typeCode;
+        }
+
+
+        public static string[] GetNames()
+        {
+            var ret = ((SpMapContentType[])Enum.GetValues(typeof(SpMapContentType)))
+                .Select(x => Enum.GetName(typeof(SpMapContentType), x)).ToArray();
+            return ret;
+        }
+
+        public static uint GetMapContentTypeValue(string objTypeName)
+        {
+            object result;
+            bool ret = Enum.TryParse(typeof(SpMapContentType), objTypeName, false, out result);
+            return ret ? (uint)result : 0;
+            //(uint)Enum.Parse(typeof(SpMapContentType), objTypeName);
+        }
+
+
     }
 }

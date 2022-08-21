@@ -106,8 +106,9 @@ namespace libSimpleMap
 
         public override string[] GetMapContentTypeNames()
         {
-            var ret = ((SpMapContentType[])Enum.GetValues(typeof(SpMapContentType)))
-                .Select(x => Enum.GetName(typeof(SpMapContentType), x)).ToArray();
+            var ret = Enum.GetNames(typeof(SpMapContentType));
+            //var ret = ((SpMapContentType[])Enum.GetValues(typeof(SpMapContentType)))
+            //    .Select(x => Enum.GetName(typeof(SpMapContentType), x)).ToArray();
             return ret;
         }
 
@@ -134,8 +135,9 @@ namespace libSimpleMap
     }
 
 
-    public abstract class SpMapAccess : ICmnMapAccess
+    public abstract class SpMapAccess : CmnMapAccess
     {
+        
         static List<UInt32> mapContentTypeList;
 
         public SpMapAccess()
@@ -145,7 +147,6 @@ namespace libSimpleMap
                 .ToList();
         }
 
-        public abstract bool IsConnected { get; set; }
 
         public abstract int SaveTile(SpTile tile);
         public abstract int SaveRoadLink(SpTile tile);
@@ -153,21 +154,16 @@ namespace libSimpleMap
         public abstract int SaveRoadGeometry(SpTile tile);
 
         //ICmnMapAccess I/F
-        public abstract int ConnectMap(string connectStr);
-        public abstract int DisconnectMap();
-        public abstract List<uint> GetMapTileIdList();
-        public virtual List<uint> GetMapContentTypeList() => mapContentTypeList;
-
-        //public abstract List<CmnObjGroup> LoadObjGroupList(uint tileId, uint type = uint.MaxValue, ushort subType = ushort.MaxValue);
-        public abstract IEnumerable<CmnObjGroup> LoadObjGroup(uint tileId, uint type, ushort subType = ushort.MaxValue);
+        public override List<uint> GetMapContentTypeList() => mapContentTypeList;
 
 
-        public virtual async Task<IEnumerable<CmnObjGroup>> LoadObjGroupAsync(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
-        {
-            Task<IEnumerable<CmnObjGroup>> taskRet = Task.Run(() => LoadObjGroup(tileId, type, subType));
-            IEnumerable<CmnObjGroup> ret = await taskRet.ConfigureAwait(false);
-            return ret;
-        }
+
+        //public virtual async Task<IEnumerable<CmnObjGroup>> LoadObjGroupAsync(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
+        //{
+        //    Task<IEnumerable<CmnObjGroup>> taskRet = Task.Run(() => LoadObjGroup(tileId, type, subType));
+        //    IEnumerable<CmnObjGroup> ret = await taskRet.ConfigureAwait(false);
+        //    return ret;
+        //}
 
 
         protected virtual CmnObj CreateObj(SpMapContentType type)
@@ -183,10 +179,19 @@ namespace libSimpleMap
 
         }
 
-        public TimeStampRange GetTimeStampRange()
-        {
-            throw new NotImplementedException();
-        }
+        //public TimeStampRange GetTimeStampRange()
+        //{
+        //    return null;
+        //}
+
+        //public async Task<IEnumerable<CmnObjGroup>> LoadObjGroupAsync(uint tileId, IEnumerable<ObjReqType> reqTypes)
+        //{
+        //    var tasks = reqTypes.Select(reqType => Task.Run(() => LoadObjGroup(tileId, reqType.type, reqType.maxSubType)));
+        //    var tmp = await Task.WhenAll(tasks).ConfigureAwait(false);
+        //    List<CmnObjGroup> ret = tmp.Where(x => x != null).SelectMany(x => x).ToList();
+
+        //    return ret;
+        //}
     }
 
 

@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Data.SQLite;
 using System.IO;
+using Akichko.libGis;
 
 namespace libSimpleMap
 {
@@ -244,6 +245,48 @@ namespace libSimpleMap
             return 0;
         }
 
+        public override SimpleMapDbRecord GetTileData(uint tileId, IEnumerable<uint> reqTypes)
+        {
+            byte[] outLinkData = null;
+            byte[] outNodeData = null;
+            byte[] outGeometryData = null;
+            byte[] outAttributeData = null;
+
+            string sqlStr = "select tile_id";
+
+            if (reqTypes.Contains((uint)SpMapContentType.Link))
+                sqlStr += ", link";
+            if (reqTypes.Contains((uint)SpMapContentType.Node))
+                sqlStr += ", node";
+            if (reqTypes.Contains((uint)SpMapContentType.LinkGeometry))
+                sqlStr += ", geometry";
+            if (reqTypes.Contains((uint)SpMapContentType.LinkAttribute))
+                sqlStr += ", attribute";
+            sqlStr += $" from map_tile where tile_id = {tileId}";
+
+            SQLiteCommand com = new SQLiteCommand(sqlStr, con);
+            semaphore.Wait();
+            SQLiteDataReader reader = com.ExecuteReader();
+
+            if (reader.Read() == true)
+            {
+                if (reqTypes.Contains((uint)SpMapContentType.Link))
+                    outLinkData = (byte[])reader["link"];
+                if (reqTypes.Contains((uint)SpMapContentType.Node))
+                    outNodeData = (byte[])reader["node"];
+                if (reqTypes.Contains((uint)SpMapContentType.LinkGeometry))
+                    outGeometryData = (byte[])reader["geometry"];
+                if (reqTypes.Contains((uint)SpMapContentType.LinkAttribute))
+                    outAttributeData = (byte[])reader["attribute"];
+            }
+            reader.Close();
+            semaphore.Release();
+
+            SimpleMapDbRecord ret = new SimpleMapDbRecord(tileId, outLinkData, outNodeData, outGeometryData, outAttributeData);
+
+            return ret;
+        }
+
         public override int SaveLinkData(uint tileId, byte[] tileBuf, int size)
         {
             Array.Resize(ref tileBuf, size);
@@ -371,6 +414,25 @@ namespace libSimpleMap
         }
 
     }
+
+    public class SimpleMapDbRecord
+    {
+        public uint tileId;
+        public byte[] linkData;
+        public byte[] nodeData;
+        public byte[] geometryData;
+        public byte[] attributeData;
+
+        public SimpleMapDbRecord(uint tileId, byte[] linkData, byte[] nodeData, byte[] geometryData, byte[] attributeData)
+        {
+            this.tileId = tileId;
+            this.linkData = linkData;
+            this.nodeData = nodeData;
+            this.geometryData = geometryData;
+            this.attributeData = attributeData;
+        }
+    }
+
 
 
 

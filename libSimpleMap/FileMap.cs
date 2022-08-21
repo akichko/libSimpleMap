@@ -35,12 +35,13 @@ namespace libSimpleMap
     public class SpTextMapAccess : SpMapAccess
     {
         string mapPath;
-        //bool isConnencted = false;
-        public override bool IsConnected { get; set; }
+        bool isConnencted;
+        public override bool IsConnected => isConnencted;
+        
 
         public SpTextMapAccess()
         {
-            IsConnected = false;
+            isConnencted = false;
         }
 
         public override int ConnectMap(string connectStr)
@@ -48,7 +49,7 @@ namespace libSimpleMap
             if (Directory.Exists(connectStr))
             {
                 this.mapPath = connectStr + "\\";
-                IsConnected = true;
+                isConnencted = true;
                 return 0;
             }
             else
@@ -61,6 +62,7 @@ namespace libSimpleMap
 
         public override int DisconnectMap()
         {
+            isConnencted = false;
             return 0;
         }
 
@@ -380,7 +382,7 @@ namespace libSimpleMap
         //}
 
 
-        public override List<CmnObjGroup> LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
+        public override IEnumerable<CmnObjGroup> LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
         {
 
             switch ((SpMapContentType)type)
@@ -424,7 +426,7 @@ namespace libSimpleMap
                     return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpAttribute, subType) };
             }
 
-            return null;
+            return new List<CmnObjGroup> { new CmnObjGroupArray(type, null, subType) };
         }
 
 
@@ -438,6 +440,11 @@ namespace libSimpleMap
         //}
 
         public List<CmnObjGroup> LoadObjGroupList(uint tileId, uint type, Filter<ushort> filter)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override List<CmnObjGroup> LoadObjGroup(uint tileId, IEnumerable<ObjReqType> reqTypes)
         {
             throw new NotImplementedException();
         }

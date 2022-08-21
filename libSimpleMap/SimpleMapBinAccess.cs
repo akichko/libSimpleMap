@@ -33,16 +33,17 @@ namespace libSimpleMap
 {
     public class SpMapBinMapAccess : SpMapAccess
     {
+        bool isConnected = false;
         bool compression = true;
         MiddleType middleType;
         IBinDataAccess dal;
 
-        public override bool IsConnected { get; set; }
+        public override bool IsConnected => isConnected;
 
         public SpMapBinMapAccess(MiddleType middleType)
         {
             this.middleType = middleType;
-            IsConnected = false;
+            isConnected = false;
 
             dal = middleType switch
             {
@@ -58,13 +59,14 @@ namespace libSimpleMap
 
             int ret = dal.Connect(connectStr);
             if (ret == 0)
-                IsConnected = true;
+                isConnected = true;
 
             return ret;
         }
 
         public override int DisconnectMap()
         {
+            isConnected = false;
             return 0;
         }
 
@@ -78,7 +80,8 @@ namespace libSimpleMap
         {
             //List<MapLink> tmpLinkList = new List<MapLink>();
 
-            byte[] tileBuf = dal.GetLinkData(tileId);
+            //byte[] tileBuf = dal.GetLinkData(tileId);
+            byte[] tileBuf = dal.GetTileData(tileId, new uint[] { (uint)SpMapContentType.Link }).linkData;
             if (tileBuf == null)
                 return new MapLink[0];
             else
@@ -452,20 +455,8 @@ namespace libSimpleMap
 
         public override List<uint> GetMapTileIdList()
         {
-            //SQLite
             return dal.GetMapTileIdList();
 
-            //Filesystem
-
-            //List<uint> retList = new List<uint>();
-            //string[] names = Directory.GetFiles(mapPath + "NODE", "*.txt");
-            //foreach (string name in names)
-            //{
-            //    string tileName = name.Replace(mapPath + "NODE\\", "").Replace("_NODE.txt", "");
-            //    retList.Add(uint.Parse(tileName));
-
-            //}
-            //return retList;
         }
 
 
@@ -861,7 +852,7 @@ namespace libSimpleMap
 
         //}
 
-        public override List<CmnObjGroup> LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
+        public override IEnumerable<CmnObjGroup> LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
         {
 
             switch ((SpMapContentType)type)
@@ -877,7 +868,9 @@ namespace libSimpleMap
                 case SpMapContentType.Node:
 
                     MapNode[] tmpMapNode = GetRoadNode(tileId, subType);
-                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpMapNode, subType) };
+                    CmnObjGroup nodeObjGr = new CmnObjGroupArray(type, tmpMapNode, subType);
+                    nodeObjGr.SetIndex();
+                    return new List<CmnObjGroup> { nodeObjGr };
 
                 case SpMapContentType.LinkGeometry:
                     //MapLink[] tmpMapLinkGeometry = GetRoadGeometry(tileId, (byte)subType);
@@ -890,9 +883,54 @@ namespace libSimpleMap
                     return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpMapLinkAttr, subType) };
             }
 
-            return null;
+            return new List<CmnObjGroup> { new CmnObjGroupArray(type, null, subType) };
         }
 
+
+        public override List<CmnObjGroup> LoadObjGroup(uint tileId, IEnumerable<ObjReqType> reqTypes)
+        {
+            List<CmnObjGroup> ret = new List<CmnObjGroup>();
+            SimpleMapDbRecord dbRecord = dal.GetTileData(tileId, reqTypes.Select(x=>x.type));
+
+            if(dbRecord.linkData != null)
+            {
+                uint type = (uint)SpMapContentType.Link;
+                ushort subType = reqTypes.Where(x => x.type == type).First().maxSubType;
+                MapLink[] tmpMapLink = GetRoadLink(tileId, subType);
+                CmnObjGroup tmp = new CmnObjGroupArray(type, tmpMapLink, subType);
+                tmp.isDrawReverse = true;
+                tmp.SetIndex();
+                ret.Add(tmp);
+            }
+
+            if (dbRecord.nodeData != null)
+            {
+                uint type = (uint)SpMapContentType.Node;
+                ushort subType = reqTypes.Where(x => x.type == type).First().maxSubType;
+                MapNode[] tmpMapNode = GetRoadNode(tileId, subType);
+                CmnObjGroup nodeObjGr = new CmnObjGroupArray(type, tmpMapNode, subType);
+                nodeObjGr.SetIndex();
+                ret.Add(nodeObjGr);
+
+            }
+            if (dbRecord.geometryData != null)
+            {
+                uint type = (uint)SpMapContentType.LinkGeometry;
+                ushort subType = reqTypes.Where(x => x.type == type).First().maxSubType;
+                MapLinkGeometry[] tmpMapLinkGeometry = GetRoadGeometry2(tileId, subType);
+                ret.Add(new CmnObjGroupArray(type, tmpMapLinkGeometry, subType));
+            }
+
+            if (dbRecord.geometryData != null)
+            {
+                uint type = (uint)SpMapContentType.LinkAttribute;
+                ushort subType = reqTypes.Where(x => x.type == type).First().maxSubType;
+                MapLinkAttribute[] tmpMapLinkAttr = GetRoadAttribute2(tileId, subType);
+                ret.Add(new CmnObjGroupArray(type, tmpMapLinkAttr, subType));
+            }
+
+            return ret;
+        }
 
         //public List<CmnObjGroup> LoadObjGroupList(uint tileId, UInt32 type = 0xffffffff, ushort subType = ushort.MaxValue)
         //{
@@ -941,11 +979,16 @@ namespace libSimpleMap
 
         //}
 
+        public override async Task<IEnumerable<CmnObjGroup>> LoadObjGroupAsync(uint tileId, IEnumerable<ObjReqType> reqTypes)
+        {
 
-        //public List<CmnObjGroup> LoadObjGroupList(uint tileId, CmnObjFilter filter)
-        //{
-        //    throw new NotImplementedException();
-        //}
+            var tasks = Task.Run(() => LoadObjGroup(tileId, reqTypes));
+            var tmp = await tasks.ConfigureAwait(false);
+            List<CmnObjGroup> ret = tmp.Where(x => x != null).Select(x => x).ToList();
+
+            return ret;
+        }
+
     }
 
 
@@ -985,6 +1028,8 @@ namespace libSimpleMap
 
             return 0;
         }
+
+        public abstract SimpleMapDbRecord GetTileData(uint tileId, IEnumerable<uint> reqTypes);
 
         public abstract int SaveLinkData(uint tileId, byte[] tileBuf, int size);
         public abstract int SaveNodeData(uint tileId, byte[] tileBuf, int size);
