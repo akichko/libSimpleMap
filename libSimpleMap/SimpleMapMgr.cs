@@ -63,10 +63,10 @@ namespace libSimpleMap
 
         /* 経路計算用 *****************************************************************/
 
-        public override CmnRouteMgr CreateRouteMgr(DykstraSetting setting = null)
-        {
-            return new SpRouteMgr(this, setting == null ? this.setting : null);
-        }
+        //public override CmnRouteMgr CreateRouteMgr(DykstraSetting setting = null)
+        //{
+        //    return new SpRouteMgr(this, setting == null ? this.setting : null);
+        //}
 
 
 
