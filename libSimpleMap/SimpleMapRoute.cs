@@ -84,5 +84,35 @@ namespace libSimpleMap
         }
 
 
+        public override RoutingMapType RoutingMapType
+        {
+            get
+            {
+                RoutingMapType ret = new RoutingMapType();
+
+                ret.roadNwObjType = (uint)(SpMapContentType.Link | SpMapContentType.Node);
+
+                ret.roadNwObjTypeList = new List<uint>{
+                    (uint)SpMapContentType.Link,
+                    (uint)SpMapContentType.Node
+                };
+
+                //ret.roadNwObjReqType = new ReqType[]{
+                //    new ReqType((uint)(SpMapContentType.Link)),
+                //    new ReqType((uint)(SpMapContentType.Node))
+                //    };
+                ret.roadNwObjFilter = new CmnObjFilter();
+                ret.roadNwObjFilter
+                    .AddRule((uint)(SpMapContentType.Link), null)
+                    .AddRule((uint)(SpMapContentType.Node), null);
+                ret.roadGeometryObjType = (uint)SpMapContentType.LinkGeometry;
+                ret.linkObjType = (uint)SpMapContentType.Link;
+                ret.nextLinkRefType = (int)SpMapRefType.NextLink;
+                ret.backLinkRefType = (int)SpMapRefType.BackLink;
+
+                return ret;
+            }
+        }
+
     }
 }
