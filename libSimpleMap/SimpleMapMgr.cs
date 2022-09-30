@@ -36,17 +36,17 @@ namespace libSimpleMap
         protected MapDataType mapDataType;
         DykstraSetting setting;
 
-        public SpMapMgr(MapDataType mapDataType) : base(new GisTileCode())
+        public SpMapMgr(MapDataType mapDataType, CmnMapAccess mapAccess = null) : base(new GisTileCode())
         {            
             this.mapDataType = mapDataType;
 
-            mapAccess = mapDataType switch
+            this.mapAccess = mapDataType switch
             {
                 MapDataType.TextFile => new SpTextMapAccess(),
                 //MapDataType.BinaryFile => new BinFileMapAccess(MiddleType.FileSystem),
                 MapDataType.SQLite => new SpMapBinMapAccess(MiddleType.SQLite),
                 MapDataType.Postgres => new SpMapBinMapAccess(MiddleType.Postgres),
-                MapDataType.MapManager => throw new NotImplementedException(),
+                MapDataType.MapManager => mapAccess,
                 _ => throw new NotImplementedException()
             };
 

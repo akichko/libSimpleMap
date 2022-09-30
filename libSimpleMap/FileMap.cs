@@ -382,7 +382,7 @@ namespace libSimpleMap
         //}
 
 
-        public override IEnumerable<CmnObjGroup> LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
+        public override CmnObjGroup LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
         {
 
             switch ((SpMapContentType)type)
@@ -392,12 +392,12 @@ namespace libSimpleMap
                     MapLink[] tmpMapLink = GetRoadLink(tileId, (byte)subType);
                     CmnObjGroup tmp = new CmnObjGroupArray(type, tmpMapLink, subType);
                     tmp.isDrawReverse = true;
-                    return new List<CmnObjGroup> { tmp };
+                    return tmp;
 
                 case SpMapContentType.Node:
 
                     MapNode[] tmpMapNode = GetRoadNode(tileId, (byte)subType);
-                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpMapNode, subType) };
+                    return new CmnObjGroupArray(type, tmpMapNode, subType);
 
                 case SpMapContentType.LinkGeometry:
 
@@ -410,7 +410,7 @@ namespace libSimpleMap
                         return y;
                     }).ToArray();
                         
-                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpGeometry, subType) };
+                    return new CmnObjGroupArray(type, tmpGeometry, subType);
 
                 case SpMapContentType.LinkAttribute:
 
@@ -423,36 +423,20 @@ namespace libSimpleMap
                         y.tagInfo = x.attribute.tagInfo;
                         return y;
                     }).ToArray();
-                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpAttribute, subType) };
+                    return new CmnObjGroupArray(type, tmpAttribute, subType);
             }
 
-            return new List<CmnObjGroup> { new CmnObjGroupArray(type, null, subType) };
+            return new CmnObjGroupArray(type, null, subType);
         }
 
 
 
-        //public override List<CmnObjGroup> LoadObjGroupList(uint tileId, UInt32 type = 0xffffffff, ushort subType = 0xffff)
-        //{
-        //    return this.GetMapContentTypeList()
-        //        .Where(x => (x & type) == x)
-        //        .SelectMany(x => LoadObjGroup(tileId, x, subType))
-        //        .ToList();
-        //}
 
-        public List<CmnObjGroup> LoadObjGroupList(uint tileId, uint type, Filter<ushort> filter)
+        public override IEnumerable<CmnObjGroup> LoadObjGroup(uint tileId, List<ObjReqType> reqTypes)
         {
             throw new NotImplementedException();
         }
 
-        public override List<CmnObjGroup> LoadObjGroup(uint tileId, IEnumerable<ObjReqType> reqTypes)
-        {
-            throw new NotImplementedException();
-        }
-
-        //public override List<CmnObjGroup> LoadObjGroup(uint tileId, uint type, ushort subType)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 
 

@@ -852,7 +852,7 @@ namespace libSimpleMap
 
         //}
 
-        public override IEnumerable<CmnObjGroup> LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
+        public override CmnObjGroup LoadObjGroup(uint tileId, UInt32 type, UInt16 subType = 0xFFFF)
         {
 
             switch ((SpMapContentType)type)
@@ -860,34 +860,34 @@ namespace libSimpleMap
                 case SpMapContentType.Link:
 
                     MapLink[] tmpMapLink = GetRoadLink(tileId, subType);
-                    CmnObjGroup tmp = new CmnObjGroupArray(type, tmpMapLink, subType);
-                    tmp.isDrawReverse = true;
-                    tmp.SetIndex();
-                    return new List<CmnObjGroup> { tmp };
+                    CmnObjGroup linkObjGr = new CmnObjGroupArray(type, tmpMapLink, subType);
+                    linkObjGr.isDrawReverse = true;
+                    linkObjGr.SetIndex();
+                    return linkObjGr;
 
                 case SpMapContentType.Node:
 
                     MapNode[] tmpMapNode = GetRoadNode(tileId, subType);
                     CmnObjGroup nodeObjGr = new CmnObjGroupArray(type, tmpMapNode, subType);
                     nodeObjGr.SetIndex();
-                    return new List<CmnObjGroup> { nodeObjGr };
+                    return nodeObjGr;
 
                 case SpMapContentType.LinkGeometry:
                     //MapLink[] tmpMapLinkGeometry = GetRoadGeometry(tileId, (byte)subType);
                     MapLinkGeometry[] tmpMapLinkGeometry = GetRoadGeometry2(tileId, subType);
-                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpMapLinkGeometry, subType) };
+                    return new CmnObjGroupArray(type, tmpMapLinkGeometry, subType);
 
                 case SpMapContentType.LinkAttribute:
 
                     MapLinkAttribute[] tmpMapLinkAttr = GetRoadAttribute2(tileId, subType);
-                    return new List<CmnObjGroup> { new CmnObjGroupArray(type, tmpMapLinkAttr, subType) };
+                    return new CmnObjGroupArray(type, tmpMapLinkAttr, subType);
             }
 
-            return new List<CmnObjGroup> { new CmnObjGroupArray(type, null, subType) };
+            return new CmnObjGroupArray(type, null, subType);
         }
 
 
-        public override List<CmnObjGroup> LoadObjGroup(uint tileId, IEnumerable<ObjReqType> reqTypes)
+        public override IEnumerable<CmnObjGroup> LoadObjGroup(uint tileId, List<ObjReqType> reqTypes)
         {
             List<CmnObjGroup> ret = new List<CmnObjGroup>();
             SimpleMapDbRecord dbRecord = dal.GetTileData(tileId, reqTypes.Select(x=>x.type));
@@ -979,7 +979,7 @@ namespace libSimpleMap
 
         //}
 
-        public override async Task<IEnumerable<CmnObjGroup>> LoadObjGroupAsync(uint tileId, IEnumerable<ObjReqType> reqTypes)
+        public override async Task<IEnumerable<CmnObjGroup>> LoadObjGroupAsync(uint tileId, List<ObjReqType> reqTypes)
         {
 
             var tasks = Task.Run(() => LoadObjGroup(tileId, reqTypes));
