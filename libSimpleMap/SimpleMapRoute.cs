@@ -32,9 +32,8 @@ namespace libSimpleMap
 {
     public class SpRouteMgr : CmnRouteMgr
     {
-        public SpRouteMgr(SpMapMgr mapMgr, DykstraSetting setting) : base(mapMgr, setting)
+        public SpRouteMgr(SpMapMgr mapMgr, DykstraSetting setting = null) : base(mapMgr, setting)
         {
-            //this.setting = setting;
         }
 
         //地図仕様に応じてオーバーライド
