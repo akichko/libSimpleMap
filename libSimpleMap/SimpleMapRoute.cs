@@ -89,7 +89,7 @@ namespace libSimpleMap
             {
                 RoutingMapType ret = new RoutingMapType();
 
-                ret.roadNwObjType = (uint)(SpMapContentType.Link | SpMapContentType.Node);
+                //ret.roadNwObjType = (uint)(SpMapContentType.Link | SpMapContentType.Node);
 
                 ret.roadNwObjTypeList = new List<uint>{
                     (uint)SpMapContentType.Link,

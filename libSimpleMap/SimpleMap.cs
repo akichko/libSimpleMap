@@ -312,6 +312,7 @@ namespace libSimpleMap
 
     public class SpLinkHandle : CmnObjHandle
     {
+        public override ulong ObjId => ((ulong)TileId << 16) + obj.Index;
 
         public SpLinkHandle(CmnTile tile, MapLink obj, DirectionCode direction = DirectionCode.None) : base(tile, obj, direction) { }
 
@@ -1158,5 +1159,51 @@ namespace libSimpleMap
         }
 
 
+    }
+
+
+    public static class DefaultMapType
+    {
+        public static RoutingMapType RoutingMapType()
+        {
+            RoutingMapType ret = new RoutingMapType();
+
+            ret.roadNwObjTypeList = new List<uint>{
+                    (uint)SpMapContentType.Link,
+                    (uint)SpMapContentType.Node
+                };
+
+            ret.roadNwObjFilter = new CmnObjFilter();
+            ret.roadNwObjFilter
+                .AddRule((uint)(SpMapContentType.Link), null)
+                .AddRule((uint)(SpMapContentType.Node), null);
+            ret.roadGeometryObjType = (uint)SpMapContentType.LinkGeometry;
+            ret.linkObjType = (uint)SpMapContentType.Link;
+            ret.nextLinkRefType = (int)SpMapRefType.NextLink;
+            ret.backLinkRefType = (int)SpMapRefType.BackLink;
+
+            return ret;
+        }
+
+        public static LocateMapType LocateMapType()
+        {
+            LocateMapType ret = new LocateMapType();
+
+            ret.roadNwObjTypeList = new List<uint>{
+                    (uint)SpMapContentType.Link,
+                    (uint)SpMapContentType.Node
+                };
+
+            ret.roadNwObjFilter = new CmnObjFilter();
+            ret.roadNwObjFilter
+                .AddRule((uint)(SpMapContentType.Link), null)
+                .AddRule((uint)(SpMapContentType.Node), null);
+            ret.roadGeometryObjType = (uint)SpMapContentType.LinkGeometry;
+            ret.linkObjType = (uint)SpMapContentType.Link;
+            ret.nextLinkRefType = (int)SpMapRefType.NextLink;
+            ret.backLinkRefType = (int)SpMapRefType.BackLink;
+
+            return ret;
+        }
     }
 }
