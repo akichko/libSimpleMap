@@ -426,16 +426,12 @@ namespace libSimpleMap
                     return new CmnObjGroupArray(type, tmpAttribute, subType);
             }
 
-            return new CmnObjGroupArray(type, null, subType);
+            var ret = new CmnObjGroupArray(type, null, subType);
+            return ret;
         }
 
 
 
-
-        public override IEnumerable<CmnObjGroup> LoadObjGroup(uint tileId, List<ObjReqType> reqTypes)
-        {
-            throw new NotImplementedException();
-        }
 
     }
 
