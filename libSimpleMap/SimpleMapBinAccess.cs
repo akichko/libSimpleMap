@@ -127,7 +127,7 @@ namespace libSimpleMap
                     {
 #else
                     tmpLink = (MapLink)CreateObj(SpMapContentType.Link);// new MapLink();
-                    tmpLink.index = i;
+                    tmpLink.Index = i;
 
 
                     ms.Read(tmpBuf, 0, 2);

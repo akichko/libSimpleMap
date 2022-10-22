@@ -425,7 +425,7 @@ namespace libSimpleMap
 
     public class MapLink : CmnObj
     {
-        public ushort index; //コスト計算管理情報など、外部テーブルを用意した場合の参照用
+        //public ushort index; //コスト計算管理情報など、外部テーブルを用意した場合の参照用
         public ushort[] edgeNodeIndex; //必ず２つ。[0]:始点側 [1]:終点側
         public TileOffset2 endNodeTileOffset;
 
@@ -445,7 +445,7 @@ namespace libSimpleMap
         public override UInt16 SubType => (UInt16)roadType;
         public override LatLon[] Geometry => geometry;
         public override double Length => linkLength;
-        public override UInt16 Index => index;
+        //public override UInt16 Index => index;
 
 
         public override int Cost
@@ -802,7 +802,7 @@ namespace libSimpleMap
     {
         //public SpTile tile; //検索時に記憶するようにする？
         public UInt64 nodeId; //いずれ消す？
-        public short index;
+        //public ushort index;
         public ConnectLink[] connectLink; //メッシュ内退出リンク
 
         //public bool f_upper_level; //いる？リンクにつける？
@@ -815,6 +815,8 @@ namespace libSimpleMap
 
 
         public override UInt64 Id => nodeId;
+
+        //public override ushort Index => index;
 
         public override UInt32 Type { get { return (UInt32)SpMapContentType.LinkAttribute; } }
 
