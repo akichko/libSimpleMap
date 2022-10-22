@@ -116,7 +116,7 @@ namespace libSimpleMap
                 while ((fbuf = sr.ReadLine()) != null)
                 {
                     MapLinkFull tmpLink = new MapLinkFull();
-                    tmpLink.index = numLink++;
+                    tmpLink.Index = numLink++;
 
                     string[] csv_column = fbuf.Split('\t');
 
@@ -170,11 +170,11 @@ namespace libSimpleMap
 
             using (StreamReader sr = new StreamReader(mapPath + "NODE\\" + tileId + "_NODE.txt"))
             {
-
+                ushort numNode = 0;
                 MapNode tmpNode = null;
                 String fbuf;
 
-                short index = 0;
+                ushort index = numNode++;
                 UInt64 preNodeId = 0;
                 List<ConnectLink> tmpConnectLinkList = null;
 
@@ -199,7 +199,7 @@ namespace libSimpleMap
                         if (tmpNode != null)
                             tmpNode.connectLink = tmpConnectLinkList.ToArray();
                         tmpNode = new MapNode();
-                        tmpNode.index = index;
+                        tmpNode.Index = index;
                         tmpNode.nodeId = tmpNodeId;
                         tmpConnectLinkList = new List<ConnectLink>();
                         preNodeId = tmpNodeId;
