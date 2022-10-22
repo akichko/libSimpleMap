@@ -438,23 +438,23 @@ namespace libSimpleMap
 
     public class SQLite
     {
-        string dbDirectoryPath;
+        //string dbDirectoryPath;
         string dbPath;
         SQLiteConnection con;
 
-        public SQLite(string dbDirectoryPath, string dbFileName)
+        public SQLite(string dbPath)
         {
-            this.dbDirectoryPath = dbDirectoryPath;
-            this.dbPath = dbDirectoryPath + @"\" + dbFileName;
+            //this.dbDirectoryPath = dbDirectoryPath;
+            this.dbPath = dbPath;
         }
 
         public int CreateDB()
         {
-            if (!Directory.Exists(dbDirectoryPath))
-            {
-                Console.WriteLine("DB directory not exists");
-                return -1;
-            }
+            //if (!Directory.Exists(dbDirectoryPath))
+            //{
+            //    Console.WriteLine("DB directory not exists");
+            //    return -1;
+            //}
 
             if (File.Exists(dbPath))
             {

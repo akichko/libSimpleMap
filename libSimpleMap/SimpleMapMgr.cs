@@ -117,7 +117,7 @@ namespace libSimpleMap
         public SpMapAccess()
         {
             mapContentTypeList = ((uint[])Enum.GetValues(typeof(SpMapContentType)))
-                .Where(x => x != 0xFFFF && x != (UInt32)SpMapContentType.Tile)
+                //.Where(x => x != 0xFFFF && x != (UInt32)SpMapContentType.Tile)
                 .ToList();
         }
 

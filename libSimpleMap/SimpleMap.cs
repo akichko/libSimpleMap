@@ -1108,8 +1108,8 @@ namespace libSimpleMap
         Link = 1,
         Node = 2,
         LinkGeometry = 3,
-        LinkAttribute = 4,
-        Tile = 5
+        LinkAttribute = 4
+        //Tile = 5
 
     }
 
