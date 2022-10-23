@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="FileAccess - コピー.cs" />
     <Compile Remove="FileAccess.cs" />
   </ItemGroup>
 

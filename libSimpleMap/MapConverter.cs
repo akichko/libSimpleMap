@@ -10,16 +10,12 @@ namespace libSimpleMap
     public class SpMapConvertSetting
     {
         public string inMapPath;
-
         public string outMapFilePath;
     }
 
     public class SpMapConverter
     {
         SpMapConvertSetting setting;
-
-
-        public string outDbFile;
 
         public SpMapConverter(SpMapConvertSetting setting)
         {
@@ -45,23 +41,20 @@ namespace libSimpleMap
             List<uint> tileList = textMapMgr.GetMapTileIdList();
             Console.WriteLine($"tileNum = {tileList.Count}");
 
-
             //タイルループ
             int count = 0;
             foreach (uint tileId in tileList)
             {
+                Console.WriteLine($"[{++count}] {tileId}");
+
                 textMapMgr.LoadTile(tileId);
+                SpTile tmpTile = (SpTile)textMapMgr.SearchTile(tileId);
 
-                Console.WriteLine($"[{++count}] {tileId.ToString()}");
+                tmpTile.CalcLinkCost(); //リンク長計算
 
-                CmnTile tmpTile = textMapMgr.SearchTile(tileId);
-
-                ((SpTile)tmpTile).CalcLinkCost(); //リンク長計算
-
-                sqliteMapMgr.SaveTile((SpTile)tmpTile);
+                sqliteMapMgr.SaveTile(tmpTile);
 
                 textMapMgr.UnloadTile(tileId);
-
             }
 
             sqliteMapMgr.Disconnect();
@@ -70,9 +63,6 @@ namespace libSimpleMap
             sqLite.ConnectDB();
             sqLite.CreateIndex();
             sqLite.DisconnectDB();
-
-            //Console.WriteLine("GenerateSQLiteMap End");
-            //Console.ReadKey();
 
             return 0;
         }
