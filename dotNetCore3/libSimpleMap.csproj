@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\libSimpleMap\FileMap.cs" Link="FileMap.cs" />
+    <Compile Include="..\libSimpleMap\MapConverter.cs" Link="MapConverter.cs" />
+    <Compile Include="..\libSimpleMap\PackData.cs" Link="PackData.cs" />
+    <Compile Include="..\libSimpleMap\Postgres.cs" Link="Postgres.cs" />
+    <Compile Include="..\libSimpleMap\SimpleMap.cs" Link="SimpleMap.cs" />
+    <Compile Include="..\libSimpleMap\SimpleMapBinAccess.cs" Link="SimpleMapBinAccess.cs" />
+    <Compile Include="..\libSimpleMap\SimpleMapMgr.cs" Link="SimpleMapMgr.cs" />
+    <Compile Include="..\libSimpleMap\SimpleMapRoute.cs" Link="SimpleMapRoute.cs" />
+    <Compile Include="..\libSimpleMap\SQLite.cs" Link="SQLite.cs" />
+    <Compile Include="..\libSimpleMap\Zlib.cs" Link="Zlib.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="5.0.4" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.113.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\libGis\dotNetCore3\libGis.csproj" />
+  </ItemGroup>
+
+</Project>
