@@ -921,7 +921,7 @@ namespace libSimpleMap
                 ret.Add(new CmnObjGroupArray(type, tmpMapLinkGeometry, subType));
             }
 
-            if (dbRecord.geometryData != null)
+            if (dbRecord.attributeData != null)
             {
                 uint type = (uint)SpMapContentType.LinkAttribute;
                 ushort subType = reqTypes.Where(x => x.type == type).First().maxSubType;

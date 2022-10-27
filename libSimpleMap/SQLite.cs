@@ -36,7 +36,6 @@ namespace libSimpleMap
     public class SQLiteAccess : IBinDataAccess
     {
         string mapPath;
-        //byte[] commonBuf;
 
         //string dbDirectoryPath;
         //string dbPath;

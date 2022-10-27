@@ -31,20 +31,6 @@ using System.Drawing;
 
 namespace libSimpleMap
 {
-    //public abstract class SpObj : CmnObj
-    //{
-    //    //public virtual ICmnObjHandle ToICmnObjHandle(CmnTile tile)
-    //    //{
-    //    //    return new SpObjHandle(tile, this);
-    //    //}
-    //}
-
-    //共通ハンドル型
-    //public abstract class SpObjHandle : ICmnObjHandle
-    //{
-    //    public SpObjHandle() { }
-    //    public SpObjHandle(CmnTile tile, CmnObj obj) : base(tile, obj) { }
-    //}
 
     public class SpTile : CmnTile //, ITile
     {
@@ -56,30 +42,14 @@ namespace libSimpleMap
         public MapLinkGeometry[] geometry;
         public MapLinkAttribute[] attribute;
 
-        //static List<UInt32> mapContentTypeList;
+        override public UInt32 Type => 0;
 
-        override public UInt32 Type { get { return 0; } }
-
-        public SpTile() { }
+        //public SpTile() { }
         public SpTile(uint tileId)
         {
             tileCode = new GisTileCode(tileId);
-
-
-            //objDic = new Dictionary<UInt16, CmnObjGroup>();
-            //objDic.Add((UInt16)SpMapContentType.Link, new SpObjGroup());
-            //objDic.Add((UInt16)SpMapContentType.Node, new SpObjGroup());
-
-
-
         }
 
-        //static SpTile()
-        //{
-        //    mapContentTypeList = ((uint[])Enum.GetValues(typeof(SpMapContentType)))
-        //        .Where(x => x != 0xFFFF && x != (UInt32)SpMapContentType.Tile)
-        //        .ToList();
-        //}
 
         override public CmnTile CreateTile(uint tileId)
         {
@@ -130,7 +100,6 @@ namespace libSimpleMap
                     break;
 
                 case SpMapContentType.LinkAttribute:
-                    //linkAttr = (MapLink[])objDic[objType].objArray;
                     attribute = (MapLinkAttribute[])objGroupDic[objType].ObjArray;
                     //MergeAttribute(linkAttr, true);
                     objGroup.isDrawable = false;
@@ -162,6 +131,7 @@ namespace libSimpleMap
                     return false;
                 }
             }
+
             //for (int i = 0; i < link.Length; i++)
             //{
             //    if (link[i].linkId != shapeLinkList[i].linkId)
@@ -169,6 +139,7 @@ namespace libSimpleMap
             //        return false;
             //    }
             //}
+
             for (int i = 0; i < link.Length; i++)
             {
                 link[i].geometry = shapeLinkList[i].geometry;
@@ -200,112 +171,16 @@ namespace libSimpleMap
         }
 
 
-        //public bool MergeAttribute(MapLink[] attrLinkList, bool ignoreError)
-        //{
-        //    if (!ignoreError)
-        //    {
-        //        if (link.Length != attrLinkList.Length)
-        //        {
-        //            Console.WriteLine("link num not match");
-        //            return false;
-        //        }
-        //    }
-        //    for (int i = 0; i < link.Length; i++)
-        //    {
-        //        if (link[i].linkId != attrLinkList[i].linkId)
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    for (int i = 0; i < link.Length; i++)
-        //    {
-        //        link[i].attribute = attrLinkList[i].attribute;
-        //    }
-        //    return true;
-        //}
-
-
-
-        //public void PrintGeometry()
-        //{
-        //    foreach (var mapLink in link)
-        //    {
-        //        mapLink.PrintGeometry(1);
-        //        Console.WriteLine("");
-        //    }
-
-        //}
-
-        //public int WriteMap(string fileName, bool append)
-        //{
-        //    StreamWriter sw = new StreamWriter(fileName, append);
-        //    if (sw == null)
-        //        return -1;
-        //    foreach (MapLink mapLink in link)
-        //    {
-        //        mapLink.WriteGeometry(1, sw);
-        //        sw.WriteLine("");
-        //    }
-        //    sw.Close();
-        //    return 0;
-
-        //}
-
-
-        //public LinkHandle SearchNearestMapLink(LatLon latlon, byte maxRoadType = 0xFF)
-        //{
-
-        //    MapLink tmpLink = link
-        //        .Where(x => x.roadType <= maxRoadType)
-        //        .OrderBy(x => x.GetDistance(latlon))
-        //        .FirstOrDefault();
-
-        //    return new LinkHandle(this, tmpLink);
-
-        //}
-
-
-        //public LinkDistance SearchNearestMapLink2(LatLon latlon, byte maxRoadType = 0xFF)
-        //{
-
-        //    MapLink tmpLink = link
-        //        .Where(x => x.roadType <= maxRoadType)
-        //        .OrderBy(x => x.GetDistance(latlon))
-        //        .FirstOrDefault();
-
-
-        //    return tmpLink.GetDistance2(latlon);
-
-        //}
-
-
         public int CalcLinkCost()
         {
             Array.ForEach(link, x =>
             {
                 x.linkLength = (ushort)LatLon.CalcLength(x.Geometry);
             });
-            //Array.ForEach(link, x => x.CalcCost());
-            //link.ForEach(x => x.CalcCost());
 
             return 0;
         }
 
-
-
-        //public static List<UInt32> GetMapContentTypeList() => mapContentTypeList;
-        //{
-        //    return ((uint[])Enum.GetValues(typeof(SpMapContentType)))
-        //        .Select(x => (UInt32)x)
-        //        .Where(x => x != 0xFFFF && x != (UInt32)SpMapContentType.Tile)
-        //        .ToList();
-        //}
-
-
-        //public override ICmnObjHandle ToICmnObjHandle(CmnTile tile)
-        //{
-        //    return new CmnObjHandle(tile, this);
-        //}
     }
 
 
@@ -568,26 +443,6 @@ namespace libSimpleMap
             return BitConverter.GetBytes(packData.rawData);
         }
 
-        //public int WriteGeometry(int direction, StreamWriter sw)
-        //{
-        //    if (direction == 0)
-        //    {
-        //        for (int i = geometry.Length - 1; i >= 0; i--)
-        //        {
-        //            sw.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
-        //        }
-        //    }
-        //    else
-        //    {
-        //        for (int i = 0; i < geometry.Length; i++)
-        //        {
-        //            sw.WriteLine($"{geometry[i].lon}\t{geometry[i].lat}");
-        //        }
-        //    }
-        //    return 0;
-        //}
-
-
 
         //public LatLon[] GetGeometry(int direction)
         //{
@@ -595,36 +450,6 @@ namespace libSimpleMap
         //        return geometry.Reverse().ToArray();
         //    else
         //        return geometry;
-        //}
-
-
-        //public LinkDistance GetDistance2(LatLon latlon)
-        //{
-        //    if (geometry.Count() <= 1)
-        //        return null;
-
-        //    double minDistance = Double.MaxValue;
-        //    int index = -1;
-
-        //    for (int i = 0; i < geometry.Count() - 1; i++)
-        //    {
-        //        double tmp = latlon.GetDistanceToLine(geometry[i], geometry[i + 1]);
-        //        if (tmp < minDistance)
-        //        {
-        //            minDistance = tmp;
-        //            index = i;
-        //        }
-        //    }
-
-        //    double offset = 0;
-        //    for (int i = 0; i < index; i++)
-        //    {
-        //        offset += geometry[i].GetDistanceTo(geometry[i + 1]);
-        //    }
-        //    LinkPos linkPos = new LinkPos(null, this, offset);
-
-        //    return new LinkDistance(linkPos, minDistance);
-
         //}
 
 
